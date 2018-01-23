@@ -1,0 +1,398 @@
+﻿@{
+    ViewBag.Title = "用户信息维护";
+    Layout = "~/Views/Shared/Normal.cshtml";
+}
+@section scripts{
+    <script>
+        $(function () {
+            var ajaxHelper = new AjaxHelper();
+
+
+            layui.use(['laydate', 'layer', 'element', 'form', 'laytpl'], function () {
+                var laydate = layui.laydate, layer = layui.layer, element = layui.element, form = layui.form, $ = layui.jquery, laytpl = layui.laytpl;
+
+                var start = {
+                    min: laydate.now
+                  , max: '2099-06-16 23:59:59'
+                  , istoday: false
+                  , choose: function (datas) {
+                      end.min = datas; //开始日选好后，重置结束日的最小日期
+                      end.start = datas //将结束日的初始值设定为开始日
+                  }
+                };
+
+                var end = {
+                    min: laydate.now
+                  , max: '2099-06-16 23:59:59'
+                  , istoday: true
+                  , choose: function (datas) {
+                      start.max = datas; //结束日选好后，重置开始日的最大日期
+                  }
+                };
+                laydate.render({
+                    elem: '#test1'
+                });
+                laydate.render({
+                    elem: '#test2'
+                });
+
+                //查询
+                form.on('submit(search)', function (data) {
+                    var ddd = { str: JSON.stringify(data.field) };
+                    ajaxHelper.post("/BasicSys/UserInfos/", ddd, function (da) {
+                        var jsonObj = JSON.parse(da);
+                        var getTpl = $("#tuserinfo").html()
+, view = $("#t_UserInfo");
+                        if (jsonObj.result) {
+                            if (jsonObj.data.length > 0) {
+                                laytpl(getTpl).render(jsonObj.data, function (a) {
+                                    $(view).html(a);
+                                });
+                            }
+                        }
+                        else {
+                            $("#t_UserInfo").html("");
+                            layer.open({
+                                title: '提示', content: jsonObj.reason, time: 2000
+                            });
+                        }
+                        form.render();
+                    });
+                    return false;
+                });
+
+                $(function () {
+                    var ddd = { str: '' };
+                    selectchanged('', "Province");
+                });
+                //下拉框绑定
+                function selectchanged(parentid, elem) {
+                    $("#" + elem + "").empty();
+
+                    var ddd = { str: parentid }
+                    ajaxHelper.post("/BasicSys/OrgInfos/", ddd, function (da) {
+                        var jsonObj = JSON.parse(da);
+                        var getTpl = $("#tuserinfo").html()
+                            , view = $("#t_UserInfo");
+                        var getTpl2 = $("#orginfo").html()
+                            , view2 = $("#" + elem + "");
+                        if (jsonObj.result) {
+                            if (jsonObj.data.length > 0) {
+                                laytpl(getTpl).render(jsonObj.data, function (a) {
+                                    $(view).html(a);
+                                });
+                                laytpl(getTpl2).render(jsonObj.data, function (a2) {
+                                    $(view2).html(a2);
+                                });
+                            }
+                        }
+                        else {
+                            $("#t_UserInfo").html("");
+                        }
+                        form.render();
+                    });
+                }
+                form.on('select(Province)', function (data) {
+                    $("#CompanyCity").empty();
+                    document.getElementById('CompanyCity').innerHTML = "";
+                    document.getElementById('CompanyUnderCity').innerHTML = "";
+                    document.getElementById('CompanyUnderArea').innerHTML = "";
+                    $("#CompanyUnderCity").empty();
+                    $("#CompanyUnderArea").empty();
+                    $("#t_UserInfo").html("");
+                    var parentid = $("#Province option:selected").val();
+                    if (parentid == "") {
+                        return false;
+                    }
+                    else {
+                        selectchanged(parentid, "CompanyCity");
+                    }
+                    return false;
+                });
+                form.on('select(CompanyCity)', function (data) {
+                    $("#CompanyUnderCity").html("");
+                    $("#CompanyUnderArea").html("");
+                    $("#t_UserInfo").html("");
+                    var parentid = $("#CompanyCity option:selected").val();
+                    if (parentid == "") {
+                        return false;
+                    }
+                    selectchanged(parentid, "CompanyUnderCity");
+                    return false;
+                });
+                form.on('select(CompanyUnderCity)', function (data) {
+                    $("#CompanyUnderArea").html("");
+                    $("#t_UserInfo").html("");
+                    var parentid = $("#CompanyUnderCity option:selected").val();
+                    if (parentid == "") {
+                        return false;
+                    }
+                    selectchanged(parentid, "CompanyUnderArea");
+                    return false;
+                });
+
+                //全选
+                form.on('checkbox(allChoose)', function (data) {
+                    var child = $(data.elem).parents('table').find('tbody input[type="checkbox"]');
+                    child.each(function (index, item) {
+                        item.checked = data.elem.checked;
+                    });
+                    form.render('checkbox');
+                });
+                form.render();
+                //新增数据
+                $("#add").click(function () {
+                    layer.open({
+                        type: 2,
+                        title: '新增用户',
+                        closeBtn: 0,
+                        shade: [0],
+                        area: ['700px', '550px'],
+                        anim: 2,
+                        moveOut: true,
+                        content: ['/BasicSys/UserInfo_AddEdit', 'no'],//iframe的url，no代表不显示滚动条
+                        end: function () {
+                            $("#search").click();
+                        }
+                    });
+                });
+                //编辑
+                $("#edit").click(function () {
+                    var addeditcode = $("[name=table_ck]:checked:eq(0)").val();
+                    if ($("#t_UserInfo").find("[name=table_ck]:checked").length == 0) {
+                        layer.open({
+                            title: '提示', content: '请勾选需要进行操作的数据!', time: 2000
+                        });
+                        return;
+                    }
+                    layer.open({
+                        type: 2,
+                        title: '修改用户',
+                        closeBtn: 1,
+                        shade: [0],
+                        area: ['700px', '550px'],
+                        anim: 2,
+                        moveOut: true,
+                        content: ['/BasicSys/UserInfo_AddEdit?addeditcode=' + addeditcode, 'no'],//iframe的url，no代表不显示滚动条
+                        end: function () {
+                            $("#search").click();
+                        }
+                    });
+                });
+                //批量删除
+                $("#delete").click(function () {
+                    if ($("#t_UserInfo").find("[name=table_ck]:checked").length == 0) {
+                        layer.open({
+                            title: '提示', content: '请勾选需要进行操作的数据!',time:2000
+                        });
+                        return;
+                    }
+                    var delkeys = "";
+                    $("#t_UserInfo").find("[name=table_ck]:checked").each(function () {
+                        delkeys += $(this).val() + ",";
+                    });
+                    delkeys = delkeys.substring(0, delkeys.length - 1);
+                    var senddata = { str: delkeys };
+                    ajaxHelper.post("/BasicSys/UserInfo_Deletes/", senddata, function (da) {
+                        var jsonObj = JSON.parse(da);
+                        if (jsonObj.result) {
+                            layer.open({
+                                title: '提示', content: jsonObj.data, time: 2000
+                            });
+                            $("#search").click();
+                        }
+                        else {
+                            layer.open({
+                                title: '提示', content: jsonObj.result, time: 2000
+                            });
+                        }
+                    });
+                    return false;
+                });
+                //批量注销
+                $("#updatestate").click(function () {
+                    if ($("#t_UserInfo").find("[name=table_ck]:checked").length == 0) {
+                        layer.open({
+                            title: '提示', content: '请勾选需要进行操作的数据!'
+                        });
+                        return;
+                    }
+                    var delkeys = "";
+                    $("#t_UserInfo").find("[name=table_ck]:checked").each(function () {
+                        delkeys += $(this).val() + ",";
+                    });
+                    delkeys = delkeys.substring(0, delkeys.length - 1);
+                    var senddata = { str: delkeys };
+                    ajaxHelper.post("/BasicSys/UserInfo_Update/", senddata, function (da) {
+                        var jsonObj = JSON.parse(da);
+                        if (jsonObj.result) {
+                            layer.open({
+                                title: '提示', content: jsonObj.data
+                            });
+                            $("#search").click();
+                        }
+                        else {
+                            layer.open({
+                                title: '提示', content: jsonObj.result
+                            });
+                        }
+                    });
+                    return false;
+                });
+            });
+        })
+    </script>
+}
+<style>
+    .layui-form-label {
+        width: 120px;
+    }
+</style>
+<script id="orginfo" type="text/html">
+    <option value="">请选择</option>
+    {{#  layui.each(d, function(index, item){ }}
+    <option value="{{item.OrgID}}">{{item.Name}}</option>
+    {{#  }); }}
+</script>
+<script id="tuserinfo" type="text/html">
+    {{#  layui.each(d, function(index, item){ }}
+    <tr>
+        <td><input type="checkbox" name="table_ck" value="{{item.ID}}" lay-filter="table_ck" lay-skin="primary" title=""></td>
+        <td>{{item.USERNO}}</td>
+        <td>{{item.NAME}}</td>
+        <td>{{item.SEX}}</td>
+        <td>{{item.ROLE}}</td>
+        <td>{{item.ORGNAME}}</td>
+        <td>{{item.IDCARD}}</td>
+        <td>{{item.PHONENUMBER}}</td>
+        <td>{{item.ADDRESS}}</td>
+        <td>{{item.EMAIL}}</td>
+        <td>{{item.STATE}}</td>
+        <td>{{item.INDATE}}</td>
+        <td>{{item.OPERATOR}}</td>
+    </tr>
+    {{#  }); }}
+</script>
+<div>
+    <div class="layui-collapse" lay-accordion="">
+        <div class="layui-colla-item">
+            <h2 class="layui-colla-title">查询条件</h2>
+            <div class="layui-colla-content layui-show">
+                <form class="layui-form">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">录入起始时间</label>
+                        <div class="layui-input-inline">
+                            <input type="text" class="layui-input" name="test1" id="test1" placeholder="年-月-日">
+                        </div>
+                        <label class="layui-form-label">录入截止时间</label>
+                        <div class="layui-input-inline">
+                            <div class="layui-input-inline">
+                                <input type="text" class="layui-input" name="test2" id="test2" placeholder="年-月-日">
+                            </div>
+                        </div>
+                        <label class="layui-form-label">省</label>
+                        <div class="layui-input-inline">
+                            <select id="Province" lay-filter="Province"   style="width:150px;" name="Province">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">市分公司</label>
+                        <div class="layui-input-inline">
+                            <select id="CompanyCity" lay-filter="CompanyCity"   style="width:150px;" name="CompanyCity">
+                            </select>
+                        </div>
+                        <label class="layui-form-label">县分公司</label>
+                        <div class="layui-input-inline">
+                            <select id="CompanyUnderCity" lay-filter="CompanyUnderCity"   style="width:150px;" name="CompanyUnderCity">
+                            </select>
+                        </div>
+                        <label class="layui-form-label">网点</label>
+                        <div class="layui-input-inline">
+                            <select id="CompanyUnderArea" lay-filter="CompanyUnderArea"   style="width:150px;" name="CompanyUnderArea">
+                            </select>
+                        </div>
+
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">用户编号</label>
+                        <div class="layui-input-inline">
+                            <input type="text" style="width:auto;" id="UserNo" name="UserNo" autocomplete="off" class="layui-input" maxlength="50" value="">
+                        </div>
+                        <label class="layui-form-label">证件号</label>
+                        <div class="layui-input-inline">
+                            <input type="text" style="width:auto;" id="IDCard" name="IDCard" autocomplete="off" class="layui-input" maxlength="50" value="">
+                        </div>
+                        <label class="layui-form-label">姓名</label>
+                        <div class="layui-input-inline">
+                            <input type="text" style="width:auto;" id="Name" name="Name" autocomplete="off" class="layui-input" maxlength="50" value="">
+                        </div>
+                    </div>
+                    <div class=" layui-form-item">
+                        <label class="layui-form-label">状态</label>
+                        <div class="layui-input-inline">
+                            <select id="State" style="width:150px;" name="State">
+                                <option value="">请选择状态</option>
+                                <option value="0">有效</option>
+                                <option value="1">无效</option>
+                            </select>
+                        </div>
+                        <label class="layui-form-label">用户角色</label>
+                        <div class="layui-input-inline">
+                            <select id="Role" style="width:150px;" name="Role">
+                                <option value="">请选择角色</option>
+                                <option value="1">管理员</option>
+                                <option value="2">分发员</option>
+                                <option value="3">投递员</option>
+                                <option value="4">财务员</option>
+                            </select>
+                        </div>
+                        <button class="layui-btn" lay-filter="search" lay-submit="" id="search" data-type="save">查询</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div>
+        <form class="layui-form" style="margin-left: 5px; margin-top: 20px;" id="formBtn">
+            <div class=" layui-form-item">
+                <button class="layui-btn layui-btn-warm" type="button" id="add">
+                    <i class="layui-icon">&#xe654;</i> 新增
+                </button>
+                <button class="layui-btn layui-btn-warm" type="button" id="edit">
+                    <i class="layui-icon">&#xe642;</i> 修改
+                </button>
+                <button class="layui-btn layui-btn-danger" id="updatestate">
+                    <i class="layui-icon">&#x1006;</i> 注销选中用户
+                </button>
+                <button class="layui-btn layui-btn-danger" id="delete">
+                    <i class="layui-icon">&#xe640;</i> 删除选中用户
+                </button>
+            </div>
+        </form>
+    </div>
+    <div>
+        <form class="layui-form">
+            <table class="layui-table" id="maintb" style="width: 99%; margin-left: 5px;">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" lay-filter="allChoose" lay-skin="primary" /></th>
+                        <td>用户编号</td>
+                        <td>用户名称</td>
+                        <td>性别</td>
+                        <td>用户角色</td>
+                        <td>所属机构</td>
+                        <td>证件号码</td>
+                        <td>联系方式</td>
+                        <td>住址</td>
+                        <td>Email</td>
+                        <td>用户状态</td>
+                        <td>录入时间</td>
+                        <td>录入员</td>
+                    </tr>
+                </thead>
+                <tbody id="t_UserInfo"></tbody>
+            </table>
+        </form>
+    </div>
+</div>

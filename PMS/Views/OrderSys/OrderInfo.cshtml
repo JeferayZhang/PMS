@@ -1,0 +1,351 @@
+﻿@{
+    ViewBag.Title = "订单管理";
+    Layout = "~/Views/Shared/Normal.cshtml";
+}
+@section scripts{
+    <script>
+        $(function () {
+            var ajaxHelper = new AjaxHelper();
+
+            layui.use(['laydate', 'layer', 'element', 'form', 'upload', 'table', 'laytpl'], function () {
+                var laydate = layui.laydate, layer = layui.layer, element = layui.element, form = layui.form,
+                    $ = layui.jquery, upload = layui.upload, table = layui.table, laytpl = layui.laytpl;
+
+                var start = {
+                    min: laydate.now
+                  , max: '2099-06-16 23:59:59'
+                  , istoday: false
+                  , choose: function (datas) {
+                      end.min = datas; //开始日选好后，重置结束日的最小日期
+                      end.start = datas //将结束日的初始值设定为开始日
+                  }
+                };
+
+                var end = {
+                    min: laydate.now
+                  , max: '2099-06-16 23:59:59'
+                  , istoday: true
+                  , choose: function (datas) {
+                      start.max = datas; //结束日选好后，重置开始日的最大日期
+                  }
+                };
+                laydate.render({
+                    elem: '#test1'
+                });
+                laydate.render({
+                    elem: '#test2'
+                });
+                table.render({
+                    elem: '#maintb',
+                    url: '/OrderSys/OrderInfos/',
+                    cols: [[
+                        { type: 'checkbox' },
+                        { field: 'ID', title: '订购流水号', sort: true },
+                        { field: 'BKDH', align: 'center', title: '报刊代号', sort: true },
+                        { field: 'docname', align: 'center', title: '报刊名称', sort: true },
+                        { field: 'UnitName', align: 'center', title: '单位名称', sort: true },
+                        { field: 'ToUser', align: 'center', title: '单位负责人' },
+                        { field: 'OrderNum', align: 'center', title: '订购数' },
+                        { field: 'OrderMonths', align: 'center', title: '订购月数' },
+                        { field: 'GetUser', align: 'center', title: '收订员' },
+                        { field: 'InUser', align: 'center', title: '录入员', sort: true },
+                        { field: 'Indate', align: 'center', title: '录入时间', sort: true }
+                    ]],
+                    page: true,
+                    id: 'testReload'
+                });
+                $(function () {
+                    var ddd = { str: '' };
+                    selectchanged('', "Province");
+                });
+                //下拉框绑定
+                function selectchanged(parentid, elem) {
+                    $("#" + elem + "").empty();
+
+                    var ddd = { str: parentid }
+                    ajaxHelper.post("/BasicSys/OrgInfos/", ddd, function (da) {
+                        var jsonObj = JSON.parse(da);
+                        var getTpl2 = $("#orginfo").html()
+                            , view2 = $("#" + elem + "");
+                        if (jsonObj.result) {
+                            if (jsonObj.data.length > 0) {
+                                laytpl(getTpl2).render(jsonObj.data, function (a2) {
+                                    $(view2).html(a2);
+                                });
+                            }
+                        }
+                        else {
+                            laytpl(getTpl2).render("", function (a2) {
+                                $(view2).html(a2);
+                            });
+                        }
+                        form.render();
+                    });
+                }
+                form.on('select(Province)', function (data) {
+                    var parentid = $("#Province option:selected").val();
+                    if (parentid == "" || parentid == undefined) {
+                        var getTpl2 = $("#orginfo").html();
+                        laytpl(getTpl2).render("CompanyCity", function (a2) {
+                            $("#CompanyCity").html(a2);
+                            $("#CompanyUnderCity").html(a2);
+                            $("#CompanyUnderArea").html(a2);
+                        });
+                    }
+                    else {
+                        selectchanged(parentid, "CompanyCity");
+                    }
+                    return false;
+                });
+                form.on('select(CompanyCity)', function (data) {
+                    $("#CompanyUnderCity").html("");
+                    $("#CompanyUnderArea").html("");
+                    var parentid = $("#CompanyCity option:selected").val();
+                    if (parentid == "" || parentid == undefined) {
+                        var getTpl2 = $("#orginfo").html();
+                        laytpl(getTpl2).render("CompanyCity", function (a2) {
+                            $("#CompanyUnderCity").html(a2);
+                            $("#CompanyUnderArea").html(a2);
+                        });
+                        return false;
+                    }
+                    selectchanged(parentid, "CompanyUnderCity");
+                    return false;
+                });
+                form.on('select(CompanyUnderCity)', function (data) {
+                    $("#CompanyUnderArea").html("");
+                    var parentid = $("#CompanyUnderCity option:selected").val();
+                    if (parentid == "" || parentid == undefined) {
+                        var getTpl2 = $("#orginfo").html();
+                        laytpl(getTpl2).render("CompanyCity", function (a2) {
+                            $("#CompanyUnderArea").html(a2);
+                        });
+                        return false;
+                    }
+                    selectchanged(parentid, "CompanyUnderArea");
+                    return false;
+                });
+                var $ = layui.$, active = {
+                    reload: function () {
+                        var test1 = $('#test1').val();
+                        var test2 = $('#test2').val();
+                        var Province = $('#Province option:selected').val();
+                        var CompanyCity = $('#CompanyCity option:selected').val();
+                        var CompanyUnderCity = $('#CompanyUnderCity option:selected').val();
+                        var CompanyUnderArea = $('#CompanyUnderArea option:selected').val();
+                        var OrderNo = $('#OrderNo').val();
+                        var UnitName = $('#UnitName').val();
+                        var BKDH = $('#BKDH').val();
+                        alert(OrderNo);
+                        //执行重载
+                        table.reload('testReload', {
+                            page: {
+                                curr: 1, //重新从第 1 页开始
+                                layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'],
+                                groups: 5,
+                                last: true,
+                                first: true
+                            }
+                          , where: {
+                              test1: test1,
+                              test2: test2,
+                              Province: Province,
+                              CompanyCity: CompanyCity,
+                              CompanyUnderCity: CompanyUnderCity,
+                              CompanyUnderArea: CompanyUnderArea,
+                              OrderNo: OrderNo,
+                              UnitName: UnitName,
+                              BKDH: BKDH
+                          }
+                        });
+                    }
+                };
+
+                $('.layui-form .layui-btn').on('click', function () {
+                    var type = $(this).data('type');
+
+                    active[type] ? active[type].call(this) : '';
+                });
+                form.render();
+                //新增数据
+                $("#add").click(function () {
+                    layer.open({
+                        type: 2,
+                        title: '新增订单',
+                        closeBtn: 0,
+                        shade: [0],
+                        area: ['700px', '550px'],
+                        anim: 2,
+                        moveOut: true,
+                        content: ['/OrderSys/Order_AddEdit', 'no'],//iframe的url，no代表不显示滚动条
+                        end: function () {
+                            $("#search").click();
+                        }
+                    });
+                });
+                //编辑
+                $("#edit").click(function () {
+                    var checkStatus = table.checkStatus('testReload')
+                        , data = checkStatus.data;
+                    if (data.length != 1) {
+                        layer.open({
+                            title: '提示', content: '请勾选一条数据进行操作!', time: 2000
+                        });
+                        return;
+                    }
+                    var addeditcode = data[0].ID;
+                    layer.open({
+                        type: 2,
+                        title: '修改订单',
+                        closeBtn: 1,
+                        shade: [0],
+                        area: ['700px', '550px'],
+                        anim: 2,
+                        moveOut: true,
+                        content: ['/OrderSys/Order_AddEdit?addeditcode=' + addeditcode, 'no'],//iframe的url，no代表不显示滚动条
+                        end: function () {
+                            $("#search").click();
+                        }
+                    });
+                });
+                //批量删除
+                $("#delete").click(function () {
+                    var checkStatus = table.checkStatus('testReload')
+                        , data = checkStatus.data;
+                    if (data.length == 0 || data.length == undefined) {
+                        layer.open({
+                            title: '提示', content: '请勾选需要进行操作的数据!', time: 2000
+                        });
+                        return;
+                    }
+                    var senddata = { str: JSON.stringify(data) };
+                    ajaxHelper.post("/OrderSys/Order_AddEdit_Deletes/", senddata, function (da) {
+                        var jsonObj = JSON.parse(da);
+                        if (jsonObj.result) {
+                            layer.open({
+                                title: '提示', content: jsonObj.data, time: 2000
+                            });
+                            $("#search").click();
+                        }
+                        else {
+                            layer.open({
+                                title: '提示', content: jsonObj.result, time: 2000
+                            });
+                        }
+                    });
+                    return false;
+                });
+                //执行实例
+                var uploadInst = upload.render({
+                    elem: '#file' //绑定元素
+                    , url: '/OrderSys/Order_PL/' //上传接口
+                    , accept: 'file' //普通文件
+                    , exts: 'xls|xlsx' //只允许上传Excel文件
+                    , before: function (obj) { //obj参数包含的信息，跟 choose回调完全一致
+                        layer.load(); //上传loading
+                    }
+                    , done: function (res, index, upload) {
+
+                        layer.closeAll('loading'); //关闭loading
+                        $("#search").click();
+
+                    }
+                    , error: function () {
+                        alert("444");
+                    }
+                });
+            });
+        })
+    </script>
+}
+<script id="orginfo" type="text/html">
+    <option value="">请选择</option>
+    {{#  layui.each(d, function(index, item){ }}
+    <option value="{{item.OrgID}}">{{item.Name}}</option>
+    {{#  }); }}
+</script>
+<style>
+    .layui-form-label {
+        width: 120px;
+    }
+</style>
+<div>
+    <div>
+        <form class="layui-form" style="margin-top: 20px;">
+            <div class="layui-form-item">
+                <label class="layui-form-label">报刊代号</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="BKDH" name="BKDH" autocomplete="off" class="layui-input" maxlength="50">
+                </div>
+                <label class="layui-form-label">单位编号</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="OrderNo" name="OrderNo" autocomplete="off" class="layui-input" maxlength="50" value="">
+                </div>
+                <label class="layui-form-label">单位名称</label>
+                <div class="layui-input-inline">
+                    <input type="text"  id="UnitName" name="UnitName" autocomplete="off" class="layui-input" maxlength="50" value="">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                
+                <label class="layui-form-label">录入起始时间</label>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" name="test1" id="test1" placeholder="年-月-日">
+                </div>
+                <label class="layui-form-label">录入截止时间</label>
+                <div class="layui-input-inline">
+                    <div class="layui-input-inline">
+                        <input type="text" class="layui-input" name="test2" id="test2" placeholder="年-月-日">
+                    </div>
+                </div>
+                <label class="layui-form-label">省</label>
+                <div class="layui-input-inline">
+                    <select id="Province"  lay-filter="Province" style="width:150px;" name="Province">
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+               
+                <label class="layui-form-label">市分公司</label>
+                <div class="layui-input-inline">
+                    <select id="CompanyCity" lay-filter="CompanyCity"  style="width:150px;" name="CompanyCity">
+                    </select>
+                </div>
+                <label class="layui-form-label">县分公司</label>
+                <div class="layui-input-inline">
+                    <select id="CompanyUnderCity" lay-filter="CompanyUnderCity"  style="width:150px;" name="CompanyUnderCity">
+                    </select>
+                </div>
+                <label class="layui-form-label">网点</label>
+                <div class="layui-input-inline">
+                    <select id="CompanyUnderArea" lay-filter="CompanyUnderArea"  style="width:150px;" name="CompanyUnderArea">
+                    </select>
+                </div>
+                <button class="layui-btn" lay-filter="search" lay-submit="" id="search" data-type="reload">查询</button>
+            </div>
+        </form>
+    </div>
+    <div>
+        <form class="layui-form" style="margin-left: 5px; margin-top: 20px;" action="" method="get" id="mainform">
+            <div class=" layui-form-item">         
+                <button class="layui-btn layui-btn-warm" type="button" id="add">
+                    <i class="layui-icon">&#xe654;</i> 新增
+                </button>
+                <button class="layui-btn layui-btn-warm" type="button" id="edit">
+                    <i class="layui-icon">&#xe642;</i> 修改
+                </button>
+                <button class="layui-btn layui-btn-danger">
+                    <i class="layui-icon">&#x1006;</i> 批量退订
+                </button>
+                <button class="layui-btn layui-btn-danger">
+                    <i class="layui-icon">&#x1006;</i> 批量删除
+                </button>
+                <button type="button" class="layui-btn" name="file" id="file"><i class="layui-icon"></i>批量导入订购</button>
+                <button class="layui-btn test" id="test4">下载导入模板</button>
+            </div>
+        </form>
+    </div>
+    <div>
+        <table class="layui-table" id="maintb" style="width: 99%; margin-left: 5px;"></table>
+    </div>
+</div>

@@ -1,0 +1,29 @@
+﻿@{
+    RouteValueDictionary x = Url.RequestContext.RouteData.Values;
+    string controllername = "";
+    string actionname = "";
+    foreach (var item in x)
+    {
+        if (item.Key == "controller")
+        {
+            controllername = item.Value.ToString();
+        }
+        if (item.Key == "action")
+        {
+            actionname = item.Value.ToString();
+        }
+    }
+    if (controllername == "Home")
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+    else if (actionname.IndexOf("_") != -1)
+    {
+        Layout = "~/Views/Shared/childpage.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/Normal.cshtml";
+    }
+
+}

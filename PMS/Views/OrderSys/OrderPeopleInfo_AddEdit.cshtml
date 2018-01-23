@@ -1,0 +1,193 @@
+﻿@using System.Data
+@using Common
+@model object
+@{
+    DataRow dr = null;
+    if (Model != null)
+    {
+        PageModel pg = Model as PageModel;
+
+        if (pg.code==0)
+        {
+            DataTable dt = pg.data as DataTable;
+            if (dt != null && dt.Rows.Count > 0)
+            {
+                dr = dt.Rows[0];
+            }
+        }
+    }}
+    @section scripts{
+    <script>
+        $(function () {
+            var ajaxHelper = new AjaxHelper();
+
+            layui.use(['laydate', 'jquery', 'layer', 'form', 'laytpl', 'element'], function () {
+                var $ = layui.jquery, laydate = layui.laydate, layer = layui.layer, form = layui.form, laytpl = layui.laytpl, element = layui.element;
+                form.on('submit(save1)', function (data) {
+                    if (!$('#OrderNo').val().match(/^[0-9a-zA-Z]*$/g)) {
+                        layer.open({
+                            title: '提示', content: '单位编号应由数字、字母组成!', time: 2000
+                        });
+                        return false;
+                    }
+                    if ($('#CompanyUnderArea option:selected').val() === "") {
+                        layer.open({
+                            title: '提示',
+                            content: '必须选择单位所属网点!',
+                            time: 2000
+                        });
+                        return false;
+                    }
+                    var ddd = { str: JSON.stringify(data.field) };
+                    alert(ddd);
+                    ajaxHelper.post("/OrderSys/OrderPeopleInfo_AddEdits/", ddd, function (da) {
+                        var jsonObj = JSON.parse(da);
+                        if (jsonObj.result) {
+                            layer.open({
+                                title: '提示',
+                                content: '保存成功',
+                                time: 2000,
+                                end: function () {
+                                    var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                                    parent.layer.close(index);  // 关闭layer
+                                }
+                            });
+
+                        }
+                        else {
+                            layer.open({
+                                title: '提示',
+                                content: jsonObj.result,
+                                time: 2000
+                            });
+                        }
+
+                    });
+                    return false;
+                });
+                //下拉框绑定
+                $(function () {
+                    var ddd = { str: '' };
+                    selectchanged('', "Province");
+                });
+                function selectchanged(parentid, elem) {
+                    $("#" + elem + "").empty();
+
+                    var ddd = { str: parentid }
+                    ajaxHelper.post("/BasicSys/OrgInfos/", ddd, function (da) {
+                        var jsonObj = JSON.parse(da);
+                        var getTpl2 = $("#orginfo").html()
+                            , view2 = $("#" + elem + "");
+                        if (jsonObj.result) {
+                            if (jsonObj.data.length > 0) {
+                                laytpl(getTpl2).render(jsonObj.data, function (a2) {
+                                    $(view2).html(a2);
+                                });
+                            }
+                        }
+                        form.render();
+                    });
+                }
+                form.on('select(Province)', function (data) {
+                    $("#CompanyCity").empty();
+                    document.getElementById('CompanyCity').innerHTML = "";
+                    document.getElementById('CompanyUnderCity').innerHTML = "";
+                    document.getElementById('CompanyUnderArea').innerHTML = "";
+                    $("#CompanyUnderCity").empty();
+                    $("#CompanyUnderArea").empty();
+                    $("#t_UserInfo").html("");
+                    var parentid = $("#Province option:selected").val();
+                    if (parentid == "") {
+                        return false;
+                    }
+                    else {
+                        selectchanged(parentid, "CompanyCity");
+                    }
+                    return false;
+                });
+                form.on('select(CompanyCity)', function (data) {
+                    $("#CompanyUnderCity").html("");
+                    $("#CompanyUnderArea").html("");
+                    $("#t_UserInfo").html("");
+                    var parentid = $("#CompanyCity option:selected").val();
+                    if (parentid == "") {
+                        return false;
+                    }
+                    selectchanged(parentid, "CompanyUnderCity");
+                    return false;
+                });
+                form.on('select(CompanyUnderCity)', function (data) {
+                    $("#CompanyUnderArea").html("");
+                    $("#t_UserInfo").html("");
+                    var parentid = $("#CompanyUnderCity option:selected").val();
+                    if (parentid == "") {
+                        return false;
+                    }
+                    selectchanged(parentid, "CompanyUnderArea");
+                    return false;
+                });
+                form.render();
+            });
+        });
+    </script>
+    }
+<script id="orginfo" type="text/html">
+    <option value="">请选择</option>
+    {{#  layui.each(d, function(index, item){ }}
+    <option value="{{item.OrgID}}">{{item.Name}}</option>
+    {{#  }); }}
+</script>
+@* 本功能用户所属机构和负责机构都没有设置 *@
+<form class="layui-form layui-form-pane" style="margin-left: 20px;margin-top:20px;" action="" method="get" id="mainform">
+    <input type="hidden" name="ID" value="@(dr == null ? "" : dr["ID"]._ToStrTrim())" />
+    <input type="hidden" name="MGuid" value="@(dr == null ? "" : dr["MGUID"]._ToStrTrim())" />
+    <div class=" layui-form-item">
+        <label class="layui-form-label">单位编号</label>
+        <div class="layui-input-inline">
+            <input type="text" id="OrderNo" name="OrderNo" lay-verify="required" autocomplete="off" class="layui-input" maxlength="50" value="@(dr == null ? "" : dr["OrderNo"]._ToStrTrim())">
+        </div>
+        <label class="layui-form-label">单位名称</label>
+        <div class="layui-input-inline">
+            <input type="text" id="" name="UnitName" lay-verify="required" placeholder="" autocomplete="off" class="layui-input" maxlength="50" value="@(dr == null ? "" : dr["UnitName"]._ToStrTrim())">
+        </div>
+    </div>
+    <div class=" layui-form-item">
+        <label class="layui-form-label">单位地址</label>
+        <div class="layui-input-inline">
+            <input type="text" id="" name="Address" placeholder="" autocomplete="off" class="layui-input" maxlength="50" value="@(dr == null ? "" : dr["Address"]._ToStrTrim())">
+        </div>
+        <label class="layui-form-label">负责人名称</label>
+        <div class="layui-input-inline">
+            <input type="text" id="" name="Name" lay-verify="required" placeholder="" autocomplete="off" class="layui-input" maxlength="50" value="@(dr == null ? "" : dr["Name"]._ToStrTrim())">
+        </div>
+    </div>
+    <div class=" layui-form-item">
+        <label class="layui-form-label">电话</label>
+        <div class="layui-input-inline">
+            <input type="text" id="" name="Phone" lay-verify="required|phone" placeholder="" autocomplete="off" class="layui-input" maxlength="50" value="@(dr == null ? "" : dr["Phone"]._ToStrTrim())">
+        </div>
+        <label class="layui-form-label">省</label>
+        <div class="layui-input-inline">
+            <select id="Province" style="width:150px;" name="Province"></select>
+        </div>
+    </div>
+    <div class=" layui-form-item">
+        <label class="layui-form-label">市分公司</label>
+        <div class="layui-input-inline">
+            <select id="CompanyCity" style="width:150px;" name="CompanyCity"></select>
+        </div>
+        <label class="layui-form-label">县分公司</label>
+        <div class="layui-input-inline">
+            <select id="CompanyUnderCity" style="width:150px;" name="CompanyUnderCity"> </select>
+        </div>
+    </div>
+    <div class=" layui-form-item">
+        <label class="layui-form-label">网点</label>
+        <div class="layui-input-inline">
+            <select id="CompanyUnderArea" style="width:150px;" name="CompanyUnderArea">
+            </select>
+        </div>
+        <button class="layui-btn" lay-filter="save1" lay-submit="" data-type="save">保存</button>
+        <button class="layui-btn layui-btn-danger" onclick="javascript: mvccloseall();">取消</button>
+    </div>
+</form>

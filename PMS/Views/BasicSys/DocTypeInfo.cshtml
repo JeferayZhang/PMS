@@ -1,0 +1,38 @@
+﻿@{
+    ViewBag.Title = "用户信息维护";
+    Layout = "~/Views/Shared/Normal.cshtml";
+}
+<div>
+    <div>
+        <form class="layui-form layui-form-pane" style="margin-left: 5px; margin-top: 20px;" action="" method="get" id="mainform">
+            <div class=" layui-form-item">
+                <label class="layui-form-label">类型名称：</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="" name="Name" autocomplete="off" class="layui-input" maxlength="50" value="">
+                </div>
+                <button class="layui-btn layui-btn-normal" type="button">
+                    <i class="layui-icon">&#xe615;</i> 查询
+                </button>
+                <button class="layui-btn layui-btn-warm" type="button" onclick="javascript: openUrlByJumpOutPage_Scroll('/BasicSys/DocTypeInfo_AddEdit', '400px', '350px', '修改类型信息');">
+                    <i class="layui-icon">&#xe642;</i> 修改
+                </button>
+                <button class="layui-btn layui-btn-danger">
+                    <i class="layui-icon">&#xe640;</i> 删除选中类型
+                </button>
+            </div>
+        </form>
+    </div>
+    <div>
+        <table class="layui-table" style="width: 99%; margin-left: 5px;">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" title="全选" style="height:20px;width:20px;"></th>
+                    <td hidden>类型ID</td>
+                    <td>类型名称</td>
+                    <td>类型说明</td>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>

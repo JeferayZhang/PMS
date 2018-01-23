@@ -1,0 +1,167 @@
+﻿@{
+    ViewBag.Title = "CostInfo";
+}
+@section scripts{
+    <script>
+        $(function () {
+            var ajaxHelper = new AjaxHelper();
+
+
+            layui.use(['laydate', 'layer', 'element', 'form', 'table'], function () {
+                var laydate = layui.laydate, layer = layui.layer, element = layui.element, form = layui.form, $ = layui.jquery, table = layui.table;
+                table.render({
+                    elem: '#maintb',
+                    url: '/CostSys/CostInfos/',
+                    cols: [[
+                        { type: 'checkbox' },
+                        { field: 'id',  title: '缴费记录流水号', sort: true },
+                        { field: 'OrderNo', align: 'center', title: '单位编码', sort: true },
+                        { field: 'UnitName', align: 'center', title: '单位名称', sort: true },
+                        { field: 'indate', align: 'center', title: '起订日期' },
+                        { field: 'ordermonths', align: 'center', title: '订购月数' },
+                        { field: 'money', align: 'center', title: '应缴费用' },
+                        { field: 'moneypayed', align: 'center', title: '已缴费用' },
+                        { field: 'updatetime', align: 'center', title: '上次更新时间', sort: true },
+                        { field: 'updateuser', align: 'center', title: '上次更新人' },
+                        { field: 'state', align: 'center', title: '状态' }
+                    ]],
+                    page: true,
+                    id: 'testReload'
+                });
+                var $ = layui.$, active = {
+                    reload: function () {
+                        var OrderID = $('#OrderID').val();
+                        var State = $('#State').val();
+                        var OrderNo = $('#OrderNo').val();
+                        var UnitName = $('#UnitName').val();
+                        //执行重载
+                        table.reload('testReload', {
+                            page: {
+                                curr: 1, //重新从第 1 页开始
+                                layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'],
+                                groups: 5,
+                                last: true,
+                                first: true
+                            }
+                          , where: {
+                              OrderID: OrderID,
+                              State: State,
+                              OrderNo: OrderNo,
+                              UnitName: UnitName
+                          }
+                        });
+                    },
+                    getCheckData: function () { //获取选中数据
+                        var checkStatus = table.checkStatus('testReload')
+                        , data = checkStatus.data;
+                        layer.alert(JSON.stringify(data));
+                    }
+                };
+
+                $('.layui-form .layui-btn').on('click', function () {
+                    var type = $(this).data('type');
+                    active[type] ? active[type].call(this) : '';
+                });
+
+                form.render();
+                //缴费
+                $("#edit").click(function () {
+                    var addeditcode = $("[name=table_ck]:checked:eq(0)").val();
+                    if ($("#t_UserInfo").find("[name=table_ck]:checked").length == 0) {
+                        layer.open({
+                            title: '提示', content: '请勾选需要进行操作的数据!', time: 2000
+                        });
+                        return;
+                    }
+                    layer.open({
+                        type: 2,
+                        title: '修改用户',
+                        closeBtn: 1,
+                        shade: [0],
+                        area: ['700px', '550px'],
+                        anim: 2,
+                        moveOut: true,
+                        content: ['/BasicSys/UserInfo_AddEdit?addeditcode=' + addeditcode, 'no'],//iframe的url，no代表不显示滚动条
+                        end: function () {
+                            $("#search").click();
+                        }
+                    });
+                });
+                //批量删除
+                $("#delete").click(function () {
+                    if ($("#t_UserInfo").find("[name=table_ck]:checked").length == 0) {
+                        layer.open({
+                            title: '提示', content: '请勾选需要进行操作的数据!',time:2000
+                        });
+                        return;
+                    }
+                    var delkeys = "";
+                    $("#t_UserInfo").find("[name=table_ck]:checked").each(function () {
+                        delkeys += $(this).val() + ",";
+                    });
+                    delkeys = delkeys.substring(0, delkeys.length - 1);
+                    var senddata = { str: delkeys };
+                    ajaxHelper.post("/BasicSys/UserInfo_Deletes/", senddata, function (da) {
+                        var jsonObj = JSON.parse(da);
+                        if (jsonObj.result) {
+                            layer.open({
+                                title: '提示', content: jsonObj.data, time: 2000
+                            });
+                            $("#search").click();
+                        }
+                        else {
+                            layer.open({
+                                title: '提示', content: jsonObj.result, time: 2000
+                            });
+                        }
+                    });
+                    return false;
+                });
+            });
+        })
+    </script>
+}
+<form class="layui-form" style="margin-top: 20px;" action="" method="get" id="mainform">
+    <div class=" layui-form-item">
+        <label class="layui-form-label">订购流水号</label>
+        <div class="layui-input-inline">
+            <input type="text" id="OrderID" name="OrderID" placeholder="" autocomplete="off" class="layui-input" maxlength="50" value="">
+        </div>
+        <label class="layui-form-label">单位编号</label>
+        <div class="layui-input-inline">
+            <input type="text" id="OrderNo" name="OrderNo" placeholder="" autocomplete="off" class="layui-input" maxlength="50" value="">
+        </div>
+        <label class="layui-form-label">单位名称</label>
+        <div class="layui-input-inline">
+            <input type="text" id="UnitName" name="UnitName" placeholder="" autocomplete="off" class="layui-input" maxlength="50" value="">
+        </div>
+    </div>
+    <div class=" layui-form-item">
+        <label class="layui-form-label">状态</label>
+        <div class="layui-input-inline">
+            <select id="State" style="width:150px;" name="State">
+                <option value="">请选择状态</option>
+                <option value="0">已交清</option>
+                <option value="1">未交清</option>
+            </select>
+        </div>
+        <button class="layui-btn layui-btn-normal" data-type="reload" type="button">
+            查询
+        </button>
+        <button class="layui-btn layui-btn-warm" type="button" id="edit">
+            缴费
+        </button>
+        <button class="layui-btn layui-btn-danger" type="button" id="delete">
+            全部置为已缴
+        </button>
+        <button class="layui-btn layui-btn-danger" type="button" id="delete">
+            删除
+        </button>
+    </div>
+</form>
+<form class="layui-form">
+    <div>
+        <table class="layui-table" id="maintb"></table>
+    </div>
+
+</form>

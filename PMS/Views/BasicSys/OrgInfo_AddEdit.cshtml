@@ -1,0 +1,78 @@
+﻿@using System.Data
+@using Common
+@model object
+@{
+    DataRow dr = null;
+    string ID = "";
+    string ParentID = "";
+    if (Model != null)
+    {
+        List<retValue> ret = Model as List<retValue>;
+
+        if (ret[0].result)
+        {
+            DataTable dt = ret[1].data as DataTable;
+            if (dt != null && dt.Rows.Count > 0)
+            {
+                dr = dt.Rows[0];
+                ID = dr["OrgID"]._ToStr();
+            }
+        }
+        else
+        {
+            ParentID = ret[0].data._ToStr();
+        }
+    }
+
+}
+@section scripts{
+    <script>
+        $(function () {
+            var ajaxHelper = new AjaxHelper();
+
+            layui.use(['jquery', 'layer', 'form', 'element'], function () {
+                var $ = layui.jquery, layer = layui.layer, form = layui.form, element = layui.element;
+                form.on('submit(save1)', function (data) {
+                    var ddd = { str: JSON.stringify(data.field) };
+                    ajaxHelper.post("/BasicSys/OrgInfo_AddEdits/", ddd, function (da) {
+                        var jsonObj = JSON.parse(da);
+                        if (jsonObj.result) {
+                            layer.open({
+                                title: '提示', content: jsonObj.data, time: 2000,
+                                end: function () {
+                                    var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                                    parent.layer.close(index);  // 关闭layer
+                                }
+                            });
+                        }
+                        else {
+                            layer.open({
+                                title: '提示', content: jsonObj.result
+                            });
+                        }
+                    });
+                    return false;
+                });
+                form.render();
+            });
+        });
+    </script>
+}
+<form class="layui-form">
+    <input type="hidden" name="ID" value="@ID" />
+    <input type="hidden" name="ParentID" value="@ParentID" />
+    <div class=" layui-form-item">
+        <label class="layui-form-label">机构名称</label>
+        <div class="layui-input-inline">
+            <input type="text" lay-verify="required" id="Name" value="@(dr == null ? "" : dr["Name"]._ToStrTrim())" name="Name" autocomplete="off" class="layui-input" maxlength="50">
+        </div>
+        <label class="layui-form-label">地址</label>
+        <div class="layui-input-inline">
+            <input type="text" id="Address" name="Address" value="@(dr == null ? "" : dr["ADDRESS"]._ToStrTrim())" autocomplete="off" class="layui-input" maxlength="50">
+        </div>
+    </div>
+    <div class=" layui-form-item">
+        <button class="layui-btn" lay-filter="save1" lay-submit="" data-type="save">保存</button>
+        <button class="layui-btn layui-btn-danger" onclick="javascript: mvccloseall();">取消</button>
+    </div>
+</form>

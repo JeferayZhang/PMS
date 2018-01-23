@@ -1,0 +1,115 @@
+﻿@using System.Data
+@using Common
+@model object
+@{
+    DataRow dr = null;
+    if (Model != null)
+    {
+        List<retValue> ret = Model as List<retValue>;
+
+        if (ret[0].result)
+        {
+            DataTable dt = ret[0].data as DataTable;
+            if (dt != null && dt.Rows.Count > 0)
+            {
+                dr = dt.Rows[0];
+            }
+        }
+    }
+
+}
+@section scripts{
+    <script>
+        $(function () {
+            var ajaxHelper = new AjaxHelper();
+
+            layui.use(['jquery', 'layer', 'form', 'element'], function () {
+                var $ = layui.jquery, layer = layui.layer, form = layui.form, element = layui.element;
+                form.on('submit(save1)', function (data) {
+                    var result = $('#Price').val().match(/(^[1-9]([0-9]+)?(\.[0-9]{1,2})?$)|(^(0){1}$)|(^[0-9]\.[0-9]([0-9])?$)/);
+                    if (result==null) {
+                        layer.open({
+                            title: '提示', content: '价格格式不正确!', time: 2000
+                        });
+                        return false;
+                    }
+                    var ddd = { str: JSON.stringify(data.field) };
+                    ajaxHelper.post("/BasicSys/DocInfo_AddEdits/", ddd, function (da) {
+                        var jsonObj = JSON.parse(da);
+                        console.log(jsonObj.data);
+                        if (jsonObj.result) {
+                            layer.open({
+                                title: '提示', content: jsonObj.data, time: 2000,
+                                end: function () {
+                                    var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                                    parent.layer.close(index);  // 关闭layer
+                                }
+                            });
+                        }
+                        else {
+                            layer.open({
+                                title: '提示', content: jsonObj.result, time: 2000
+                            });
+                        }
+
+                    });
+                    return false;
+                });
+                form.render();
+            });
+        });
+    </script>
+}
+
+<form class="layui-form layui-form-pane">
+    <div class=" layui-form-item">
+        <input type="hidden" name="ID" value="@(dr == null ? "" : dr["ID"]._ToStrTrim())" />
+        <input type="hidden" name="NGUID" value="@(dr == null ? "" : dr["NGUID"]._ToStrTrim())" />
+        <label class="layui-form-label">报刊类别</label>
+        <div class="layui-input-inline">
+            <select id="Role" required value="@(dr == null ? "" : dr["TYPEID"]._ToStrTrim())" name="Role">
+                <option value="1">报纸</option>
+                <option value="2">杂志</option>
+            </select>
+        </div>
+        <label class="layui-form-label">报刊名称</label>
+        <div class="layui-input-inline">
+            <input type="text" id="" name="Name" autocomplete="off" class="layui-input" maxlength="50" value="@(dr == null ? "" : dr["DOCNAME"]._ToStrTrim())">
+        </div>
+    </div>
+    <div class=" layui-form-item">
+        <label class="layui-form-label">ISSN</label>
+        <div class="layui-input-inline">
+            <input type="text" id="" name="ISSN" autocomplete="off" class="layui-input" maxlength="50" value="@(dr == null ? "" : dr["ISSN"]._ToStrTrim())">
+        </div>
+        <label class="layui-form-label">出版地</label>
+        <div class="layui-input-inline">
+            <input type="text" id="" name="PublishArea" autocomplete="off" class="layui-input" maxlength="50" value="@(dr == null ? "" : dr["PUBLISHAREA"]._ToStrTrim())">
+        </div>
+        
+    </div>
+    <div class=" layui-form-item">
+        <label class="layui-form-label">出版社</label>
+        <div class="layui-input-inline">
+            <input type="text" id="" name="Publisher" autocomplete="off" class="layui-input" maxlength="50" value="@(dr == null ? "" : dr["PUBLISHER"]._ToStrTrim())">
+        </div>
+        <label class="layui-form-label">月定价</label>
+        <div class="layui-input-inline">
+            <input type="text" id="Price" name="Price" placeholder="" autocomplete="off" class="layui-input" maxlength="50" value="@(dr == null ? "" : dr["PRICE"]._ToStrTrim())">
+        </div>
+    </div>
+    <div class=" layui-form-item">
+        <label class="layui-form-label">出版频率</label>
+        <div class="layui-input-inline">
+            <input type="text" id="" name="PL" placeholder="" autocomplete="off" class="layui-input" maxlength="50" value="@(dr == null ? "" : dr["PL"]._ToStrTrim())">
+        </div>
+        <label class="layui-form-label">报刊代号</label>
+        <div class="layui-input-inline">
+            <input type="text" id="" name="BKDH" placeholder="" autocomplete="off" class="layui-input" maxlength="50" value="@(dr == null ? "" : dr["BKDH"]._ToStrTrim())">
+        </div>
+    </div>
+    <div class=" layui-form-item">
+        <button class="layui-btn" lay-filter="save1" lay-submit="" data-type="save">保存</button>
+        <button class="layui-btn layui-btn-danger" onclick="javascript: mvccloseall();">取消</button>
+    </div>
+</form>

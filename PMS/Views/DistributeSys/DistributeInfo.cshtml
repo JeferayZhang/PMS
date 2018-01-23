@@ -1,0 +1,128 @@
+﻿<form class="layui-form" style=" margin-top: 10px;" action="" method="get" id="mainform">
+    <div class=" layui-form-item" id="Group_Type">
+        <label class="layui-form-label">统计类型</label>
+        <div class="layui-input-block">
+            <input type="radio" name="Group_Type" value="1" title="按报刊统计" checked>
+            <input type="radio" name="Group_Type" value="2" title="按机构统计">
+        </div>
+    </div>
+    <div class=" layui-form-item" id="Visable_ByMagazine" hidden>
+        <label class="layui-form-label">报刊种类</label>
+        <div class="layui-input-inline">
+            <select id="" name="DocType">
+                <option value="1">报刊种类</option>
+                <option value="0">报刊种类</option>
+            </select>
+        </div>
+        <label class="layui-form-label">报刊名称</label>
+        <div class="layui-input-inline">
+            <select id="" name="NewspaperName">
+                <option value="1">报刊名称</option>
+                <option value="0">报刊名称</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item" id="Visable_ByOrg1">
+        <label class="layui-form-label" hidden>省</label>
+        <div class="layui-input-inline" hidden>
+            <select name="Province" style="width:150px;" lay-verify="required" lay-search="">
+                <option value="">直接选择或搜索选择</option>
+                <option value="1">layer</option>
+                <option value="2">form</option>
+                <option value="3">layim</option>
+            </select>
+        </div>
+        <label class="layui-form-label" id="Visable_ByOrg2_1">市分公司</label>
+        <div class="layui-input-inline" id="Visable_ByOrg2_2">
+            <select name="CompanyUnderCity" style="width:150px;" lay-verify="required" lay-search="">
+                <option value="">直接选择或搜索选择</option>
+                <option value="1">layer</option>
+                <option value="2">form</option>
+                <option value="3">layim</option>
+            </select>
+        </div>
+
+    </div>
+    <div class="layui-form-item" id="Visable_ByOrg2" hidden>
+        <label class="layui-form-label" id="Visable_ByOrg2_3">县分公司</label>
+        <div class="layui-input-inline" id="Visable_ByOrg2_4">
+            <select name="Area" style="width:150px;" lay-verify="required" lay-search="">
+                <option value="">直接选择或搜索选择</option>
+                <option value="1">layer</option>
+                <option value="2">form</option>
+                <option value="3">layim</option>
+            </select>
+        </div>
+        <label class="layui-form-label" id="Visable_ByOrg3_3">网点</label>
+        <div class="layui-input-inline" id="Visable_ByOrg3_4">
+            <select name="CompanyUnderArea" style="width:150px;" lay-verify="required" lay-search="">
+                <option value="">直接选择或搜索选择</option>
+                <option value="1">layer</option>
+                <option value="2">form</option>
+                <option value="3">layim</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <button class="layui-btn layui-btn-normal">
+            <i class="layui-icon">&#xe615;</i> 统计
+        </button>
+        <button class="layui-btn layui-btn-warm">
+            <i class="layui-icon">&#xe615;</i> 分发
+        </button>
+        <button class="layui-btn layui-btn-danger" onclick="javascript: mvccloseall();">
+            <i class="layui-icon">&#x1006;</i> 取消
+        </button>
+    </div>
+</form>
+<div>
+    @*按照报刊统计,统计出报刊在当前机构下各县的订购数*@
+    <table class="layui-table" id="table1" style="width: 99%; margin-left: 5px;" hidden>
+        <thead>
+            <tr>
+                <th><input type="checkbox" title="全选" style="height:20px;width:20px;"></th>
+                <td>报刊种类</td>
+                <td>报刊名称</td>
+                <th>机构名称</th>
+                <th>数量</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < 30; i++)
+            {
+                <tr>
+                    <td width="30"><input type="checkbox" style="height:20px;width:20px;"></td>
+                    <td>报刊种类</td>
+                    <td>报刊名称</td>
+                    <th>机构名称</th>
+                    <th>数量</th>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @*按照机构统计,统计出当前机构下各种报刊的订购数*@
+    <table class="layui-table" id="table2" style="width: 99%; margin-left: 5px;">
+        <thead>
+            <tr>
+                <th><input type="checkbox" title="全选" style="height:20px;width:20px;"></th>
+                <th>机构名称</th>
+                <td>报刊种类</td>
+                <td>报刊名称</td>                
+                <th>数量</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < 30; i++)
+            {
+                <tr>
+                    <td width="30"><input type="checkbox" style="height:20px;width:20px;"></td>
+                    <th>机构名称</th>
+                    <td>报刊种类</td>
+                    <td>报刊名称</td>                    
+                    <th>数量</th>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

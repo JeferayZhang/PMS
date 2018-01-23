@@ -1,0 +1,234 @@
+﻿@using System.Data
+@using Common
+@model object
+@{
+    DataRow dr = null;
+    if (Model!=null)
+    {
+        List<retValue> ret = Model as List<retValue>;
+
+        if (ret[0].result)
+        {
+            DataTable dt = ret[0].data as DataTable;
+            if (dt != null && dt.Rows.Count > 0)
+            {
+                dr = dt.Rows[0];
+            }
+        }
+    }
+    
+}
+@section scripts{
+    <script>
+        $(function () {
+            var ajaxHelper = new AjaxHelper();
+
+            layui.use(['laydate', 'jquery', 'layer', 'form', 'laytpl', 'element'], function () {
+                var $ = layui.jquery, laydate = layui.laydate, layer = layui.layer, form = layui.form, laytpl = layui.laytpl, element = layui.element;
+                form.on('submit(save1)', function (data) {
+                    if (!$('#USERNO').val().match(/[^\\w+$]/)) {
+                        layer.open({
+                            title: '提示', content: '用户编号应由数字、字母或下划线组成!',time:2000
+                        });
+                        return;
+                    }
+                    if ($('#Province option:selected').val() === ""
+                        || $('#CompanyCity option:selected').val() === ""
+                        || $('#CompanyUnderCity option:selected').val() === ""
+                        || $('#CompanyUnderArea option:selected').val() === "") {
+                        layer.open({
+                            title: '提示', content: '机构不能为空!'
+                        });
+                        return;
+                    }
+                    var ddd = { str: JSON.stringify(data.field) };
+                    ajaxHelper.post("/BasicSys/UserInfo_AddEdits/", ddd, function (da) {
+                        var jsonObj = JSON.parse(da);
+                        if (jsonObj.result) {
+                            layer.open({
+                                title: '提示', content: jsonObj.data, time: 2000,
+                                end: function () {
+                                    var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                                    parent.layer.close(index);  // 关闭layer
+                                }
+                            });
+                           
+                        }
+                        else {
+                            layer.open({
+                                title: '提示', content: jsonObj.result
+                            });
+                        }
+                      
+                    });
+                    return false;
+                });
+                $(function () {
+                    var ddd = { str: '' };
+                    selectchanged('', "Province");
+                });
+                //下拉框绑定
+                function selectchanged(parentid, elem) {
+                    $("#" + elem + "").empty();
+
+                    var ddd = { str: parentid }
+                    ajaxHelper.post("/BasicSys/OrgInfos/", ddd, function (da) {
+                        var jsonObj = JSON.parse(da);
+                        var getTpl2 = $("#orginfo").html()
+                            , view2 = $("#" + elem + "");
+                        if (jsonObj.result) {
+                            if (jsonObj.data.length > 0) {
+                                laytpl(getTpl2).render(jsonObj.data, function (a2) {
+                                    $(view2).html(a2);
+                                });
+                            }
+                        }
+                        form.render();
+                    });
+                }
+                form.on('select(Province)', function (data) {
+                    $("#CompanyCity").empty();
+                    document.getElementById('CompanyCity').innerHTML = "";
+                    document.getElementById('CompanyUnderCity').innerHTML = "";
+                    document.getElementById('CompanyUnderArea').innerHTML = "";
+                    $("#CompanyUnderCity").empty();
+                    $("#CompanyUnderArea").empty();
+                    $("#t_UserInfo").html("");
+                    var parentid = $("#Province option:selected").val();
+                    if (parentid == "") {
+                        return false;
+                    }
+                    else {
+                        selectchanged(parentid, "CompanyCity");
+                    }
+                    return false;
+                });
+                form.on('select(CompanyCity)', function (data) {
+                    $("#CompanyUnderCity").html("");
+                    $("#CompanyUnderArea").html("");
+                    $("#t_UserInfo").html("");
+                    var parentid = $("#CompanyCity option:selected").val();
+                    if (parentid == "") {
+                        return false;
+                    }
+                    selectchanged(parentid, "CompanyUnderCity");
+                    return false;
+                });
+                form.on('select(CompanyUnderCity)', function (data) {
+                    $("#CompanyUnderArea").html("");
+                    $("#t_UserInfo").html("");
+                    var parentid = $("#CompanyUnderCity option:selected").val();
+                    if (parentid == "") {
+                        return false;
+                    }
+                    selectchanged(parentid, "CompanyUnderArea");
+                    return false;
+                });
+                form.render();
+            });
+        });    
+    </script>
+    }
+<script id="orginfo" type="text/html">
+    <option value="">请选择</option>
+    {{#  layui.each(d, function(index, item){ }}
+    <option value="{{item.OrgID}}">{{item.Name}}</option>
+    {{#  }); }}
+</script>
+<div>
+    <form class="layui-form">
+        <input type="hidden" name="ID" value="@(dr == null ? "" : dr["ID"]._ToStrTrim())" />
+        <input type="hidden" name="MGuid" value="@(dr == null ? "" : dr["MGUID"]._ToStrTrim())" />
+        <div class=" layui-form-item">
+            <label class="layui-form-label">用户编号</label>
+            <div class="layui-input-inline">
+                <input type="text" lay-verify="required" onkeyup="this.value = this.value.replace(/[^\w]/g, '')" id="USERNO" value="@(dr == null ? "" : dr["USERNO"]._ToStrTrim())" name="USERNO" autocomplete="off" class="layui-input" maxlength="50">
+            </div>
+            <label class="layui-form-label">姓名</label>
+            <div class="layui-input-inline">
+                <input type="text" lay-verify="required" id="NAME" value="@(dr == null ? "" : dr["NAME"]._ToStrTrim())" name="NAME" autocomplete="off" class="layui-input" maxlength="50">
+            </div>
+
+        </div>
+        <div class=" layui-form-item">
+            <label class="layui-form-label">性别</label>
+            <div class="layui-input-inline">
+                <select id="Sex" required value="@(dr == null ? "" : dr["SEX"]._ToStrTrim())" name="Sex">
+                    <option value="1">男</option>
+                    <option value="0">女</option>
+                </select>
+            </div>
+            <label class="layui-form-label">角色</label>
+            <div class="layui-input-inline">
+                <select id="Role" required value="@(dr == null ? "" : dr["ROLE"]._ToStrTrim())" name="Role">
+                    <option value="1">管理员</option>
+                    <option value="2">分发员</option>
+                    <option value="3">投递员</option>
+                    <option value="4">财务员</option>
+                </select>
+            </div>
+        </div>
+        <div class=" layui-form-item">
+            <label class="layui-form-label">密码</label>
+            <div class="layui-input-inline">
+                <input type="password" id="Password" name="Password" value="@(dr == null ? "" : dr["PASSWORD"]._ToStrTrim())" required autocomplete="off" class="layui-input" maxlength="50">
+            </div>
+            <label class="layui-form-label">身份证号</label>
+            <div class="layui-input-inline">
+                <input type="text" id="IDCard" name="IDCard" lay-verify="required|identity" value="@(dr == null ? "" : dr["IDCARD"]._ToStrTrim())" autocomplete="off" class="layui-input" maxlength="50">
+            </div>
+
+        </div>
+        <div class=" layui-form-item">
+            <label class="layui-form-label">联系方式</label>
+            <div class="layui-input-inline">
+                <input type="text" id="PhoneNumber" lay-verify="required|phone" name="PhoneNumber" value="@(dr == null ? "" : dr["PHONENUMBER"]._ToStrTrim())" autocomplete="off" class="layui-input" maxlength="50">
+            </div>
+            <label class="layui-form-label">Email</label>
+            <div class="layui-input-inline">
+                <input type="text" id="Email" lay-verify="email" name="Email" value="@(dr == null ? "" : dr["EMAIL"]._ToStrTrim())" autocomplete="off" class="layui-input" maxlength="50">
+            </div>
+        </div>
+        <div class=" layui-form-item">
+            <label class="layui-form-label">住址</label>
+            <div class="layui-input-inline">
+                <input type="text" id="Address" name="Address" value="@(dr == null ? "" : dr["ADDRESS"]._ToStrTrim())" autocomplete="off" class="layui-input" maxlength="50">
+            </div>
+            <label class="layui-form-label">省</label>
+            <div class="layui-input-inline">
+                <select id="Province" name="Province" lay-filter="Province"   value="@(dr == null ? "" : dr["ORGID"]._ToStrTrim())" style="width:150px;" lay-verify="required" lay-search="">
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">市分公司</label>
+            <div class="layui-input-inline">
+                <select name="CompanyCity" lay-filter="CompanyCity"    value="@(dr == null ? "" : dr["ORGID"]._ToStrTrim())" style="width:150px;" lay-verify="required" lay-search="">
+                </select>
+            </div>
+            <label class="layui-form-label">县分公司</label>
+            <div class="layui-input-inline">
+                <select name="CompanyUnderCity" lay-filter="CompanyUnderCity"    value="@(dr == null ? "" : dr["ORGID"]._ToStrTrim())" style="width:150px;" lay-search="">
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">网点</label>
+            <div class="layui-input-inline">
+                <select name="CompanyUnderArea"  lay-filter="CompanyUnderArea"   value="@(dr == null ? "" : dr["ORGID"]._ToStrTrim())" style="width:150px;" lay-search="">
+                </select>
+            </div>
+            <label class="layui-form-label">状态</label>
+            <div class="layui-input-inline">
+                <select id="State" required value="@(dr == null ? "" : dr["STATE"]._ToStrTrim())" name="State">
+                    <option value="0">启用</option>
+                    <option value="1">禁用</option>
+                </select>
+            </div>
+        </div>
+        <div class=" layui-form-item">
+            <button class="layui-btn" lay-filter="save1" lay-submit="" data-type="save">保存</button>
+            <button class="layui-btn layui-btn-danger" onclick="javascript: mvccloseall();">取消</button>
+        </div>
+    </form>
+</div>

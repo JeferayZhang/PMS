@@ -5,11 +5,11 @@
     DataRow dr = null;
     if (Model != null)
     {
-        List<retValue> ret = Model as List<retValue>;
+        PageModel pageModel = Model as PageModel;
 
-        if (ret[0].result)
+        if (pageModel.code==0)
         {
-            DataTable dt = ret[0].data as DataTable;
+            DataTable dt = pageModel.data as DataTable;
             if (dt != null && dt.Rows.Count > 0)
             {
                 dr = dt.Rows[0];
@@ -83,6 +83,8 @@
                             if (jsonObj.data.length > 0) {
                                 laytpl(getTpl3).render(jsonObj.data, function (a3) {
                                     $(view3).html(a3);
+                                    var value = $("#OrderPeople").attr("tag");
+                                    $("#OrderPeople option[value='" + value + "']").attr("selected", "selected");
                                 });
                             }
                         }
@@ -100,6 +102,11 @@
                             if (jsonObj.data.length > 0) {
                                 laytpl(getTpl2).render(jsonObj.data, function (a2) {
                                     $(view2).html(a2);
+                                    //设置选中值
+                                    var value = $("#NewspaperName").attr("tag");
+                                    $("#NewspaperName option[value='" + value + "']").attr("selected", "selected");
+                                    //绑定价格
+                                    document.getElementById("Price").value = $("#NewspaperName").find("option:selected").attr("tag");
                                 });
                             }
                         }
@@ -107,10 +114,27 @@
                     });
                 }
                 form.on('select(NewspaperName)', function (data) {
-                    console.log($("#NewspaperName").find("option:selected").attr("tag"));
-                    document.getElementById("Price").value =  $("#NewspaperName").find("option:selected").attr("tag");
+                    //console.log($("#NewspaperName").find("option:selected").attr("tag"));
+                    document.getElementById("Price").value = $("#NewspaperName").find("option:selected").attr("tag");
+                    nowprice();
                     return false;
                 });
+                //相关元素值变更时,刷新总价
+                function nowprice()
+                {
+                    var result = $('#Discount').val().match(/^(0(.\d+)?|1(\.0+)?)$/);
+                    if (result == null) {
+                        layer.open({
+                            title: '提示', content: '折扣格式不正确!', time: 2000
+                        });
+                        return false;
+                    }
+                    var dj = $('#Price').val();//单价
+                    var Month = $('#Month').val();//月数
+                    var OrderNumber = $('#OrderNumber').val();//订购份数
+                    var Discount = $('#Discount').val();//折扣
+                    document.getElementById("FullPrice").value = dj * Month * OrderNumber * Discount;
+                }
                 form.render();
             });
         });
@@ -119,7 +143,7 @@
 <script id="orginfo" type="text/html">
     <option value="" tag="0">请选择</option>
     {{#  layui.each(d, function(index, item){ }}
-    <option value="{{item.ID}}" tag="{{item.PRICE}}">{{item.DOCNAME}}</option>
+    <option value="{{item.BKDH}}" tag="{{item.PRICE}}">{{item.DOCNAME}}</option>
     {{#  }); }}
 </script>
 <script id="OrderPeopleInfos" type="text/html">
@@ -134,40 +158,51 @@
     <div class=" layui-form-item">
         <label class="layui-form-label">订户</label>
         <div class="layui-input-inline">
-            <select id="OrderPeople" name="OrderPeople" value="@(dr == null ? "" : dr["PersonID"]._ToStrTrim())"></select>
+            <select id="OrderPeople" name="OrderPeople" tag="@(dr == null ? "" : dr["PersonID"]._ToStrTrim())"></select>
         </div>
         <label class="layui-form-label">报刊名称</label>
         <div class="layui-input-inline">
-            <select id="NewspaperName"  lay-filter="NewspaperName"  name="NewspaperName" value="@(dr == null ? "" : dr["DocID"]._ToStrTrim())">
+            <select id="NewspaperName"  lay-filter="NewspaperName"  name="NewspaperName" tag="@(dr == null ? "" : dr["BKDH"]._ToStrTrim())">
             </select>
-        </div>
+        </div>        
+    </div>
+    <div class=" layui-form-item">
         <label class="layui-form-label">单价</label>
         <div class="layui-input-inline">
-            <input type="text" id="Price" name="Price" value="0" readonly placeholder="" autocomplete="off" class="layui-input" maxlength="50">
+            <input type="text" id="Price" name="Price" value="0" readonly placeholder=""onchange="javascript: nowprice();"autocomplete="off" class="layui-input" maxlength="50">
         </div>
-    </div>
-    <div class=" layui-form-item">
         <label class="layui-form-label">订阅月数</label>
         <div class="layui-input-inline">
-            <input type="text" id="Month" value="0"  name="Month" placeholder="" autocomplete="off" class="layui-input" maxlength="50">
-        </div>
-        <label class="layui-form-label">订购份数</label>
-        <div class="layui-input-inline">
-            <input type="text" id="OrderNumber" value="0"  name="OrderNumber" value="@(dr == null ? "" : dr["OrderNum"]._ToStrTrim())" placeholder="" autocomplete="off" class="layui-input" maxlength="50">
+            <input type="text" id="Month" onkeyup="this.value=this.value.replace(/[^\d]/g,'') " value="@(dr == null ? "" : dr["OrderMonths"]._ToStrTrim())" name="Month" placeholder=""onchange="javascript: nowprice();" autocomplete="off" class="layui-input" maxlength="50">
         </div>
     </div>
-    <div class=" layui-form-item">        
-        <label class="layui-form-label">应收金额</label>
+    <div class=" layui-form-item">     
+        <label class="layui-form-label">订购份数</label>
         <div class="layui-input-inline">
-            <input type="text" id="FullPrice" name="FullPrice"  value="0" readonly placeholder="" autocomplete="off" class="layui-input" maxlength="50">
+            <input type="text" id="OrderNumber"onkeyup="this.value=this.value.replace(/[^\d]/g,'') " name="OrderNumber" value="@(dr == null ? "" : dr["OrderNum"]._ToStrTrim())" onchange="javascript: nowprice();"placeholder="" autocomplete="off" class="layui-input" maxlength="50">
         </div>
-        <label class="layui-form-label">折扣</label>
+        <label class="layui-form-label">总价</label>
         <div class="layui-input-inline">
-            <input type="text" id="Discount" name="Discount"  value="1"   placeholder="" autocomplete="off" class="layui-input" maxlength="50">
+            <input type="text" id="FullPrice" name="FullPrice" value="@(dr == null ? "" : dr["Money"]._ToStrTrim())" readonly placeholder="" autocomplete="off" class="layui-input" maxlength="50">
         </div>
     </div>
     <div class=" layui-form-item">
-        
+        <label class="layui-form-label">折扣</label>
+        <div class="layui-input-inline">
+            <input type="text" id="Discount" name="Discount" value="@(dr == null ? 1 : 
+                    dr["Money"]._ToDecimal()/(dr["OrderNum"]._ToInt32()*dr["OrderMonths"]._ToInt32()*dr["Price"]._ToDecimal()))" 
+                   placeholder="" autocomplete="off" onchange="nowprice()" class="layui-input" maxlength="50">
+        </div>
+        <label class="layui-form-label">已缴金额</label>
+        <div class="layui-input-inline">
+            <input type="text" id="MoneyPayed" name="MoneyPayed" value="@(dr == null ? "" : dr["MoneyPayed"]._ToStrTrim())" placeholder="" autocomplete="off" class="layui-input" maxlength="50">
+        </div>
+    </div>
+    <div class=" layui-form-item">
+        <label class="layui-form-label" hidden>缴费</label>
+        <div class="layui-input-inline" hidden>
+            <input type="text" id="Pay" name="Pay" value="0" placeholder="" autocomplete="off" class="layui-input" maxlength="50">
+        </div>
         <button class="layui-btn layui-btn-warm" lay-filter="save1" lay-submit="" data-type="save">
             <i class="layui-icon">&#xe618;</i> 确定
         </button>
@@ -175,4 +210,5 @@
             <i class="layui-icon">&#x1006;</i> 取消
         </button>
     </div>
+    
 </form>

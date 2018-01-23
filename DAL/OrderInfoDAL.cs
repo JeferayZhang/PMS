@@ -36,12 +36,15 @@ namespace DAL
             }
             string sql = string.Format(@"select "+ top + @" * from (
 select a.ID ,b.Name docname ,a.BKDH,c.UnitName,c.Name ToUser,a.OrderDate,a.OrderMonths,
-a.OrderNum,a.Indate,d.Name as GetUser,e.NAME as InUser ,a.PersonID,
-ROW_NUMBER() over (order by a.ID) as rownumber
-from [Order]  a left join dbo.Doc b on a.BKDH=b.BKDH
-left join dbo.OrderPeople c on a.PersonID=c.ID
+a.OrderNum,a.Indate,d.Name as GetUser,e.NAME as InUser ,a.PersonID,a.NGUID,Cost.Money,Cost.MoneyPayed,
+ROW_NUMBER() over (order by a.ID) as rownumber,b.Price
+from [Order]  a 
+inner join dbo.OrderPeople c on a.PersonID=c.ID
+left join Cost on Cost.OrderID=a.ID
+left join dbo.Doc b on a.BKDH=b.BKDH
 left join dbo.USERS d on a.PosterID=d.ID
-left join dbo.USERS e on a.userid=d.ID ");
+left join dbo.USERS e on a.userid=d.ID  
+where 1=1 ");
             if (!string.IsNullOrEmpty(OrderNo._ToStrTrim()))
             {
                 SqlParameter Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim());
@@ -90,7 +93,7 @@ select count(1) as num
 from [Order]  a left join dbo.Doc b on a.BKDH=b.BKDH
 left join dbo.OrderPeople c on a.PersonID=c.ID
 left join dbo.USERS d on a.PosterID=d.ID
-left join dbo.USERS e on a.userid=d.ID ");
+left join dbo.USERS e on a.userid=d.ID where 1=1 ");
             if (!string.IsNullOrEmpty(OrderNo._ToStrTrim()))
             {
                 SqlParameter Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim());
@@ -207,8 +210,8 @@ left join dbo.USERS e on a.userid=d.ID ");
             string res = "";
             try
             {
-                string sql = @" insert into [Order](BKDH,personid,userid,ordernum,orderdate,posterid,ordermonths,qi,zq) 
-values(@BKDH,@personid,@userid,@ordernum,@orderdate,@posterid,@ordermonths,@qi,@zq) ";
+                string sql = @" insert into [Order](BKDH,personid,userid,ordernum,orderdate,posterid,ordermonths) 
+values(@BKDH,@personid,@userid,@ordernum,@orderdate,@posterid,@ordermonths) ";
                 SqlParameter Para = null;
                 Para = new SqlParameter("BKDH", BKDH._ToStrTrim());
                 dbhelper.SqlParameterList.Add(Para);
@@ -223,7 +226,6 @@ values(@BKDH,@personid,@userid,@ordernum,@orderdate,@posterid,@ordermonths,@qi,@
                 Para = new SqlParameter("posterid", posterid._ToInt32());
                 dbhelper.SqlParameterList.Add(Para);
                 Para = new SqlParameter("ordermonths", ordermonths._ToInt32());
-                dbhelper.SqlParameterList.Add(Para);
                 dbhelper.SqlParameterList.Add(Para);
                 int num = dbhelper.ExecuteInsert(tran,sql);
                 if (num==0)

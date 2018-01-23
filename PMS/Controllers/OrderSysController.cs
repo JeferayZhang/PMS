@@ -57,11 +57,8 @@ namespace PMS.Controllers
             int addeditcode = Request["addeditcode"]._ToInt32();
             if (addeditcode > 0)
             {
-                List<retValue> resultList = new List<retValue>();
-                retValue ret = new retValue();
                 BLL.OrderInfoBLL _BLL = new BLL.OrderInfoBLL();
                 PageModel pg = _BLL.GetOrderInfo(addeditcode, "", "", "", "", "");
-                resultList.Add(ret);
                 ViewData.Model = pg;
             }
             else
@@ -336,11 +333,8 @@ namespace PMS.Controllers
             int addeditcode = Request["addeditcode"]._ToInt32();
             if (addeditcode > 0)
             {
-                List<retValue> resultList = new List<retValue>();
-                retValue ret = new retValue();
                 BLL.SubscriberBLL _SubscriberBLL = new SubscriberBLL();
                 PageModel pg = _SubscriberBLL.GetSubscriber(addeditcode, "", "", "", 0, "", "");
-                resultList.Add(ret);
                 ViewData.Model = pg;
             }
             else

@@ -47,6 +47,8 @@
                         { field: 'ToUser', align: 'center', title: '单位负责人' },
                         { field: 'OrderNum', align: 'center', title: '订购数' },
                         { field: 'OrderMonths', align: 'center', title: '订购月数' },
+                        { field: 'Money', align: 'center', title: '总价' },
+                        { field: 'MoneyPayed', align: 'center', title: '已缴费用' },
                         { field: 'GetUser', align: 'center', title: '收订员' },
                         { field: 'InUser', align: 'center', title: '录入员', sort: true },
                         { field: 'Indate', align: 'center', title: '录入时间', sort: true }
@@ -136,7 +138,6 @@
                         var OrderNo = $('#OrderNo').val();
                         var UnitName = $('#UnitName').val();
                         var BKDH = $('#BKDH').val();
-                        alert(OrderNo);
                         //执行重载
                         table.reload('testReload', {
                             page: {
@@ -174,7 +175,7 @@
                         title: '新增订单',
                         closeBtn: 0,
                         shade: [0],
-                        area: ['700px', '550px'],
+                        area: ['700px', '350px'],
                         anim: 2,
                         moveOut: true,
                         content: ['/OrderSys/Order_AddEdit', 'no'],//iframe的url，no代表不显示滚动条
@@ -199,7 +200,7 @@
                         title: '修改订单',
                         closeBtn: 1,
                         shade: [0],
-                        area: ['700px', '550px'],
+                        area: ['700px', '350px'],
                         anim: 2,
                         moveOut: true,
                         content: ['/OrderSys/Order_AddEdit?addeditcode=' + addeditcode, 'no'],//iframe的url，no代表不显示滚动条
@@ -287,7 +288,6 @@
                 </div>
             </div>
             <div class="layui-form-item">
-                
                 <label class="layui-form-label">录入起始时间</label>
                 <div class="layui-input-inline">
                     <input type="text" class="layui-input" name="test1" id="test1" placeholder="年-月-日">
@@ -305,7 +305,6 @@
                 </div>
             </div>
             <div class="layui-form-item">
-               
                 <label class="layui-form-label">市分公司</label>
                 <div class="layui-input-inline">
                     <select id="CompanyCity" lay-filter="CompanyCity"  style="width:150px;" name="CompanyCity">
@@ -321,7 +320,7 @@
                     <select id="CompanyUnderArea" lay-filter="CompanyUnderArea"  style="width:150px;" name="CompanyUnderArea">
                     </select>
                 </div>
-                <button class="layui-btn" lay-filter="search" lay-submit="" id="search" data-type="reload">查询</button>
+                <button class="layui-btn" lay-filter="search" lay-submit=""  type="button" id="search" data-type="reload">查询</button>
             </div>
         </form>
     </div>

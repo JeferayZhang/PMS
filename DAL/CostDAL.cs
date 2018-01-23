@@ -168,7 +168,7 @@ left join USERS d on a.updateuser=d.ID  ");
                 dbhelper.SqlParameterList.Add(Para);
                 Para = new SqlParameter("moneypayed", moneypayed);
                 dbhelper.SqlParameterList.Add(Para);
-                Para = new SqlParameter("userid", userid);
+                Para = new SqlParameter("updateuser", userid);
                 dbhelper.SqlParameterList.Add(Para);
                 num = dbhelper.ExecuteNonQuery(tran, sql);
             }

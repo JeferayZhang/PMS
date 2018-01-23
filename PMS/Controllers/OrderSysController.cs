@@ -10,6 +10,7 @@ using System.Web;
 using System.Web.Mvc;
 using DAL;
 using System.Data.SqlClient;
+using System.IO;
 
 namespace PMS.Controllers
 {
@@ -183,6 +184,9 @@ namespace PMS.Controllers
                             else
                             {
                                 tran.Commit();
+                                //导入后删除文件
+                                FileInfo fileInfo = new FileInfo(filepath);
+                                fileInfo.Delete();
                             }
                         }
                         catch (Exception ex)

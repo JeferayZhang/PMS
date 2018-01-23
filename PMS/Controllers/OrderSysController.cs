@@ -73,9 +73,10 @@ namespace PMS.Controllers
         [HttpPost]
         public ActionResult Order_AddEdits(string str)
         {
+            int userid = 0;
             BLL.OrderInfoBLL _BLL = new OrderInfoBLL();
             JObject o = null;
-
+            
             string content = string.Empty;
             retValue ret = new retValue();
             if (!string.IsNullOrEmpty(str))
@@ -84,10 +85,20 @@ namespace PMS.Controllers
 
                 string ID = o["ID"]._ToStrTrim();
                 string NGUID = o["NGUID"]._ToStrTrim();
+                string CostID = o["CostID"]._ToStrTrim();
                 string DocID = o["DocID"]._ToStrTrim();
                 string Month = o["Month"]._ToStrTrim();
                 string OrderNum = o["OrderNum"]._ToStrTrim();
-                ret = _BLL.UpdateByPK(ID._ToInt32(), Month._ToInt32(), OrderNum._ToInt32(), NGUID);
+                string PersonID = o["PersonID"]._ToStrTrim();
+                string BKDH = o["BKDH"]._ToStrTrim();
+                string FullPrice = o["FullPrice"]._ToStrTrim();
+                string MoneyPayed = o["MoneyPayed"]._ToStrTrim();
+                ret = _BLL.UpdateByPK(ID._ToInt32(), Month._ToInt32(), OrderNum._ToInt32(), BKDH, PersonID._ToInt32(), userid, NGUID);
+                if (ret.result)
+                {
+                    CostBLL costBLL = new CostBLL();
+                    costBLL.UpdateByPK(CostID._ToInt32(), FullPrice._ToDecimal(), MoneyPayed._ToDecimal(), userid);
+                }
             }
             content = ret.toJson();
 
@@ -95,6 +106,61 @@ namespace PMS.Controllers
 
             return Json(js, JsonRequestBehavior.AllowGet);
         }
+
+        #region 删除订购信息
+        [HttpPost]
+        public JsonResult Order_Deletes(string str)
+        {
+            BLL.OrderInfoBLL _BLL = new OrderInfoBLL();
+            retValue ret = new retValue();
+
+            string content = string.Empty;
+            DataTable dt = str.ToTable();
+            string ids = "";
+            string costs = "";
+            foreach (DataRow item in dt.Rows)
+            {
+                if (!string.IsNullOrEmpty(item["ID"]._ToStrTrim()))
+                {
+                    ids += item["ID"]._ToStrTrim() + ",";
+                    costs += item["CostID"]._ToStrTrim() + ",";
+                }
+            }
+            ret = _BLL.DeleteByPK(ids.Remove(ids.Length - 1));
+            if (ret.result)
+            {
+                CostBLL costBLL = new CostBLL();
+                costBLL.DeleteByPK(costs); 
+            }
+            content = ret.toJson();
+            var js = JsonConvert.SerializeObject(ret);
+            return Json(js, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+
+        #region 退订
+        [HttpPost]
+        public JsonResult Order_TD(string str)
+        {
+            BLL.OrderInfoBLL _BLL = new OrderInfoBLL();
+            retValue ret = new retValue();
+            int userid = 0;
+            string content = string.Empty;
+            DataTable dt = str.ToTable();
+            string ids = "";
+            foreach (DataRow item in dt.Rows)
+            {
+                if (!string.IsNullOrEmpty(item["ID"]._ToStrTrim()))
+                {
+                    ids += item["ID"]._ToStrTrim() + ",";
+                }
+            }
+            ret = _BLL.TD(ids.Remove(ids.Length - 1), userid);
+            content = ret.toJson();
+            var js = JsonConvert.SerializeObject(ret);
+            return Json(js, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
 
         //// <summary>
         /// 这里保存上传的文件到服务器上面

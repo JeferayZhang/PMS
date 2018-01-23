@@ -125,10 +125,10 @@ left join USERS d on a.updateuser=d.ID  ");
         /// <param name="moneypayed">金额</param>
         /// <param name="userid">操作员</param>
         /// <returns></returns>
-        public string update(int id ,decimal moneypayed,int userid) 
+        public string update(int id , decimal money, decimal moneypayed,int userid) 
         {
             string res = "";
-            string sql = @"update cost set moneypayed=moneypayed+@moneypayed,updatetime=getdate(), updateuse=@updateuser where id=@id";
+            string sql = @"update cost set money=@money, moneypayed=moneypayed+@moneypayed,updatetime=getdate(), updateuse=@updateuser where id=@id";
             SqlConnection conn = new SqlConnection(dbhelper.SqlConnectionString);
             conn.Open();
             using (SqlTransaction tran = conn.BeginTransaction())
@@ -136,6 +136,8 @@ left join USERS d on a.updateuser=d.ID  ");
                 try
                 {
                     SqlParameter Para = null;
+                    Para = new SqlParameter("money", money);
+                    dbhelper.SqlParameterList.Add(Para);
                     Para = new SqlParameter("moneypayed", moneypayed);
                     dbhelper.SqlParameterList.Add(Para);
                     Para = new SqlParameter("updateuser", userid);

@@ -47,8 +47,15 @@
                     elem: '#test1'
                 });
                 form.on('submit(save1)', function (data) {
+                    var result = $('#Discount').val().match(/^(0(.\d+)?|1(\.0+)?)$/);
+                    if (result == null) {
+                        layer.open({
+                            title: '提示', content: '折扣格式不正确!', time: 2000
+                        });
+                        return false;
+                    }
                     var ddd = { str: JSON.stringify(data.field) };
-                    ajaxHelper.post("/OrderSys/OrderInfo_AddEdits/", ddd, function (da) {
+                    ajaxHelper.post("/OrderSys/Order_AddEdits/", ddd, function (da) {
                         var jsonObj = JSON.parse(da);
                         if (jsonObj.result) {
                             layer.open({
@@ -155,6 +162,7 @@
 <form class="layui-form layui-form-pane" style="margin-left: 20px;margin-top:20px;" action="" method="get" id="mainform">
     <input type="hidden" name="ID" value="@(dr == null ? "" : dr["ID"]._ToStrTrim())" />
     <input type="hidden" name="MGuid" value="@(dr == null ? "" : dr["NGUID"]._ToStrTrim())" />
+    <input type="hidden" name="CostID" value="@(dr == null ? "" : dr["CostID"]._ToStrTrim())" />
     <div class=" layui-form-item">
         <label class="layui-form-label">订户</label>
         <div class="layui-input-inline">
@@ -179,7 +187,7 @@
     <div class=" layui-form-item">     
         <label class="layui-form-label">订购份数</label>
         <div class="layui-input-inline">
-            <input type="text" id="OrderNumber"onkeyup="this.value=this.value.replace(/[^\d]/g,'') " name="OrderNumber" value="@(dr == null ? "" : dr["OrderNum"]._ToStrTrim())" onchange="javascript: nowprice();"placeholder="" autocomplete="off" class="layui-input" maxlength="50">
+            <input type="text" id="OrderNumber"onkeyup="this.value=this.value.replace(/[^\d]/g,'')" name="OrderNumber" value="@(dr == null ? "" : dr["OrderNum"]._ToStrTrim())" onchange="javascript: nowprice();"placeholder="" autocomplete="off" class="layui-input" maxlength="50">
         </div>
         <label class="layui-form-label">总价</label>
         <div class="layui-input-inline">

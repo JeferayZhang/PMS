@@ -36,7 +36,7 @@ namespace DAL
             }
             string sql = string.Format(@"select "+ top + @" * from (
 select a.ID ,b.Name docname ,a.BKDH,c.UnitName,c.Name ToUser,a.OrderDate,a.OrderMonths,
-a.OrderNum,a.Indate,d.Name as GetUser,e.NAME as InUser ,a.PersonID,a.NGUID,Cost.Money,Cost.MoneyPayed,
+a.OrderNum,a.Indate,d.Name as GetUser,e.NAME as InUser ,a.PersonID,a.NGUID,Cost.Money,Cost.MoneyPayed,Cost.ID as CostID,
 ROW_NUMBER() over (order by a.ID) as rownumber,b.Price
 from [Order]  a 
 inner join dbo.OrderPeople c on a.PersonID=c.ID
@@ -142,7 +142,7 @@ left join dbo.USERS e on a.userid=d.ID where 1=1 ");
         /// <param name="months"></param>
         /// <param name="guid"></param>
         /// <returns></returns>
-        public string update(int ID, int ordernum, int months, string guid) 
+        public string update(int ID, int ordernum, int months, string guid, string bkdh, int PersonID, int ModifyUser) 
         {
             string res = check(ID, guid);
             if (!string.IsNullOrEmpty(res))
@@ -157,12 +157,19 @@ left join dbo.USERS e on a.userid=d.ID where 1=1 ");
                 try
                 {
                     SqlParameter Para = null;
-                    string sql = "update [order] set ordernum=@ordernum,ordermonths=@ordermonths,nguid=newid() where id=@id";
+                    string sql = @"update [order] set ordernum=@ordernum,ordermonths=@ordermonths,nguid=newid() ,
+bkdh = @bkdh,PersonID = @PersonID,ModifyDate = GETDATE(),ModifyUser = @ModifyUser where id=@id";
                     Para = new SqlParameter("ordernum", ordernum);
                     dbhelper.SqlParameterList.Add(Para);
                     Para = new SqlParameter("ordermonths", months);
                     dbhelper.SqlParameterList.Add(Para);
                     Para = new SqlParameter("id", ID);
+                    dbhelper.SqlParameterList.Add(Para);
+                    Para = new SqlParameter("bkdh", bkdh);
+                    dbhelper.SqlParameterList.Add(Para);
+                    Para = new SqlParameter("PersonID", PersonID);
+                    dbhelper.SqlParameterList.Add(Para);
+                    Para = new SqlParameter("ModifyUser", ModifyUser);
                     dbhelper.SqlParameterList.Add(Para);
                     int num = dbhelper.ExecuteNonQuery(tran, sql);
                     tran.Commit();
@@ -177,6 +184,45 @@ left join dbo.USERS e on a.userid=d.ID where 1=1 ");
             return res;
         }
 
+        public string TD(string ids, int ModifyUser)
+        {
+            string res = "";
+            SqlConnection conn = new SqlConnection(dbhelper.SqlConnectionString);
+            conn.Open();
+            using (SqlTransaction tran = conn.BeginTransaction())
+            {
+                try
+                {
+                    SqlParameter Para = null;
+                    string[] pk = ids.Split(',');
+                    foreach (string item in pk)
+                    {
+                        string sql = @"update [order] set state=-1,nguid=newid() ,
+ModifyDate = GETDATE(),ModifyUser = @ModifyUser where id=@id and state<>-1";
+                        Para = new SqlParameter("id", item);
+                        dbhelper.SqlParameterList.Add(Para);
+                        Para = new SqlParameter("ModifyUser", ModifyUser);
+                        dbhelper.SqlParameterList.Add(Para);
+                        int num = dbhelper.ExecuteNonQuery(tran, sql);
+                        if (num>0)
+                        {
+                            sql = " update cost set moneypayed=moneypayed*-1 where  orderid=@id ";
+                            Para = new SqlParameter("id", item);
+                            dbhelper.SqlParameterList.Add(Para);
+                            num = dbhelper.ExecuteNonQuery(tran, sql);
+                        }
+                    }
+                    tran.Commit();
+                }
+                catch (Exception ex)
+                {
+                    tran.Rollback();
+                    res = ex.Message;
+                }
+            }
+            conn.Close();
+            return res;
+        }
         private string check( int ID = 0, string guid = "")
         {
             string sql = @"";

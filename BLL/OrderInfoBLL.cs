@@ -56,10 +56,10 @@ namespace BLL
             return pg;
         }
 
-        public retValue UpdateByPK(int ID, int months, int ordernum = 1, string guid = "")
+        public retValue UpdateByPK(int ID, int months, int ordernum ,  string bkdh, int PersonID, int ModifyUser,string guid = "")
         {
             retValue ret = new retValue();
-            string res = dal.update(ID, ordernum, months,guid);
+            string res = dal.update(ID, ordernum, months, guid, bkdh, PersonID, ModifyUser);
             if (string.IsNullOrEmpty(res))
             {
                 ret.result = true; ret.data = "保存成功";
@@ -71,7 +71,21 @@ namespace BLL
 
             return ret;
         }
+        public retValue TD(string ID,int ModifyUser)
+        {
+            retValue ret = new retValue();
+            string res = dal.TD(ID,  ModifyUser);
+            if (string.IsNullOrEmpty(res))
+            {
+                ret.result = true; ret.data = "退订成功";
+            }
+            else
+            {
+                ret.result = false; ret.reason = res;
+            }
 
+            return ret;
+        }
         #region 根据主键删除数据
         /// <summary>
         /// 根据主键删除数据

@@ -41,6 +41,7 @@
                     cols: [[
                         { type: 'checkbox' },
                         { field: 'ID', title: '订购流水号', sort: true },
+                        { field: 'CostID', title: '费用流水号', sort: true },
                         { field: 'BKDH', align: 'center', title: '报刊代号', sort: true },
                         { field: 'docname', align: 'center', title: '报刊名称', sort: true },
                         { field: 'UnitName', align: 'center', title: '单位名称', sort: true },
@@ -220,7 +221,34 @@
                         return;
                     }
                     var senddata = { str: JSON.stringify(data) };
-                    ajaxHelper.post("/OrderSys/Order_AddEdit_Deletes/", senddata, function (da) {
+                    ajaxHelper.post("/OrderSys/Order_Deletes/", senddata, function (da) {
+                        var jsonObj = JSON.parse(da);
+                        if (jsonObj.result) {
+                            layer.open({
+                                title: '提示', content: jsonObj.data, time: 2000
+                            });
+                            $("#search").click();
+                        }
+                        else {
+                            layer.open({
+                                title: '提示', content: jsonObj.result, time: 2000
+                            });
+                        }
+                    });
+                    return false;
+                });
+                //批量退订
+                $("#td").click(function () {
+                    var checkStatus = table.checkStatus('testReload')
+                        , data = checkStatus.data;
+                    if (data.length == 0 || data.length == undefined) {
+                        layer.open({
+                            title: '提示', content: '请勾选需要进行操作的数据!', time: 2000
+                        });
+                        return;
+                    }
+                    var senddata = { str: JSON.stringify(data) };
+                    ajaxHelper.post("/OrderSys/Order_TD/", senddata, function (da) {
                         var jsonObj = JSON.parse(da);
                         if (jsonObj.result) {
                             layer.open({
@@ -333,11 +361,11 @@
                 <button class="layui-btn layui-btn-warm" type="button" id="edit">
                     <i class="layui-icon">&#xe642;</i> 修改
                 </button>
-                <button class="layui-btn layui-btn-danger">
-                    <i class="layui-icon">&#x1006;</i> 批量退订
+                <button class="layui-btn layui-btn-warm" type="button" id="td">
+                    <i class="layui-icon">&#x1006;</i> 退订
                 </button>
-                <button class="layui-btn layui-btn-danger">
-                    <i class="layui-icon">&#x1006;</i> 批量删除
+                <button class="layui-btn layui-btn-danger" type="button" id="delete">
+                    <i class="layui-icon">&#x1006;</i> 删除
                 </button>
                 <button type="button" class="layui-btn" name="file" id="file"><i class="layui-icon"></i>批量导入订购</button>
                 <button class="layui-btn test" id="test4">下载导入模板</button>

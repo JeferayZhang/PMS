@@ -57,10 +57,10 @@ namespace BLL
         #endregion
 
         #region 更新
-        public retValue UpdateByPK(int id, decimal moneypayed, int userid)
+        public retValue UpdateByPK(int id, decimal money,decimal moneypayed, int userid)
         {
             retValue ret = new retValue();
-            string res = dal.update(id, moneypayed, userid);
+            string res = dal.update(id, money, moneypayed, userid);
             if (string.IsNullOrEmpty(res))
             {
                 ret.result = true; ret.data = "保存成功";

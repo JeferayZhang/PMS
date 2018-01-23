@@ -128,7 +128,7 @@ left join USERS d on a.updateuser=d.ID  ");
         public string update(int id , decimal money, decimal moneypayed,int userid) 
         {
             string res = "";
-            string sql = @"update cost set money=@money, moneypayed=moneypayed+@moneypayed,updatetime=getdate(), updateuse=@updateuser where id=@id";
+            string sql = @"update cost set money=@money, moneypayed=moneypayed+@moneypayed,updatetime=getdate(), updateuser=@updateuser where id=@id";
             SqlConnection conn = new SqlConnection(dbhelper.SqlConnectionString);
             conn.Open();
             using (SqlTransaction tran = conn.BeginTransaction())

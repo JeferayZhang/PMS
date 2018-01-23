@@ -37,7 +37,7 @@ namespace DAL
             string sql = string.Format(@"select "+ top + @" * from (
 select a.ID ,b.Name docname ,a.BKDH,c.UnitName,c.Name ToUser,a.OrderDate,a.OrderMonths,
 a.OrderNum,a.Indate,d.Name as GetUser,e.NAME as InUser ,a.PersonID,a.NGUID,Cost.Money,Cost.MoneyPayed,Cost.ID as CostID,
-ROW_NUMBER() over (order by a.ID) as rownumber,b.Price
+ROW_NUMBER() over (order by a.ID) as rownumber,b.Price, case isnull(a.state,0) when 0 then '正常' when -1 then '退订' when 1 then '过期' end as State
 from [Order]  a 
 inner join dbo.OrderPeople c on a.PersonID=c.ID
 left join Cost on Cost.OrderID=a.ID
@@ -90,10 +90,13 @@ where 1=1 ");
         {
             string sql = string.Format(@"
 select count(1) as num
-from [Order]  a left join dbo.Doc b on a.BKDH=b.BKDH
-left join dbo.OrderPeople c on a.PersonID=c.ID
+from [Order]  a 
+inner join dbo.OrderPeople c on a.PersonID=c.ID
+left join Cost on Cost.OrderID=a.ID
+left join dbo.Doc b on a.BKDH=b.BKDH
 left join dbo.USERS d on a.PosterID=d.ID
-left join dbo.USERS e on a.userid=d.ID where 1=1 ");
+left join dbo.USERS e on a.userid=d.ID  
+where 1=1 ");
             if (!string.IsNullOrEmpty(OrderNo._ToStrTrim()))
             {
                 SqlParameter Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim());
@@ -198,7 +201,7 @@ bkdh = @bkdh,PersonID = @PersonID,ModifyDate = GETDATE(),ModifyUser = @ModifyUse
                     foreach (string item in pk)
                     {
                         string sql = @"update [order] set state=-1,nguid=newid() ,
-ModifyDate = GETDATE(),ModifyUser = @ModifyUser where id=@id and state<>-1";
+ModifyDate = GETDATE(),ModifyUser = @ModifyUser where id=@id and isnull(state,0)!=-1";
                         Para = new SqlParameter("id", item);
                         dbhelper.SqlParameterList.Add(Para);
                         Para = new SqlParameter("ModifyUser", ModifyUser);

@@ -92,7 +92,7 @@ namespace PMS.Controllers
                 string PersonID = o["PersonID"]._ToStrTrim();
                 string BKDH = o["BKDH"]._ToStrTrim();
                 string FullPrice = o["FullPrice"]._ToStrTrim();
-                string MoneyPayed = o["MoneyPayed"]._ToStrTrim();
+                string MoneyPayed = o["Pay"]._ToStrTrim();
                 ret = _BLL.UpdateByPK(ID._ToInt32(), Month._ToInt32(), OrderNum._ToInt32(), BKDH, PersonID._ToInt32(), userid, NGUID);
                 if (ret.result)
                 {

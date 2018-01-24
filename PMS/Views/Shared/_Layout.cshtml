@@ -29,7 +29,7 @@
                         if (user != null)
                         {
                             <a href="javascript:;">
-                                user.Name
+                                @user.Name
                             </a>
                         }
                     }
@@ -54,9 +54,7 @@
         @RenderBody()
 
         <div class="layui-footer">
-            <!-- 底部固定区域 -->
-            ©2018
-            <a href="javascript:;" target="_black">Jeffin</a>
+
         </div>
     </div>
     @RenderSection("scripts", required: false)

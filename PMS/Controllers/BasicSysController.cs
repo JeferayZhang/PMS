@@ -9,6 +9,7 @@ using System.Data;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Converters;
+using PMS.Models;
 
 namespace PMS.Controllers
 {
@@ -210,11 +211,58 @@ namespace PMS.Controllers
             return Json(js, JsonRequestBehavior.AllowGet);
         } 
         #endregion
+
+        #region 保存用户信息
+        /// <summary>
+        /// 编辑用户
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult UserLogin(string str)
+        {
+            BLL.UserBLL _UserBLL = new UserBLL();
+            JObject o = null;
+
+            string content = string.Empty;
+            retValue ret = new retValue();
+            if (!string.IsNullOrEmpty(str))
+            {
+                o = JObject.Parse(str);
+                string USERNO = o["UserNo"]._ToStrTrim();
+                string Password = o["Password"]._ToStrTrim();
+                ret = _UserBLL.Login(USERNO, Password);
+                if (ret.result)
+                {
+                    UserModel user = new UserModel();
+
+                    DataTable dt = ret.data as DataTable;
+                    DataRow dr = dt.Rows[0];
+                    user._ID = dr["ID"]._ToInt32();
+                    user.UserNo = dr["UserNo"]._ToStrTrim();
+                    user.OrgID = dr["OrgID"]._ToInt32();
+                    user.Name = dr["NAME"]._ToStrTrim();
+                    user.Role = dr["Role"]._ToInt32();
+                    user.Password = dr["Password"]._ToStrTrim();
+                    user.Sex = dr["Sex"]._ToInt32();
+                    user.IDCard = dr["IDCard"]._ToStrTrim();
+                    user.State = dr["State"]._ToInt32();
+                    Session["UserModel"] = user;
+                }
+            }
+            content = ret.toJson();
+
+            var js = JsonConvert.SerializeObject(ret);
+
+            return Json(js, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
         #endregion
 
         #region 文献管理
         public ActionResult DocInfo()
         {
+            if (!authorize.checkFilterContext())
+                return authorize.returnNeedLogin();
             return View();
         }
 
@@ -271,6 +319,8 @@ namespace PMS.Controllers
         /// <returns></returns>
         public ActionResult DocInfo_AddEdit()
         {
+            if (!authorize.checkFilterContext())
+                return authorize.returnNeedLogin();
             int addeditcode = Request["addeditcode"]._ToInt32();
             if (addeditcode > 0)
             {
@@ -360,6 +410,8 @@ namespace PMS.Controllers
         #region 机构管理
         public ActionResult OrgInfo()
         {
+            if (!authorize.checkFilterContext())
+                return authorize.returnNeedLogin();
             return View();
         }
 
@@ -383,6 +435,8 @@ namespace PMS.Controllers
         #region 加载机构新增修改页面
         public ActionResult OrgInfo_AddEdit()
         {
+            if (!authorize.checkFilterContext())
+                return authorize.returnNeedLogin();
             string ID = Request["ID"]._ToStrTrim();
             string ParentID = Request["ParentID"]._ToStrTrim();
             List<retValue> resultList = new List<retValue>();
@@ -418,6 +472,8 @@ namespace PMS.Controllers
         [HttpPost]
         public ActionResult OrgInfo_AddEdits(string str)
         {
+            if (!authorize.checkFilterContext())
+                return authorize.returnNeedLogin();
             BLL.OrgInfoBLL _BLL = new OrgInfoBLL();
             JObject o = null;
 

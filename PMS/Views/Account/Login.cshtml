@@ -1,50 +1,54 @@
-﻿@model PMS.Models.LoginModel
+﻿@section scripts{
+    <script>
+        $(function () {
+            var ajaxHelper = new AjaxHelper();
 
-@{
-    ViewBag.Title = "登录";
+            layui.use(['jquery', 'layer', 'form'], function () {
+                var $ = layui.jquery,  layer = layui.layer, form = layui.form ;
+                form.on('submit(save1)', function (data) {
+                    if (!$('#UserNo').val().match(/[^\\w+$]/)) {
+                        layer.open({
+                            title: '提示', content: '用户编号应由数字、字母或下划线组成!', time: 2000
+                        });
+                        return;
+                    }
+                    var ddd = { str: JSON.stringify(data.field) };
+                    ajaxHelper.post("/BasicSys/UserLogin/", ddd, function (da) {
+                        var jsonObj = JSON.parse(da);
+                        if (jsonObj.result) {
+                            location.href = "/Home/Index";
+                        }
+                        else {
+                            layer.open({
+                                title: '提示', content: jsonObj.reason
+                            });
+                        }
+
+                    });
+                    return false;
+                });
+                form.render();
+            });
+        });
+    </script>
 }
-
-<hgroup class="title">
-    <h1>@ViewBag.Title.</h1>
-</hgroup>
-
-<section id="loginForm">
-<h2>使用本地帐户登录。</h2>
-@using (Html.BeginForm(new { ReturnUrl = ViewBag.ReturnUrl })) {
-    @Html.AntiForgeryToken()
-    @Html.ValidationSummary(true)
-
-    <fieldset>
-        <legend>“登录”表单</legend>
-        <ol>
-            <li>
-                @Html.LabelFor(m => m.UserName)
-                @Html.TextBoxFor(m => m.UserName)
-                @Html.ValidationMessageFor(m => m.UserName)
-            </li>
-            <li>
-                @Html.LabelFor(m => m.Password)
-                @Html.PasswordFor(m => m.Password)
-                @Html.ValidationMessageFor(m => m.Password)
-            </li>
-            <li>
-                @Html.CheckBoxFor(m => m.RememberMe)
-                @Html.LabelFor(m => m.RememberMe, new { @class = "checkbox" })
-            </li>
-        </ol>
-        <input type="submit" value="登录" />
-    </fieldset>
-    <p>
-        @Html.ActionLink("注册", "Register") 如果你没有帐户。
-    </p>
-}
-</section>
-
-<section class="social" id="socialLoginForm">
-    <h2>使用其他服务登录。</h2>
-    @Html.Action("ExternalLoginsList", new { ReturnUrl = ViewBag.ReturnUrl })
-</section>
-
-@section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
-}
+<form class="layui-form" style="margin-top: 20px;">
+    <div class="layui-form-item">
+        <label class="layui-form-label">账号</label>
+        <div class="layui-input-inline">
+            <input type="text" id="UserNo" name="UserNo" autocomplete="off" class="layui-input" maxlength="50">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">密码</label>
+        <div class="layui-input-inline">
+            <input type="text" id="Password" typeof="password" name="Password" autocomplete="off" class="layui-input" maxlength="50" value="">
+        </div>
+    </div>
+    <button class="layui-btn layui-btn-warm" type="button" lay-filter="save1" lay-submit="" data-type="save">
+        <i class="layui-icon">&#xe618;</i> 确定
+    </button>
+    <button class="layui-btn layui-btn-danger" onclick="javascript: mvccloseall();">
+        <i class="layui-icon">&#x1006;</i> 取消
+    </button>
+</form>

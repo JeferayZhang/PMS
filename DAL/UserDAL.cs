@@ -363,26 +363,33 @@ LEFT JOIN ROLE ON ROLE.ROLEID = USERS.ROLE WHERE 1=1 ";
         /// <param name="userNo">用户编号</param>
         /// <param name="password">密码</param>
         /// <returns>返回验证结果</returns>
-        public string Login(string userNo, string password)
+        public retValue Login(string userNo, string password)
         {
-            string res = "";
+            retValue ret = new retValue();
             try
             {
                 SqlParameter Para = new SqlParameter("USERNO", userNo._ToStrTrim());
                 dbhelper.SqlParameterList.Add(Para);
                 Para = new SqlParameter("PASSWORD", password._ToStrTrim());
                 dbhelper.SqlParameterList.Add(Para);
-                int count = dbhelper.ExecuteSql(@" SELECT 1 FROM USERS WHERE USERNO =@USERNO AND PASSWORD=@PASSWORD ").Rows.Count;
-                if (count == 0)
+                DataTable dt = dbhelper.ExecuteSql(@" SELECT * FROM USERS WHERE USERNO =@USERNO AND PASSWORD=@PASSWORD ");
+                if (dt==null||dt.Rows.Count == 0)
                 {
-                    res = "账号或者密码不正确";
+                    ret.result = false;
+                    ret.reason = "账号或者密码不正确";
+                }
+                else
+                {
+                    ret.result = true;
+                    ret.data = dt;
                 }
             }
             catch (Exception ex)
             {
-                res = ex.Message;
+                ret.result = false;
+                ret.reason = ex.Message;
             }
-            return res;
+            return ret;
         } 
         #endregion
     }

@@ -1,9 +1,9 @@
-﻿@{
+﻿
+@{
     ViewBag.Title = "首页";
 }
 
 @section scripts{
-    @*<script src="~/JS/Common/AjaxHelper.js"></script>*@
     <script src="~/JS/LeftTree.js"></script>
 }
 <div class="layui-side layui-bg-black">
@@ -11,37 +11,54 @@
         <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
         <form class="layui-form">
             <ul class="layui-nav layui-nav-tree" lay-filter="test" id="menuView">
-                <li class="layui-nav-item layui-nav-itemed">
-                    <a href="javascript:;">系统管理</a>
-                    <dl class="layui-nav-child">
-                        @*<dd id="RoleInfo"><a href="/BasicSys/RoleInfo">角色管理</a></dd>*@
-                        @*<dd id="DocTypeInfo"><a href="/BasicSys/DocTypeInfo">类型管理</a></dd>*@
-                        <dd lay-id="111"><a data-title="用户管理" data-id="111" class="tabItem" data-href="/BasicSys/UserInfo">用户管理</a></dd>
-                        <dd lay-id="222"><a data-title="机构管理" data-id="222" class="tabItem" data-href="/BasicSys/OrgInfo">机构管理</a></dd>
-                        <dd lay-id="333"><a data-title="文献管理" data-id="333" class="tabItem" data-href="/BasicSys/DocInfo">文献管理</a></dd>
-                    </dl>
-                </li>
-                <li class="layui-nav-item">
-                    <a href="javascript:;">订购信息管理</a>
-                    <dl class="layui-nav-child">
-                        <dd lay-id="OrderPeopleInfo"><a data-title="订户管理" data-id="OrderPeopleInfo" class="tabItem" data-href="/OrderSys/OrderPeopleInfo">订户管理</a></dd>
-                        <dd lay-id="OrderInfo"><a data-title="订单管理" data-id="OrderInfo" class="tabItem" data-href="/OrderSys/OrderInfo">订单管理</a></dd>
-                    </dl>
-                </li>
-                <li class="layui-nav-item">
-                    <a href="javascript:;">分发系统</a>
-                    <dl class="layui-nav-child">
-                        <dd id="DistributeInfo1"><a href="/DistributeSys/DistributeInfo">市分发到县</a></dd>
-                        <dd id="DistributeInfo2"><a href="/DistributeSys/DistributeInfo">县分发到网点</a></dd>
-                        <dd id="DistributeLog"><a href="/DistributeSys/DistributeLog">分发日志</a></dd>
-                    </dl>
-                </li>
-                <li class="layui-nav-item">
-                    <a href="javascript:;">财务系统</a>
-                    <dl class="layui-nav-child">
-                        <dd id="CostInfo"><a data-title="缴费管理" data-id="CostInfo" class="tabItem" data-href="/CostSys/CostInfo">缴费管理</a></dd>@*缴费需要管理订购信息*@
-                    </dl>
-                </li>
+                @{
+                    PMS.Models.UserModel user = new PMS.Models.UserModel();
+                    user = Session["UserModel"] as PMS.Models.UserModel;
+                    if (user != null)
+                    {
+                        if (user.Role == 1)
+                        {
+                            <li class="layui-nav-item layui-nav-itemed">
+                                <a href="javascript:;">系统管理</a>
+                                <dl class="layui-nav-child">
+                                    <dd lay-id="111"><a data-title="用户管理" data-id="111" class="tabItem" data-href="/BasicSys/UserInfo">用户管理</a></dd>
+                                    <dd lay-id="222"><a data-title="机构管理" data-id="222" class="tabItem" data-href="/BasicSys/OrgInfo">机构管理</a></dd>
+                                    <dd lay-id="333"><a data-title="文献管理" data-id="333" class="tabItem" data-href="/BasicSys/DocInfo">文献管理</a></dd>
+                                </dl>
+                            </li>
+                        }
+                        if (user.Role == 1 || user.Role == 2)
+                        {
+                            <li class="layui-nav-item">
+                                <a href="javascript:;">订购信息管理</a>
+                                <dl class="layui-nav-child">
+                                    <dd lay-id="OrderPeopleInfo"><a data-title="订户管理" data-id="OrderPeopleInfo" class="tabItem" data-href="/OrderSys/OrderPeopleInfo">订户管理</a></dd>
+                                    <dd lay-id="OrderInfo"><a data-title="订单管理" data-id="OrderInfo" class="tabItem" data-href="/OrderSys/OrderInfo">订单管理</a></dd>
+                                </dl>
+                            </li>
+                        }
+                        if (user.Role == 3)
+                        {
+                            <li class="layui-nav-item">
+                                <a href="javascript:;">分发系统</a>
+                                <dl class="layui-nav-child">
+                                    <dd id="DistributeInfo1"><a href="/DistributeSys/DistributeInfo">市分发到县</a></dd>
+                                    <dd id="DistributeInfo2"><a href="/DistributeSys/DistributeInfo">县分发到网点</a></dd>
+                                    <dd id="DistributeLog"><a href="/DistributeSys/DistributeLog">分发日志</a></dd>
+                                </dl>
+                            </li>
+                        }
+                        if (user.Role == 4)
+                        {
+                            <li class="layui-nav-item">
+                                <a href="javascript:;">财务系统</a>
+                                <dl class="layui-nav-child">
+                                    <dd id="CostInfo"><a data-title="缴费管理" data-id="CostInfo" class="tabItem" data-href="/CostSys/CostInfo">缴费管理</a></dd>@*缴费需要管理订购信息*@
+                                </dl>
+                            </li>
+                        }
+                    }
+}
             </ul>
         </form>
     </div>
@@ -61,7 +78,7 @@
         <!-- 内容 -->
         <div class="layui-tab-content">
             <div class="layui-tab-item layui-show" lay-id="21">
-                <iframe src="/BasicSys/UserInfo"></iframe>
+                <iframe src=""></iframe>
             </div>
         </div>
     </div>

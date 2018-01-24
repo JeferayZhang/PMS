@@ -52,9 +52,6 @@
                         }
                         else {
                             $("#t_UserInfo").html("");
-                            layer.open({
-                                title: '提示', content: jsonObj.reason, time: 2000
-                            });
                         }
                         form.render();
                     });
@@ -203,7 +200,7 @@
                         }
                         else {
                             layer.open({
-                                title: '提示', content: jsonObj.result, time: 2000
+                                title: '提示', content: jsonObj.reason, time: 2000
                             });
                         }
                     });
@@ -227,13 +224,13 @@
                         var jsonObj = JSON.parse(da);
                         if (jsonObj.result) {
                             layer.open({
-                                title: '提示', content: jsonObj.data
+                                title: '提示', content: jsonObj.data, time: 2000
                             });
                             $("#search").click();
                         }
                         else {
                             layer.open({
-                                title: '提示', content: jsonObj.result
+                                title: '提示', content: jsonObj.reason, time: 2000
                             });
                         }
                     });

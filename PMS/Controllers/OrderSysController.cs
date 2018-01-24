@@ -19,6 +19,7 @@ namespace PMS.Controllers
         //
         // GET: /OrderSys/
 
+        #region 订单信息管理
         /// <summary>
         /// 订单信息管理
         /// </summary>
@@ -27,6 +28,7 @@ namespace PMS.Controllers
         {
             return View();
         }
+        #region 查询订单
         [HttpGet]
         public ActionResult OrderInfos(int page, int limit, string test1, string test2,
             string Province, string CompanyCity, string CompanyUnderCity,
@@ -45,12 +47,15 @@ namespace PMS.Controllers
                     CompanyUnderCity) :
                     CompanyUnderArea;
             PageModel pg = _BLL.GetOrderInfo(0, BKDH, OrderNo, UnitName, test1, test2, limit, page);
-            
+
             var js = JsonConvert.SerializeObject(pg);
             return Content(js);
         }
+        #endregion
+
+        #region 初始化订单新增修改界面
         /// <summary>
-        /// 修改订购信息
+        /// 初始化订单新增修改界面
         /// </summary>
         /// <returns></returns>
         public ActionResult Order_AddEdit()
@@ -68,15 +73,16 @@ namespace PMS.Controllers
             }
             return View();
         }
+        #endregion
 
-
+        #region 保存订单的修改,同时修改缴费记录
         [HttpPost]
         public ActionResult Order_AddEdits(string str)
         {
             int userid = 0;
             BLL.OrderInfoBLL _BLL = new OrderInfoBLL();
             JObject o = null;
-            
+
             string content = string.Empty;
             retValue ret = new retValue();
             if (!string.IsNullOrEmpty(str))
@@ -106,6 +112,7 @@ namespace PMS.Controllers
 
             return Json(js, JsonRequestBehavior.AllowGet);
         }
+        #endregion
 
         #region 删除订购信息
         [HttpPost]
@@ -130,7 +137,7 @@ namespace PMS.Controllers
             if (ret.result)
             {
                 CostBLL costBLL = new CostBLL();
-                costBLL.DeleteByPK(costs); 
+                costBLL.DeleteByPK(costs);
             }
             content = ret.toJson();
             var js = JsonConvert.SerializeObject(ret);
@@ -162,6 +169,7 @@ namespace PMS.Controllers
         }
         #endregion
 
+        #region 批量导入
         //// <summary>
         /// 这里保存上传的文件到服务器上面
         /// </summary>
@@ -268,13 +276,21 @@ namespace PMS.Controllers
             var js = JsonConvert.SerializeObject(ret);
             return Json(js, JsonRequestBehavior.AllowGet);
         }
+        #endregion
+
+        #region 读取Excel中的数据
+        /// <summary>
+        /// 读取Excel中的数据
+        /// </summary>
+        /// <param name="filepath"></param>
+        /// <returns></returns>
         private DataTable OpenFile(string filepath)
         {
             DataTable dt = new DataTable();
             object[] ret = CommonHelper.LoadExcelToDataTable(filepath);
             if (ret[0]._ToInt32() == 1)
                 dt = ret[1] as DataTable;
-            
+
             if (dt == null || dt.Rows.Count == 0)
             {
                 return dt;
@@ -337,6 +353,9 @@ namespace PMS.Controllers
             }
             return dt;
         }
+        #endregion
+
+        #region 续订
         /// <summary>
         /// 续订
         /// </summary>
@@ -345,7 +364,10 @@ namespace PMS.Controllers
         {
             return View();
         }
+        #endregion 
+        #endregion
 
+        #region 订户管理
         /// <summary>
         /// 订户管理
         /// </summary>
@@ -355,9 +377,10 @@ namespace PMS.Controllers
             return View();
         }
 
+        #region 查询订户信息----分页
         [HttpGet]
         public ActionResult OrderPeopleInfos(int page, int limit, string test1, string test2,
-            string Province, string CompanyCity, string CompanyUnderCity, 
+            string Province, string CompanyCity, string CompanyUnderCity,
             string CompanyUnderArea, string OrderNo, string Name)
         {
             BLL.SubscriberBLL _SubscriberBLL = new SubscriberBLL();
@@ -372,7 +395,7 @@ namespace PMS.Controllers
                     CompanyCity) :
                     CompanyUnderCity) :
                     CompanyUnderArea;
-            PageModel pg = _SubscriberBLL.GetSubscriber(0, OrderNo, Name, "", OrgID._ToInt32(), test1, test2, limit,page);
+            PageModel pg = _SubscriberBLL.GetSubscriber(0, OrderNo, Name, "", OrgID._ToInt32(), test1, test2, limit, page);
             //content = ret.toJson();
             //SubscriberDAL dal = new SubscriberDAL();
             //DataTable dt = dal.GetSubscriber(0, OrderNo, Name, "", OrgID._ToInt32(), test1, test2, limit, page);
@@ -384,16 +407,20 @@ namespace PMS.Controllers
             var js = JsonConvert.SerializeObject(pg);
             return Content(js);
         }
+        #endregion
 
+        #region 获取所有订户
         [HttpPost]
         public JsonResult GetAllOrderPeopleInfos(string str)
         {
             BLL.SubscriberBLL _SubscriberBLL = new SubscriberBLL();
-            PageModel pg = _SubscriberBLL.GetSubscriber(0, "", "", "",0, "", "", 0, 0);
+            PageModel pg = _SubscriberBLL.GetSubscriber(0, "", "", "", 0, "", "", 0, 0);
             var js = JsonConvert.SerializeObject(pg);
             return Json(js, JsonRequestBehavior.AllowGet);
         }
+        #endregion
 
+        #region 初始化订户新增修改界面
         /// <summary>
         /// 初始化订户新增修改界面
         /// </summary>
@@ -413,6 +440,7 @@ namespace PMS.Controllers
             }
             return View();
         }
+        #endregion
 
         #region 保存订户信息
         /// <summary>
@@ -468,7 +496,6 @@ namespace PMS.Controllers
         }
         #endregion
 
-
         #region 删除
         [HttpPost]
         public JsonResult OrderPeopleInfo_Deletes(string str)
@@ -483,7 +510,7 @@ namespace PMS.Controllers
             {
                 if (!string.IsNullOrEmpty(item["ID"]._ToStrTrim()))
                 {
-                    ids += item["ID"]._ToStrTrim() + ",";                   
+                    ids += item["ID"]._ToStrTrim() + ",";
                 }
             }
             ret = _SubscriberBLL.DeleteByPK(ids.Remove(ids.Length - 1));
@@ -491,13 +518,8 @@ namespace PMS.Controllers
             var js = JsonConvert.SerializeObject(ret);
             return Json(js, JsonRequestBehavior.AllowGet);
         }
+        #endregion 
         #endregion
-
-
-        public ActionResult OrderPeopleInfo_Search()
-        {
-            return View();
-        }
 
     }
 }

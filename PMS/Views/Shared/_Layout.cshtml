@@ -23,9 +23,17 @@
 
             <ul class="layui-nav layui-layout-right">
                 <li class="layui-nav-item layui-hide-xs">
-                    <a href="javascript:;">
-                        Jeffin
-                    </a>
+                    @{
+                        PMS.Models.UserModel user = new PMS.Models.UserModel();
+                        user = Session["UserModel"] as PMS.Models.UserModel;
+                        if (user != null)
+                        {
+                            <a href="javascript:;">
+                                user.Name
+                            </a>
+                        }
+                    }
+                   
                     <dl class="layui-nav-child">
                         <dd>
                             <a href="javascript:;">基本资料</a>
@@ -47,7 +55,7 @@
 
         <div class="layui-footer">
             <!-- 底部固定区域 -->
-            ©2017
+            ©2018
             <a href="javascript:;" target="_black">Jeffin</a>
         </div>
     </div>

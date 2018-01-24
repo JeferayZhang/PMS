@@ -165,15 +165,7 @@ namespace BLL
         public retValue Login(string UserNo, string password)
         {
             retValue ret = new retValue();
-            string res = dal.Login(UserNo, password);
-            if (string.IsNullOrEmpty(res))
-            {
-                ret.result = true; ret.data = "登录成功";
-            }
-            else
-            {
-                ret.result = false; ret.reason = res;
-            }
+            ret = dal.Login(UserNo, password);
             return ret;
         } 
         #endregion

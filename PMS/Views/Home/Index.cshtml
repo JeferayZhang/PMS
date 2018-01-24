@@ -37,18 +37,18 @@
                                 </dl>
                             </li>
                         }
-                        if (user.Role == 3)
+                        if (user.Role == 1 || user.Role == 3)
                         {
                             <li class="layui-nav-item">
                                 <a href="javascript:;">分发系统</a>
                                 <dl class="layui-nav-child">
-                                    <dd id="DistributeInfo1"><a href="/DistributeSys/DistributeInfo">市分发到县</a></dd>
-                                    <dd id="DistributeInfo2"><a href="/DistributeSys/DistributeInfo">县分发到网点</a></dd>
-                                    <dd id="DistributeLog"><a href="/DistributeSys/DistributeLog">分发日志</a></dd>
+                                    <dd id="DistributeInfo1"><a data-title="市-县分发<" data-id="DistributeInfo1" class="tabItem" data-href="/DistributeSys/DistributeInfo">市-县分发</a></dd>
+                                    <dd id="DistributeInfo2"><a data-title="县-段道分发" data-id="DistributeInfo2" class="tabItem" data-href="/DistributeSys/DistributeInfo">县-段道分发</a></dd>
+                                    <dd id="DistributeLog"><a data-title="订户管理" data-id="DistributeLog" class="tabItem" data-href="/DistributeSys/DistributeLog">分发日志</a></dd>
                                 </dl>
                             </li>
                         }
-                        if (user.Role == 4)
+                        if (user.Role == 1 || user.Role == 4)
                         {
                             <li class="layui-nav-item">
                                 <a href="javascript:;">财务系统</a>

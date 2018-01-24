@@ -46,7 +46,7 @@
                         { field: 'Name', align: 'center', title: '负责人名称' },
                         { field: 'Phone', align: 'center', title: '电话' },
                         { field: 'Address', align: 'center', title: '单位地址'},
-                        { field: 'OrgID', title: '所属网点' },
+                        { field: 'OrgName', title: '所属网点' },
                         { field: 'Indate', align: 'center', title: '录入时间', sort: true },
                         { field: 'InUser', align: 'center', title: '录入员'}
                     ]],
@@ -286,7 +286,7 @@
                         <div class="layui-input-inline">
                             <input type="text" style="width:auto;" id="Name" name="Name" autocomplete="off" class="layui-input" maxlength="50" value="">
                         </div>
-                        <button class="layui-btn layui-btn-normal" data-type="reload" type="button">
+                        <button class="layui-btn layui-btn-normal" id="search" data-type="reload" type="button">
                             查询
                         </button>
                     </div>

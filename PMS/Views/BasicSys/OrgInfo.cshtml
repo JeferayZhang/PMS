@@ -39,23 +39,29 @@
                 //下拉框绑定
                 function selectchanged(parentid,elem)
                 {
-                    $("#" + elem + "").empty();
+                    if (elem!="") {
+                        $("#" + elem + "").empty();
+                    }                 
                     
                     var ddd = { str: parentid }
                     ajaxHelper.post("/BasicSys/OrgInfos/", ddd, function (da) {
                         var jsonObj = JSON.parse(da);
                         var getTpl = $("#tuserinfo").html()
-, view = $("#t_UserInfo");
-                        var getTpl2 = $("#orginfo").html()
-, view2 = $("#" + elem + "");
+                            , view = $("#t_UserInfo");
+                        if (elem != "") {
+                            var getTpl2 = $("#orginfo").html()
+                                , view2 = $("#" + elem + "");
+                        }
                         if (jsonObj.result) {
                             if (jsonObj.data.length > 0) {
                                 laytpl(getTpl).render(jsonObj.data, function (a) {
                                     $(view).html(a);
                                 });
-                                laytpl(getTpl2).render(jsonObj.data, function (a2) {
-                                    $(view2).html(a2);
-                                });
+                                if (elem != "") {
+                                    laytpl(getTpl2).render(jsonObj.data, function (a2) {
+                                        $(view2).html(a2);
+                                    });
+                                }
                             }
                         }
                         else {
@@ -100,6 +106,15 @@
                         return false;
                     }
                     selectchanged(parentid, "CompanyUnderArea");
+                    return false;
+                });
+                form.on('select(CompanyUnderArea)', function (data) {
+                    $("#t_UserInfo").html("");
+                    var parentid = $("#CompanyUnderArea option:selected").val();
+                    if (parentid == "") {
+                        return false;
+                    }
+                    selectchanged(parentid, "");
                     return false;
                 });
                 //全选
@@ -234,6 +249,7 @@
     {{#  layui.each(d, function(index, item){ }}
     <tr>
         <td><input type="checkbox" name="table_ck" value="{{item.OrgID}}" lay-filter="table_ck" lay-skin="primary" title=""></td>
+        <td>{{item.OrgCode}}</td>
         <td>{{item.Name}}</td>
         <td>{{item.Address}}</td>
     </tr>
@@ -281,6 +297,7 @@
         <thead>
             <tr>
                 <th><input type="checkbox" lay-filter="allChoose" lay-skin="primary" /></th>
+                <td>编号</td>
                 <td>名称</td>
                 <td>地址</td>
             </tr>

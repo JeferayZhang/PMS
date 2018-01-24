@@ -36,7 +36,7 @@ namespace DAL
             }
             string sql = string.Format(@"select "+ top + @" * from (
 select a.ID ,b.Name docname ,a.BKDH,c.UnitName,c.Name ToUser,a.OrderDate,a.OrderMonths,
-a.OrderNum,a.Indate,d.Name as GetUser,e.NAME as InUser ,a.PersonID,a.NGUID,Cost.Money,Cost.MoneyPayed,Cost.ID as CostID,
+a.OrderNum,CONVERT(varchar(100), a.Indate, 23) Indate,d.Name as GetUser,e.NAME as InUser ,a.PersonID,a.NGUID,Cost.Money,Cost.MoneyPayed,Cost.ID as CostID,
 ROW_NUMBER() over (order by a.ID) as rownumber,b.Price, case isnull(a.state,0) when 0 then '正常' when -1 then '退订' when 1 then '过期' end as State
 from [Order]  a 
 inner join dbo.OrderPeople c on a.PersonID=c.ID
@@ -270,7 +270,7 @@ values(@BKDH,@personid,@userid,@ordernum,@orderdate,@posterid,@ordermonths) ";
                 dbhelper.SqlParameterList.Add(Para);
                 Para = new SqlParameter("ordernum", ordernum._ToStrTrim());
                 dbhelper.SqlParameterList.Add(Para);
-                Para = new SqlParameter("orderdate", orderDate._ToStrTrim());
+                Para = new SqlParameter("orderdate", orderDate._ToDateTime());
                 dbhelper.SqlParameterList.Add(Para);
                 Para = new SqlParameter("posterid", posterid._ToInt32());
                 dbhelper.SqlParameterList.Add(Para);

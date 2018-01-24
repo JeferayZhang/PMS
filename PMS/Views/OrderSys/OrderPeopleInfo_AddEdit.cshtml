@@ -30,16 +30,15 @@
                         });
                         return false;
                     }
-                    if ($('#CompanyUnderArea option:selected').val() === "") {
+                    if ($('#Roads option:selected').val() == "" || $('#Roads option:selected').val() == undefined) {
                         layer.open({
                             title: '提示',
-                            content: '必须选择单位所属网点!',
+                            content: '必须选择单位所属段道!',
                             time: 2000
                         });
                         return false;
                     }
                     var ddd = { str: JSON.stringify(data.field) };
-                    alert(ddd);
                     ajaxHelper.post("/OrderSys/OrderPeopleInfo_AddEdits/", ddd, function (da) {
                         var jsonObj = JSON.parse(da);
                         if (jsonObj.result) {
@@ -52,12 +51,11 @@
                                     parent.layer.close(index);  // 关闭layer
                                 }
                             });
-
                         }
                         else {
                             layer.open({
                                 title: '提示',
-                                content: jsonObj.result,
+                                content: jsonObj.reason,
                                 time: 2000
                             });
                         }
@@ -95,7 +93,6 @@
                     document.getElementById('CompanyUnderArea').innerHTML = "";
                     $("#CompanyUnderCity").empty();
                     $("#CompanyUnderArea").empty();
-                    $("#t_UserInfo").html("");
                     var parentid = $("#Province option:selected").val();
                     if (parentid == "") {
                         return false;
@@ -118,12 +115,20 @@
                 });
                 form.on('select(CompanyUnderCity)', function (data) {
                     $("#CompanyUnderArea").html("");
-                    $("#t_UserInfo").html("");
                     var parentid = $("#CompanyUnderCity option:selected").val();
                     if (parentid == "") {
                         return false;
                     }
                     selectchanged(parentid, "CompanyUnderArea");
+                    return false;
+                });
+                form.on('select(CompanyUnderArea)', function (data) {
+                    $("#Roads").html("");
+                    var parentid = $("#CompanyUnderArea option:selected").val();
+                    if (parentid == "") {
+                        return false;
+                    }
+                    selectchanged(parentid, "Roads");
                     return false;
                 });
                 form.render();
@@ -168,25 +173,30 @@
         </div>
         <label class="layui-form-label">省</label>
         <div class="layui-input-inline">
-            <select id="Province" style="width:150px;" name="Province"></select>
+            <select id="Province" lay-filter="Province" style="width:150px;" name="Province"></select>
         </div>
     </div>
     <div class=" layui-form-item">
         <label class="layui-form-label">市分公司</label>
         <div class="layui-input-inline">
-            <select id="CompanyCity" style="width:150px;" name="CompanyCity"></select>
+            <select id="CompanyCity" lay-filter="CompanyCity" style="width:150px;" name="CompanyCity"></select>
         </div>
         <label class="layui-form-label">县分公司</label>
         <div class="layui-input-inline">
-            <select id="CompanyUnderCity" style="width:150px;" name="CompanyUnderCity"> </select>
+            <select id="CompanyUnderCity" style="width:150px;" lay-filter="CompanyUnderCity" name="CompanyUnderCity"></select>
         </div>
     </div>
     <div class=" layui-form-item">
         <label class="layui-form-label">网点</label>
         <div class="layui-input-inline">
-            <select id="CompanyUnderArea" style="width:150px;" name="CompanyUnderArea">
-            </select>
+            <select id="CompanyUnderArea" style="width:150px;" lay-filter="CompanyUnderArea" name="CompanyUnderArea"></select>
         </div>
+        <label class="layui-form-label">段道</label>
+        <div class="layui-input-inline">
+            <select id="Roads" style="width:150px;" lay-filter="Roads"  name="Roads"></select>
+        </div>
+    </div>
+    <div class=" layui-form-item">
         <button class="layui-btn" lay-filter="save1" lay-submit="" data-type="save">保存</button>
         <button class="layui-btn layui-btn-danger" onclick="javascript: mvccloseall();">取消</button>
     </div>

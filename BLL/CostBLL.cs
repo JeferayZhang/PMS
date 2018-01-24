@@ -26,7 +26,7 @@ namespace BLL
         /// <param name="pagesize">每页显示数量</param>
         /// <param name="pageindex">页码</param>
         /// <returns></returns>
-        public PageModel GetCostRecords(int id, int state, int orderid, string OrderNo, string unitname, int pagesize, int pageindex)
+        public PageModel GetCostRecords(int id, string state, int orderid, string OrderNo, string unitname, int pagesize, int pageindex)
         {
             PageModel pg = new PageModel();
             try

@@ -13,9 +13,9 @@ namespace BLL
     public class OrgInfoBLL
     {
         OrgInfoDAL dal = new OrgInfoDAL();
-        public int GetIDByName(string name) 
+        public int GetIDByName(string OrgCode) 
         {
-            return dal.GetOrgByName(name);
+            return dal.GetOrgByName(OrgCode);
         }
 
         public retValue GetOrgByPK(int id) 
@@ -52,11 +52,11 @@ namespace BLL
             return ret;
         }
 
-        public retValue insert(string Name, string address, int parentID = 0) 
+        public retValue insert(string Name, string address, string OrgCode, int parentID = 0) 
         {
             retValue ret = new retValue();
-            int res = dal.insert(Name, address, parentID);
-            if (res > 0)
+            string res = dal.insert(Name, address, OrgCode, parentID);
+            if (string.IsNullOrEmpty(res))
             {
                 ret.result = true;
                 ret.data = "保存成功";
@@ -64,16 +64,16 @@ namespace BLL
             else
             {
                 ret.result = false;
-                ret.reason = "保存失败";
+                ret.reason = res;
             }
             return ret;
         }
 
-        public retValue update( int ID,string Name, string address)
+        public retValue update( int ID,string Name, string OrgCode, string address)
         {
             retValue ret = new retValue();
-            int res = dal.update(ID, Name, address);
-            if (res > 0)
+            string res = dal.update(ID, Name, OrgCode, address);
+            if (string.IsNullOrEmpty(res))
             {
                 ret.result = true;
                 ret.data = "保存成功";
@@ -81,7 +81,7 @@ namespace BLL
             else
             {
                 ret.result = false;
-                ret.reason = "保存失败";
+                ret.reason = res;
             }
             return ret;
         }

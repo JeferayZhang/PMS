@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CostBLL.cs" />
+    <Compile Include="DistributeBLL.cs" />
     <Compile Include="DocBLL.cs" />
     <Compile Include="DocTypeBLL.cs" />
     <Compile Include="OrderInfoBLL.cs" />

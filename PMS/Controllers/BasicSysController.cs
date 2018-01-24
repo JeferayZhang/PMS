@@ -485,17 +485,18 @@ namespace PMS.Controllers
 
                 string ID = o["ID"]._ToStrTrim();
                 string NAME = o["Name"]._ToStrTrim();
+                string OrgCode = o["OrgCode"]._ToStrTrim();
                 string Address = o["Address"]._ToStrTrim();
                 string parentID = o["ParentID"]._ToStrTrim();
                 //新增
                 if (string.IsNullOrEmpty(ID))
                 {
-                    ret = _BLL.insert(NAME, Address, parentID._ToInt32());
+                    ret = _BLL.insert(NAME, Address, OrgCode, parentID._ToInt32());
                 }
                 //更新
                 else
                 {
-                    ret = _BLL.update(ID._ToInt32(), NAME, Address);
+                    ret = _BLL.update(ID._ToInt32(), OrgCode, NAME, Address);
                 }
             }
             content = ret.toJson();

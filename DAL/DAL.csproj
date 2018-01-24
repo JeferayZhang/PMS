@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CostDAL.cs" />
+    <Compile Include="DistributeDAL.cs" />
     <Compile Include="DocDAL.cs" />
     <Compile Include="DocTypeDAL.cs" />
     <Compile Include="OrderInfoDAL.cs" />

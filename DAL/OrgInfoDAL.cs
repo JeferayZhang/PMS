@@ -13,17 +13,17 @@ namespace DAL
     {
         SqlHelp dbh = new SqlHelp();
         /// <summary>
-        /// 根据名称获取ID
+        /// 根据机构编号获取ID
         /// </summary>
-        /// <param name="orgname">此名称应该唯一</param>
+        /// <param name="orgname">机构编号唯一</param>
         /// <returns></returns>
-        public int GetOrgByName(string orgname) 
+        public int GetOrgByName( string OrgCode) 
         {
             DataTable dt=new DataTable();
             SqlParameter Para = null;
-            Para = new SqlParameter("orgname", orgname._ToStrTrim());
+            Para = new SqlParameter("OrgCode", OrgCode._ToStrTrim());
             dbh.SqlParameterList.Add(Para);
-            dt = dbh.ExecuteSql(" select orgid from org where name=@orgname");
+            dt = dbh.ExecuteSql(" select orgid from org where OrgCode=@OrgCode");
             if (dt!=null &&dt.Rows.Count>0)
             {
                 return dt.Rows[0][0]._ToInt32();
@@ -51,8 +51,12 @@ namespace DAL
             return dt;
         }
 
-        public int insert(string Name,string address,int parentID=0) 
+        public string insert(string Name,string address,string OrgCode,int parentID=0) 
         {
+            if (GetOrgByName(OrgCode)>0)
+            {
+                return "机构编号已经存在";
+            }
             SqlParameter Para = null;
             Para = new SqlParameter("Name", Name._ToStrTrim());
             dbh.SqlParameterList.Add(Para);
@@ -60,12 +64,25 @@ namespace DAL
             dbh.SqlParameterList.Add(Para);
             Para = new SqlParameter("parentID", parentID._ToStrTrim());
             dbh.SqlParameterList.Add(Para);
-            string sql = @" insert into org(name,address,parentid) values(@Name,@address,@parentID)";
-            return dbh.ExecuteInsert(sql);
+            Para = new SqlParameter("OrgCode", OrgCode._ToStrTrim());
+            dbh.SqlParameterList.Add(Para);
+            string sql = @" insert into org(name,address,parentid,OrgCode) values(@Name,@address,@parentID,@OrgCode)";
+            if (dbh.ExecuteInsert(sql) > 0)
+            {
+                return "";
+            }
+            else
+            {
+                return "新增失败";
+            }
         }
 
-        public int update(int id, string Name, string address)
+        public string update(int id, string Name, string OrgCode, string address)
         {
+            if (GetOrgByName(OrgCode) > 0)
+            {
+                return "机构编号已经存在";
+            }
             SqlParameter Para = null;
             Para = new SqlParameter("Name", Name._ToStrTrim());
             dbh.SqlParameterList.Add(Para);
@@ -73,8 +90,17 @@ namespace DAL
             dbh.SqlParameterList.Add(Para);
             Para = new SqlParameter("id", id);
             dbh.SqlParameterList.Add(Para);
-            string sql = @" update org set name=@Name,address=@address where orgID=@id";
-            return dbh.ExecuteNonQuery(sql);
+            Para = new SqlParameter("OrgCode", OrgCode._ToStrTrim());
+            dbh.SqlParameterList.Add(Para);
+            string sql = @" update org set name=@Name,address=@address,OrgCode=@OrgCode where orgID=@id";
+            if (dbh.ExecuteNonQuery(sql)>0)
+            {
+                return "";
+            }
+            else
+            {
+                return "更新失败";
+            }
         }
 
         public string delete(string IDs)
@@ -102,5 +128,6 @@ namespace DAL
             }
             return res;
         }
+        
     }
 }

@@ -30,7 +30,7 @@ namespace PMS.Controllers
 
             string content = string.Empty;
 
-            PageModel pg = _BLL.GetCostRecords(0, State._ToInt32(), OrderID._ToInt32(), OrderNo, UnitName, limit, page);
+            PageModel pg = _BLL.GetCostRecords(0, State, OrderID._ToInt32(), OrderNo, UnitName, limit, page);
            
             var js = JsonConvert.SerializeObject(pg);
             return Content(js);

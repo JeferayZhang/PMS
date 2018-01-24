@@ -13,9 +13,9 @@ namespace DAL
     {
         SqlHelp dbhelper = new SqlHelp();
 
-        #region 获取读者信息
+        #region 获取用户信息
         /// <summary>
-        /// 获取读者信息
+        /// 获取用户信息
         /// </summary>
         /// <param name="userNo">用户编号</param>
         /// <param name="userName">名称</param>
@@ -27,7 +27,7 @@ namespace DAL
         /// <param name="userRegData_Begin">用户注册时间范围,起始值</param>
         /// <param name="userRegData_End">用户注册时间范围,截止值</param>
         /// <returns></returns>
-        public   DataTable GetUser(string userNo, string userName, string sex, string userRole, string userOrg,
+        public DataTable GetUser(string userNo, string userName, string sex, string userRole, string userOrg,
             string IDCard, string userState, string userRegData_Begin, string userRegData_End)
         {
             DataTable dt = new DataTable();

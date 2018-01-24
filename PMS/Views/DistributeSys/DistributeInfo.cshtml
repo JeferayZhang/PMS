@@ -1,4 +1,182 @@
-﻿<form class="layui-form" style=" margin-top: 10px;" action="" method="get" id="mainform">
+﻿@{
+    ViewBag.Title = "分发";
+    Layout = "~/Views/Shared/Normal.cshtml";
+}
+<script id="qk" type="text/html">
+    <option value="" tag="0">请选择</option>
+    {{#  layui.each(d, function(index, item){ }}
+    <option value="{{item.BKDH}}" tag="{{item.PRICE}}">{{item.DOCNAME}}</option>
+    {{#  }); }}
+</script>
+<script id="orginfo" type="text/html">
+    <option value="">请选择</option>
+    {{#  layui.each(d, function(index, item){ }}
+    <option value="{{item.OrgID}}">{{item.Name}}</option>
+    {{#  }); }}
+</script>
+<script id="tuserinfo" type="text/html">
+    {{#  layui.each(d, function(index, item){ }}
+    <tr>
+        <td>{{item.DocName}}</td>
+        <td>{{item.OrgName}}</td>
+        <td>{{item.allnums}}</td>
+    </tr>
+    {{#  }); }}
+</script>
+@section scripts{
+    <script>
+        $(function () {
+            var ajaxHelper = new AjaxHelper();
+            layui.use(['laydate', 'layer', 'element', 'form', 'laytpl'], function () {
+                var laydate = layui.laydate, layer = layui.layer, element = layui.element, form = layui.form, $ = layui.jquery, laytpl = layui.laytpl;
+
+                var start = {
+                    min: laydate.now
+                    , max: '2099-06-16 23:59:59'
+                    , istoday: false
+                    , choose: function (datas) {
+                        end.min = datas; //开始日选好后，重置结束日的最小日期
+                        end.start = datas //将结束日的初始值设定为开始日
+                    }
+                };
+
+                var end = {
+                    min: laydate.now
+                    , max: '2099-06-16 23:59:59'
+                    , istoday: true
+                    , choose: function (datas) {
+                        start.max = datas; //结束日选好后，重置开始日的最大日期
+                    }
+                };
+                laydate.render({
+                    elem: '#test1'
+                });
+                laydate.render({
+                    elem: '#test2'
+                });
+
+                //查询
+                form.on('submit(search)', function (data) {
+                    var ddd = { str: JSON.stringify(data.field) };
+                    ajaxHelper.post("/DistributeSys/GetDis/", ddd, function (da) {
+                        var jsonObj = JSON.parse(da);
+                        var getTpl = $("#tuserinfo").html()
+                            , view = $("#t_UserInfo");
+                        if (jsonObj.result) {
+                            if (jsonObj.data.length > 0) {
+                                laytpl(getTpl).render(jsonObj.data, function (a) {
+                                    $(view).html(a);
+                                });
+                            }
+                        }
+                        else {
+                            $("#t_UserInfo").html("");
+                        }
+                        form.render();
+                    });
+                    return false;
+                });
+
+                //下拉框绑定
+                $(function () {
+                    var ddd = { str: '' };
+                    selectchanged('', "Province");
+                    qk( "NewspaperName");
+                });
+                function selectchanged(parentid, elem) {
+                    $("#" + elem + "").empty();
+
+                    var ddd = { str: parentid }
+                    ajaxHelper.post("/BasicSys/OrgInfos/", ddd, function (da) {
+                        var jsonObj = JSON.parse(da);
+                        var getTpl2 = $("#orginfo").html()
+                            , view2 = $("#" + elem + "");
+                        if (jsonObj.result) {
+                            if (jsonObj.data.length > 0) {
+                                laytpl(getTpl2).render(jsonObj.data, function (a2) {
+                                    $(view2).html(a2);
+                                });
+                            }
+                        }
+                        form.render();
+                    });
+                }
+                form.on('select(Province)', function (data) {
+                    $("#CompanyCity").empty();
+                    document.getElementById('CompanyCity').innerHTML = "";
+                    $("#CompanyUnderCity").empty();
+                    var parentid = $("#Province option:selected").val();
+                    if (parentid == "") {
+                        return false;
+                    }
+                    else {
+                        selectchanged(parentid, "CompanyCity");
+                    }
+                    return false;
+                });
+                form.on('select(CompanyCity)', function (data) {
+                    $("#CompanyUnderCity").html("");
+                    var parentid = $("#CompanyCity option:selected").val();
+                    if (parentid == "") {
+                        return false;
+                    }
+                    selectchanged(parentid, "CompanyUnderCity");
+                    return false;
+                });
+
+                //绑定报纸信息
+                function qk( elem) {
+                    var ddd = { str: '' };
+                    ajaxHelper.post("/BasicSys/GetAllDocInfo/", ddd, function (da) {
+                        var jsonObj = JSON.parse(da);
+                        var getTpl2 = $("#qk").html()
+                            , view2 = $("#" + elem + "");
+                        if (jsonObj.result) {
+                            if (jsonObj.data.length > 0) {
+                                laytpl(getTpl2).render(jsonObj.data, function (a2) {
+                                    $(view2).html(a2);
+                                });
+                            }
+                        }
+                        form.render();
+                    });
+                }
+                form.render();
+                //批量删除
+                $("#delete").click(function () {
+                    if ($("#t_UserInfo").find("[name=table_ck]:checked").length == 0) {
+                        layer.open({
+                            title: '提示', content: '请勾选需要进行操作的数据!', time: 2000
+                        });
+                        return;
+                    }
+                    var delkeys = "";
+                    $("#t_UserInfo").find("[name=table_ck]:checked").each(function () {
+                        delkeys += $(this).val() + ",";
+                    });
+                    delkeys = delkeys.substring(0, delkeys.length - 1);
+                    var senddata = { str: delkeys };
+                    ajaxHelper.post("/BasicSys/UserInfo_Deletes/", senddata, function (da) {
+                        var jsonObj = JSON.parse(da);
+                        if (jsonObj.result) {
+                            layer.open({
+                                title: '提示', content: jsonObj.data, time: 2000
+                            });
+                            $("#search").click();
+                        }
+                        else {
+                            layer.open({
+                                title: '提示', content: jsonObj.reason, time: 2000
+                            });
+                        }
+                    });
+                    return false;
+                });
+            });
+        })
+    </script>
+}
+<form class="layui-form" style=" margin-top: 10px;" action="" method="get" id="mainform">
     <div class=" layui-form-item" id="Group_Type">
         <label class="layui-form-label">统计类型</label>
         <div class="layui-input-block">
@@ -6,123 +184,38 @@
             <input type="radio" name="Group_Type" value="2" title="按机构统计">
         </div>
     </div>
-    <div class=" layui-form-item" id="Visable_ByMagazine" hidden>
-        <label class="layui-form-label">报刊种类</label>
-        <div class="layui-input-inline">
-            <select id="" name="DocType">
-                <option value="1">报刊种类</option>
-                <option value="0">报刊种类</option>
-            </select>
-        </div>
+    <div class=" layui-form-item" id="Visable_ByMagazine">
         <label class="layui-form-label">报刊名称</label>
         <div class="layui-input-inline">
-            <select id="" name="NewspaperName">
-                <option value="1">报刊名称</option>
-                <option value="0">报刊名称</option>
-            </select>
+            <select id="NewspaperName" lay-filter="NewspaperName" name="NewspaperName" tag=""></select>
+        </div>     
+        <label class="layui-form-label">省</label>
+        <div class="layui-input-inline">
+            <select id="Province" lay-filter="Province" style="width:150px;" name="Province"></select>
         </div>
-    </div>
-    <div class="layui-form-item" id="Visable_ByOrg1">
-        <label class="layui-form-label" hidden>省</label>
-        <div class="layui-input-inline" hidden>
-            <select name="Province" style="width:150px;" lay-verify="required" lay-search="">
-                <option value="">直接选择或搜索选择</option>
-                <option value="1">layer</option>
-                <option value="2">form</option>
-                <option value="3">layim</option>
-            </select>
+        <label class="layui-form-label">市分公司</label>
+        <div class="layui-input-inline">
+            <select id="CompanyCity" lay-filter="CompanyCity" style="width:150px;" name="CompanyCity"></select>
         </div>
-        <label class="layui-form-label" id="Visable_ByOrg2_1">市分公司</label>
-        <div class="layui-input-inline" id="Visable_ByOrg2_2">
-            <select name="CompanyUnderCity" style="width:150px;" lay-verify="required" lay-search="">
-                <option value="">直接选择或搜索选择</option>
-                <option value="1">layer</option>
-                <option value="2">form</option>
-                <option value="3">layim</option>
-            </select>
+        <label class="layui-form-label">县分公司</label>
+        <div class="layui-input-inline">
+            <select id="CompanyUnderCity" style="width:150px;" lay-filter="CompanyUnderCity" name="CompanyUnderCity"></select>
         </div>
-
-    </div>
-    <div class="layui-form-item" id="Visable_ByOrg2" hidden>
-        <label class="layui-form-label" id="Visable_ByOrg2_3">县分公司</label>
-        <div class="layui-input-inline" id="Visable_ByOrg2_4">
-            <select name="Area" style="width:150px;" lay-verify="required" lay-search="">
-                <option value="">直接选择或搜索选择</option>
-                <option value="1">layer</option>
-                <option value="2">form</option>
-                <option value="3">layim</option>
-            </select>
-        </div>
-        <label class="layui-form-label" id="Visable_ByOrg3_3">网点</label>
-        <div class="layui-input-inline" id="Visable_ByOrg3_4">
-            <select name="CompanyUnderArea" style="width:150px;" lay-verify="required" lay-search="">
-                <option value="">直接选择或搜索选择</option>
-                <option value="1">layer</option>
-                <option value="2">form</option>
-                <option value="3">layim</option>
-            </select>
-        </div>
-    </div>
-    <div class="layui-form-item">
-        <button class="layui-btn layui-btn-normal">
-            <i class="layui-icon">&#xe615;</i> 统计
-        </button>
-        <button class="layui-btn layui-btn-warm">
-            <i class="layui-icon">&#xe615;</i> 分发
-        </button>
-        <button class="layui-btn layui-btn-danger" onclick="javascript: mvccloseall();">
-            <i class="layui-icon">&#x1006;</i> 取消
-        </button>
+        <button class="layui-btn" lay-filter="search" lay-submit="" data-type="search">统计</button>
+        <button class="layui-btn" lay-filter="save1" lay-submit="" data-type="save">分发</button>
     </div>
 </form>
 <div>
-    @*按照报刊统计,统计出报刊在当前机构下各县的订购数*@
-    <table class="layui-table" id="table1" style="width: 99%; margin-left: 5px;" hidden>
-        <thead>
-            <tr>
-                <th><input type="checkbox" title="全选" style="height:20px;width:20px;"></th>
-                <td>报刊种类</td>
-                <td>报刊名称</td>
-                <th>机构名称</th>
-                <th>数量</th>
-            </tr>
-        </thead>
-        <tbody>
-            @for (int i = 0; i < 30; i++)
-            {
+    <form class="layui-form">
+        <table class="layui-table" id="maintb" style="width: 99%; margin-left: 5px;">
+            <thead>
                 <tr>
-                    <td width="30"><input type="checkbox" style="height:20px;width:20px;"></td>
-                    <td>报刊种类</td>
                     <td>报刊名称</td>
                     <th>机构名称</th>
                     <th>数量</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-
-    @*按照机构统计,统计出当前机构下各种报刊的订购数*@
-    <table class="layui-table" id="table2" style="width: 99%; margin-left: 5px;">
-        <thead>
-            <tr>
-                <th><input type="checkbox" title="全选" style="height:20px;width:20px;"></th>
-                <th>机构名称</th>
-                <td>报刊种类</td>
-                <td>报刊名称</td>                
-                <th>数量</th>
-            </tr>
-        </thead>
-        <tbody>
-            @for (int i = 0; i < 30; i++)
-            {
-                <tr>
-                    <td width="30"><input type="checkbox" style="height:20px;width:20px;"></td>
-                    <th>机构名称</th>
-                    <td>报刊种类</td>
-                    <td>报刊名称</td>                    
-                    <th>数量</th>
-                </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody id="t_UserInfo"></tbody>
+        </table>
+    </form>
 </div>

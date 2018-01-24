@@ -62,10 +62,18 @@
     <input type="hidden" name="ID" value="@ID" />
     <input type="hidden" name="ParentID" value="@ParentID" />
     <div class=" layui-form-item">
+        <label class="layui-form-label">编号</label>
+        <div class="layui-input-inline">
+            <input type="text" lay-verify="required" id="OrgCode" value="@(dr == null ? "" : dr["OrgCode"]._ToStrTrim())" name="OrgCode" autocomplete="off" class="layui-input" maxlength="50">
+        </div>
+    </div>
+    <div class=" layui-form-item">
         <label class="layui-form-label">机构名称</label>
         <div class="layui-input-inline">
             <input type="text" lay-verify="required" id="Name" value="@(dr == null ? "" : dr["Name"]._ToStrTrim())" name="Name" autocomplete="off" class="layui-input" maxlength="50">
         </div>
+    </div>
+    <div class=" layui-form-item">
         <label class="layui-form-label">地址</label>
         <div class="layui-input-inline">
             <input type="text" id="Address" name="Address" value="@(dr == null ? "" : dr["ADDRESS"]._ToStrTrim())" autocomplete="off" class="layui-input" maxlength="50">

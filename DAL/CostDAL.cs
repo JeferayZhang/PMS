@@ -24,15 +24,15 @@ namespace DAL
         /// <param name="pagesize">每页显示数量</param>
         /// <param name="pageindex">页码</param>
         /// <returns></returns>
-        public DataTable GetCostRecords(int id, int state,int orderid, string OrderNo, string unitname, int pagesize, int pageindex)
+        public DataTable GetCostRecords(int id, string state,int orderid, string OrderNo, string unitname, int pagesize, int pageindex)
         {
             DataTable dt = new DataTable();
             string sql = string.Format(@"select top {0} * from (
 select a.id,a.orderid,c.UnitName,c.OrderNo,a.money,
-a.moneypayed,a.updatetime,d.NAME updateuser ,
+a.moneypayed,CONVERT(varchar(100), a.updatetime, 23)updatetime,d.NAME updateuser ,
 b.indate,b.ordermonths,
 ROW_NUMBER() over (order by a.ID) as rownumber ,
-case when money>moneypayed then '未缴清' else'已缴清' end as state from cost a
+case a.state when 1 then '未缴清' when 0 then'已缴清' else '异常状态' end as state from cost a
 left join [Order] b on a.orderid=b.ID
 left join OrderPeople c on b.PersonID=c.ID
 left join USERS d on a.updateuser=d.ID ", pagesize);
@@ -54,13 +54,11 @@ left join USERS d on a.updateuser=d.ID ", pagesize);
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND b.ID =@orderid";
             }
-            if (state==0)
+            if (!string.IsNullOrEmpty(state._ToStrTrim()))
             {
-                sql += " AND money>moneypayed";
-            }
-            if (state == 1)
-            {
-                sql += " AND money=moneypayed";
+                SqlParameter Para = new SqlParameter("state", state._ToInt32());
+                dbhelper.SqlParameterList.Add(Para);
+                sql += " AND  state=@state";
             }
             if (!string.IsNullOrEmpty(unitname._ToStrTrim()))
             {
@@ -145,6 +143,40 @@ left join USERS d on a.updateuser=d.ID  ");
                     Para = new SqlParameter("id", id);
                     dbhelper.SqlParameterList.Add(Para);
                     int num = dbhelper.ExecuteNonQuery(tran, sql);
+                    sql = "update cost set state=0 where id=@id and money=moneypayed";
+                    Para = new SqlParameter("id", id._ToInt32());
+                    dbhelper.SqlParameterList.Add(Para);
+                    num = dbhelper.ExecuteNonQuery(tran, sql);
+                    tran.Commit();
+                }
+                catch (Exception ex)
+                {
+                    tran.Rollback();
+                    res = ex.Message;
+                }
+            }
+            conn.Close();
+            return res;
+        }
+
+        public string UpdateStateByPK(string ids)
+        {
+            string res = "";
+            SqlConnection conn = new SqlConnection(dbhelper.SqlConnectionString);
+            conn.Open();
+            using (SqlTransaction tran = conn.BeginTransaction())
+            {
+                try
+                {
+                    SqlParameter Para = null;
+                    string[] pk = ids.Split(',');
+                    foreach (string item in pk)
+                    {
+                        string sql = "update cost set state=0 where id=@id";
+                        Para = new SqlParameter("id", item._ToInt32());
+                        dbhelper.SqlParameterList.Add(Para);
+                        int num = dbhelper.ExecuteNonQuery(tran, sql);
+                    }
                     tran.Commit();
                 }
                 catch (Exception ex)
@@ -160,7 +192,7 @@ left join USERS d on a.updateuser=d.ID  ");
         public int insert(SqlTransaction tran,int orderid,decimal money ,decimal moneypayed, int userid) 
         {
             int num = 0;
-            string sql = @"insert into cost(orderid,money,moneypayed,updateuser) values(@orderid,@money,@moneypayed,@updateuser)";
+            string sql = @"insert into cost(orderid,money,moneypayed,updateuser,state) values(@orderid,@money,@moneypayed,@updateuser,1)";
             try
             {
                 SqlParameter Para = null;

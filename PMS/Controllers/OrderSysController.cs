@@ -216,34 +216,33 @@ namespace PMS.Controllers
                                 if (orgid == 0)
                                 {
                                     ret.result = false;
-                                    ret.reason = "所属网点不能为空";
-
+                                    ret.reason ="第"+ (dt.Rows.IndexOf(item)+1)+"行数据机构填写不正确";
                                     break;
                                 }
                                 else if (string.IsNullOrEmpty(item["BKDH"]._ToStrTrim()))
                                 {
                                     ret.result = false;
-                                    ret.reason = "报刊代号不能为空"; break;
+                                    ret.reason = "第" + (dt.Rows.IndexOf(item) + 1) + "行数据报刊代号不能为空"; break;
                                 }
                                 else if (item["OrderNum"]._ToInt32() <= 0)
                                 {
                                     ret.result = false;
-                                    ret.reason = "订购数必须大于0"; break;
+                                    ret.reason = "第" + (dt.Rows.IndexOf(item) + 1) + "行数据订购数必须大于0"; break;
                                 }
                                 else if (item["OrderMonths"]._ToInt32() <= 0)
                                 {
                                     ret.result = false;
-                                    ret.reason = "订购月数必须大于0"; break;
+                                    ret.reason = "第" + (dt.Rows.IndexOf(item) + 1) + "行数据订购月数必须大于0"; break;
                                 }
                                 else if (string.IsNullOrEmpty(item["Indate"]._ToStrTrim()))
                                 {
                                     ret.result = false;
-                                    ret.reason = "订购起始日期不能为空"; break;
+                                    ret.reason = "第" + (dt.Rows.IndexOf(item) + 1) + "行数据订购起始日期不能为空"; break;
                                 }
                                 else if (string.IsNullOrEmpty(item["OrderNo"]._ToStrTrim()))
                                 {
                                     ret.result = false;
-                                    ret.reason = "订户单位编号不能为空"; break;
+                                    ret.reason = "第" + (dt.Rows.IndexOf(item) + 1) + "行数据订户单位编号不能为空"; break;
                                 }
                                 else
                                 {
@@ -466,26 +465,17 @@ namespace PMS.Controllers
                 string Address = o["Address"]._ToStrTrim();
                 string Name = o["Name"]._ToStrTrim();
                 string Phone = o["Phone"]._ToStrTrim();
-                string Province = o["Province"]._ToStrTrim();
-                string CompanyCity = o["CompanyCity"]._ToStrTrim();
-                string CompanyUnderCity = o["CompanyUnderCity"]._ToStrTrim();
-                string CompanyUnderArea = o["CompanyUnderArea"]._ToStrTrim();
+                string Roads = o["Roads"]._ToStrTrim();
                 string State = o["State"]._ToStrTrim();
-                string OrgID = CompanyUnderArea == "" ? (CompanyUnderCity == "" ?
-                    (CompanyCity == "" ?
-                    Province :
-                    CompanyCity) :
-                    CompanyUnderCity) :
-                    CompanyUnderArea;
                 //新增
                 if (string.IsNullOrEmpty(ID))
                 {
-                    ret = _SubscriberBLL.Insert(OrderNo, UnitName, Name, Phone, Address, OrgID._ToInt32(), 1);
+                    ret = _SubscriberBLL.Insert(OrderNo, UnitName, Name, Phone, Address, Roads._ToInt32(), 1);
                 }
                 //更新
                 else
                 {
-                    ret = _SubscriberBLL.UpdateByPK(ID._ToInt32(), OrderNo, UnitName, Name, Phone, Address, OrgID._ToInt32(), MGUID);
+                    ret = _SubscriberBLL.UpdateByPK(ID._ToInt32(), OrderNo, UnitName, Name, Phone, Address, Roads._ToInt32(), MGUID);
                 }
             }
             content = ret.toJson();

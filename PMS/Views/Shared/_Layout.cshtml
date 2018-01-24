@@ -28,20 +28,19 @@
                         user = Session["UserModel"] as PMS.Models.UserModel;
                         if (user != null)
                         {
-                            <a href="javascript:;">
+                            <a href="javascript:;" tag="@user._ID">
                                 @user.Name
                             </a>
+                            <dl class="layui-nav-child">
+                                <dd>
+                                    <a href="javascript:;" tag="@user._ID">基本资料</a>
+                                </dd>
+                                <dd>
+                                    <a href="javascript:;" tag="@user._ID">安全设置</a>
+                                </dd>
+                            </dl>
                         }
-                    }
-                   
-                    <dl class="layui-nav-child">
-                        <dd>
-                            <a href="javascript:;">基本资料</a>
-                        </dd>
-                        <dd>
-                            <a href="javascript:;">安全设置</a>
-                        </dd>
-                    </dl>
+}                    
                 </li>
                 <li class="layui-nav-item layui-hide-xs">
                     <a href="javascript:;">

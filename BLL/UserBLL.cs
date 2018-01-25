@@ -27,11 +27,12 @@ namespace BLL
         /// <param name="userRegData_Begin">用户注册时间范围,起始值</param>
         /// <param name="userRegData_End">用户注册时间范围,截止值</param>
         /// <returns>data为DataTable</returns>
-        public retValue GetUser(string userNo, string userName, string sex, string userRole, string userOrg, string IDCard, string userState, string userRegData_Begin, string userRegData_End)
+        public retValue GetUser(string userNo, string userName, string sex, string userRole, string userOrg, string IDCard, string userState,
+            string userRegData_Begin, string userRegData_End,string orgid)
         {
             retValue ret = new retValue();
             DataTable dt = dal.GetUser(userNo, userName, sex, userRole, userOrg, IDCard, userState,
-                userRegData_Begin, userRegData_End);
+                userRegData_Begin, userRegData_End, orgid);
             if (dt!=null && dt.Rows.Count>0)
             {
                 ret.result = true;
@@ -82,10 +83,10 @@ namespace BLL
         /// <param name="userState">状态(0有效,1无效)</param>
         /// <param name="guid">唯一标识,每次修改数据会同时修改此列</param>
         /// <returns>成功返回空值,否则返回提示</returns>
-        public retValue UpdateByPK(int ID,string userNo, string userName, string sex, string userRole, string userOrg, string IDCard, string userState, string guid) 
+        public retValue UpdateByPK(int ID,string userNo, string userName, string sex, string userRole, string userOrg, string IDCard, string userState, string guid,string Address) 
         {
             retValue ret = new retValue();
-            string res = dal.UpdateByPK(ID,userNo, userName, sex, userRole, userOrg, IDCard, userState, guid);
+            string res = dal.UpdateByPK(ID,userNo, userName, sex, userRole, userOrg, IDCard, userState, guid, Address);
             if (string.IsNullOrEmpty(res))
             {
                 ret.result = true; ret.data = "保存成功";

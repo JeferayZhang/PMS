@@ -175,7 +175,7 @@
                     layer.open({
                         type: 2,
                         title: '新增订单',
-                        closeBtn: 0,
+                        closeBtn: 1,
                         shade: [0],
                         area: ['700px', '350px'],
                         anim: 2,
@@ -224,6 +224,10 @@
                     var senddata = { str: JSON.stringify(data) };
                     ajaxHelper.post("/OrderSys/Order_Deletes/", senddata, function (da) {
                         var jsonObj = JSON.parse(da);
+                        if (jsonObj.data == "NEEDLOGIN") {
+                            top.location = "../Account/Login";
+                            return false;
+                        }
                         if (jsonObj.result) {
                             layer.open({
                                 title: '提示', content: jsonObj.data, time: 2000
@@ -232,7 +236,7 @@
                         }
                         else {
                             layer.open({
-                                title: '提示', content: jsonObj.result, time: 2000
+                                title: '提示', content: jsonObj.reason, time: 2000
                             });
                         }
                     });
@@ -251,6 +255,10 @@
                     var senddata = { str: JSON.stringify(data) };
                     ajaxHelper.post("/OrderSys/Order_TD/", senddata, function (da) {
                         var jsonObj = JSON.parse(da);
+                        if (jsonObj.data == "NEEDLOGIN") {
+                            top.location = "../Account/Login";
+                            return false;
+                        }
                         if (jsonObj.result) {
                             layer.open({
                                 title: '提示', content: jsonObj.data, time: 2000
@@ -259,7 +267,7 @@
                         }
                         else {
                             layer.open({
-                                title: '提示', content: jsonObj.result, time: 2000
+                                title: '提示', content: jsonObj.reason, time: 2000
                             });
                         }
                     });
@@ -278,10 +286,11 @@
 
                         layer.closeAll('loading'); //关闭loading
                         $("#search").click();
-
                     }
                     , error: function () {
-                        alert("444");
+                        layer.open({
+                            title: '提示', content: '批量导入出错了', time: 2000
+                        });
                     }
                 });
             });

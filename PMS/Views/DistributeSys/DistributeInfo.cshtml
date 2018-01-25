@@ -17,6 +17,7 @@
 <script id="tuserinfo" type="text/html">
     {{#  layui.each(d, function(index, item){ }}
     <tr>
+        <td hidden>{{item.ids}}</td>
         <td>{{item.DocName}}</td>
         <td>{{item.OrgName}}</td>
         <td>{{item.allnums}}</td>
@@ -210,6 +211,7 @@
         <table class="layui-table" id="maintb" style="width: 99%; margin-left: 5px;">
             <thead>
                 <tr>
+                    <td hidden>IDS</td>
                     <td>报刊名称</td>
                     <th>机构名称</th>
                     <th>数量</th>

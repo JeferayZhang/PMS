@@ -26,18 +26,18 @@ namespace BLL
         /// <param name="pageLimit"></param>
         /// <param name="pageIndex"></param>
         /// <returns></returns>
-        public PageModel GetOrderInfo(int ID, string BKDH, string OrderNo, string unitname, string dt1, string dt2, 
+        public PageModel GetOrderInfo(int ID, string BKDH, string OrderNo, string unitname, string dt1, string dt2, string orgid,
             int pageLimit = 1, int pageIndex = 0)
         {
             PageModel pg = new PageModel();
             try
             {
-                DataTable dt = dal.GetOrderInfo(ID, BKDH, OrderNo, unitname, dt1, dt2, pageLimit, pageIndex);
+                DataTable dt = dal.GetOrderInfo(ID, BKDH, OrderNo, unitname, dt1, dt2, pageLimit, pageIndex, orgid);
                 if (dt.Rows.Count > 0 && dt != null)
                 {
                     pg.code = 0;
                     pg.msg = "";
-                    pg.count = dal.GetCount(ID, BKDH, OrderNo, unitname, dt1, dt2);
+                    pg.count = dal.GetCount(ID, BKDH, OrderNo, unitname, dt1, dt2, orgid);
                     pg.data = dt;
                 }
                 else
@@ -154,14 +154,14 @@ namespace BLL
         /// <returns></returns>
         public retValue Insert(string BKDH, int ordernum, int ordermonths, string orderDate,
             string inuser, int posterid, string OrderNo,string unitname,
-            string address,string name,string phone,int orgID,SqlTransaction tran) 
+            string address,string name,string phone,int orgID,SqlTransaction tran,string oporgid) 
         {
-            int checkOrderPeople = _SubscriberDAL.GetCount(0, OrderNo, "", "", 0, "", "");
+            int checkOrderPeople = _SubscriberDAL.GetCount(0, OrderNo, "", "", 0, "", "", oporgid);
             int orderpeopleid = 0;
             retValue ret=new retValue();
             if (checkOrderPeople > 0)
             {
-                orderpeopleid = _SubscriberDAL.GetSubscriber(0, OrderNo, "", "", 0, "", "").Rows[0]["ID"]._ToInt32();
+                orderpeopleid = _SubscriberDAL.GetSubscriber(0, OrderNo, "", "", 0, "", "", oporgid).Rows[0]["ID"]._ToInt32();
             }
             else
             {

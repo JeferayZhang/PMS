@@ -50,7 +50,21 @@ namespace DAL
             dt = dbh.ExecuteSql(" select * from org where ParentID=@ParentID");
             return dt;
         }
-
+        public string childs = "";
+        public string getChilds(string orgid)
+        {
+            string sql = @"SELECT t.orgid,STUFF((SELECT ','+ltrim(org.orgID)  FROM org    
+  WHERE parentid=t.orgid FOR XML PATH('')), 1, 1, '') AS ids
+FROM org t  where t.orgid in ("+ orgid + @")
+group by t.OrgID";
+            DataTable dt = dbh.ExecuteSql(sql);
+            if (dt.Rows.Count>0 && !string.IsNullOrEmpty(dt.Rows[0]["ids"]._ToStr()))
+            {
+                childs += dt.Rows[0]["ids"]._ToStr() + ",";
+                getChilds(dt.Rows[0]["ids"]._ToStr());
+            }
+            return childs;
+        }
         public string insert(string Name,string address,string OrgCode,int parentID=0) 
         {
             if (GetOrgByName(OrgCode)>0)

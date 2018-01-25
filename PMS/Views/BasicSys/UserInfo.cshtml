@@ -41,6 +41,10 @@
                     var ddd = { str: JSON.stringify(data.field) };
                     ajaxHelper.post("/BasicSys/UserInfos/", ddd, function (da) {
                         var jsonObj = JSON.parse(da);
+                        if (jsonObj.data == "NEEDLOGIN") {
+                            top.location = "../Account/Login";
+                            return false;
+                        }
                         var getTpl = $("#tuserinfo").html()
 , view = $("#t_UserInfo");
                         if (jsonObj.result) {
@@ -143,7 +147,7 @@
                     layer.open({
                         type: 2,
                         title: '新增用户',
-                        closeBtn: 0,
+                        closeBtn: 1,
                         shade: [0],
                         area: ['700px', '550px'],
                         anim: 2,
@@ -193,6 +197,10 @@
                     var senddata = { str: delkeys };
                     ajaxHelper.post("/BasicSys/UserInfo_Deletes/", senddata, function (da) {
                         var jsonObj = JSON.parse(da);
+                        if (jsonObj.data == "NEEDLOGIN") {
+                            top.location = "../Account/Login";
+                            return false;
+                        }
                         if (jsonObj.result) {
                             layer.open({
                                 title: '提示', content: jsonObj.data, time: 2000
@@ -223,6 +231,11 @@
                     var senddata = { str: delkeys };
                     ajaxHelper.post("/BasicSys/UserInfo_Update/", senddata, function (da) {
                         var jsonObj = JSON.parse(da);
+                        var jsonObj = JSON.parse(da);
+                        if (jsonObj.data == "NEEDLOGIN") {
+                            top.location = "../Account/Login";
+                            return false;
+                        }
                         if (jsonObj.result) {
                             layer.open({
                                 title: '提示', content: jsonObj.data, time: 2000

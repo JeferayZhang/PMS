@@ -25,7 +25,7 @@ namespace DAL
         /// <param name="dt2">录入时间</param>
         /// <returns>返回DataTable</returns>
         public DataTable GetSubscriber(int ID, string OrderNo, string UnitName, string name, 
-            int OrgID, string dt1, string dt2, int pageLimit = 0, int pageIndex = 0)
+            int OrgID, string dt1, string dt2,string orgid, int pageLimit = 0, int pageIndex = 0)
         {
             DataTable dt = new DataTable();
             string sql = "";
@@ -41,6 +41,12 @@ USERS.NAME InUser,CONVERT(varchar(100),OrderPeople.INDATE, 23) Indate,
 Org.Name OrgName FROM  OrderPeople
 LEFT JOIN USERS ON OrderPeople.InUser=USERS.ID
 LEFT JOIN Org ON Org.OrgID=OrderPeople.OrgID WHERE 1=1 ");
+            if (!string.IsNullOrEmpty(orgid._ToStrTrim()))
+            {
+                OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
+                string ids = orgInfoDAL.getChilds(orgid);
+                sql += " AND OrderPeople.ORGID in (" + ids.Substring(0, ids.Length - 1) + ")";
+            }
             if (!string.IsNullOrEmpty(OrderNo._ToStrTrim()))
             {
                 SqlParameter Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim());
@@ -88,12 +94,18 @@ LEFT JOIN Org ON Org.OrgID=OrderPeople.OrgID WHERE 1=1 ");
         }
 
         public int GetCount(int ID, string OrderNo, string UnitName, string name, 
-            int OrgID, string dt1, string dt2) 
+            int OrgID, string dt1, string dt2,string orgid) 
         {
             string sql = "";
             sql = string.Format(@"select  count(1) as count FROM  OrderPeople
 LEFT JOIN USERS ON OrderPeople.InUser=USERS.ID
 LEFT JOIN Org ON Org.OrgID=OrderPeople.OrgID WHERE 1=1 ");
+            if (!string.IsNullOrEmpty(orgid._ToStrTrim()))
+            {
+                OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
+                string ids = orgInfoDAL.getChilds(orgid);
+                sql += " AND OrderPeople.ORGID in (" + ids.Substring(0, ids.Length - 1) + ")";
+            }
             if (!string.IsNullOrEmpty(OrderNo._ToStrTrim()))
             {
                 SqlParameter Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim());

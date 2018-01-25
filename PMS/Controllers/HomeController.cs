@@ -10,6 +10,10 @@ namespace PMS.Controllers
     {
         public ActionResult Index()
         {
+            if (!authorize.checkFilterContext())
+            {
+                return Redirect("../Account/Login");
+            }
             return View();
         }
     }

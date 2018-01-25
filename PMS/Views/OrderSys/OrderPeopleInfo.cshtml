@@ -162,7 +162,7 @@
                     layer.open({
                         type: 2,
                         title: '新增订户',
-                        closeBtn: 0,
+                        closeBtn:1,
                         shade: [0],
                         area: ['700px', '550px'],
                         anim: 2,
@@ -211,6 +211,10 @@
                     var senddata = { str: JSON.stringify(data) };
                     ajaxHelper.post("/OrderSys/OrderPeopleInfo_Deletes/", senddata, function (da) {
                         var jsonObj = JSON.parse(da);
+                        if (jsonObj.data == "NEEDLOGIN") {
+                            top.location = "../Account/Login";
+                            return false;
+                        }
                         if (jsonObj.result) {
                             layer.open({
                                 title: '提示', content: jsonObj.data, time: 2000
@@ -219,7 +223,7 @@
                         }
                         else {
                             layer.open({
-                                title: '提示', content: jsonObj.result, time: 2000
+                                title: '提示', content: jsonObj.reason, time: 2000
                             });
                         }
                     });

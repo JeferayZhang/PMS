@@ -73,7 +73,7 @@
                     layer.open({
                         type: 2,
                         title: '新增报刊',
-                        closeBtn: 0,
+                        closeBtn: 1,
                         shade: [0],
                         area: ['700px', '400px'],
                         anim: 2,
@@ -129,7 +129,7 @@
                         }
                         else {
                             layer.open({
-                                title: '提示', content: jsonObj.result, time: 2000
+                                title: '提示', content: jsonObj.reason, time: 2000
                             });
                         }
                     });

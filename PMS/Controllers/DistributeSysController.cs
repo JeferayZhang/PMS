@@ -20,15 +20,27 @@ namespace PMS.Controllers
 
         public ActionResult DistributeInfo()
         {
+            if (!authorize.checkFilterContext())
+            {
+                return Redirect("/Account/Login");
+            }
+
             return View();
         }
 
         [HttpPost]
         public JsonResult GetDis(string str)
         {
-            BLL.DistributeBLL _BLL = new DistributeBLL();
             retValue ret = new retValue();
+            if (!authorize.checkFilterContext())
+            {
+                ret.result = true;
+                ret.data = "NEEDLOGIN";
+                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
+            }
 
+            BLL.DistributeBLL _BLL = new DistributeBLL();
+            
             JObject o = null;
             
             if (!string.IsNullOrEmpty(str))
@@ -62,6 +74,11 @@ namespace PMS.Controllers
 
         public ActionResult DistributeLog()
         {
+            if (!authorize.checkFilterContext())
+            {
+                return Redirect("/Account/Login");
+            }
+
             return View();
         }
 

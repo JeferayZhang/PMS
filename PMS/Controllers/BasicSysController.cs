@@ -26,6 +26,11 @@ namespace PMS.Controllers
         /// <returns></returns>
         public ActionResult UserInfo()
         {
+            if (!authorize.checkFilterContext())
+            {
+                return Redirect("/Account/Login");
+            }
+
             return View();
         }
 
@@ -33,9 +38,17 @@ namespace PMS.Controllers
         [HttpPost]
         public JsonResult UserInfos(string str)
         {
-            BLL.UserBLL _UserBLL = new UserBLL();
             retValue ret = new retValue();
+            if (!authorize.checkFilterContext())
+            {
+                ret.result = true;
+                ret.data = "NEEDLOGIN";
+                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
+            }
 
+            BLL.UserBLL _UserBLL = new UserBLL();
+
+            UserModel user = Session["UserModel"] as UserModel;
             JObject o = null;
 
             string content = string.Empty;
@@ -63,7 +76,7 @@ namespace PMS.Controllers
                     CompanyUnderCity) :
                     CompanyUnderArea;
                 ret = _UserBLL.GetUser(UserNo, NAME, Sex, Role,
-                    OrgID, IDCard, State, test1, test2);
+                    OrgID, IDCard, State, test1, test2, user.OrgID._ToStr());
             }
             content = ret.toJson();
 
@@ -77,8 +90,15 @@ namespace PMS.Controllers
         [HttpPost]
         public JsonResult UserInfo_Deletes(string str)
         {
-            BLL.UserBLL _UserBLL = new UserBLL();
             retValue ret = new retValue();
+            if (!authorize.checkFilterContext())
+            {
+                ret.result = true;
+                ret.data = "NEEDLOGIN";
+                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
+            }
+
+            BLL.UserBLL _UserBLL = new UserBLL();
 
             string content = string.Empty;
 
@@ -99,8 +119,16 @@ namespace PMS.Controllers
         [HttpPost]
         public JsonResult UserInfo_Update(string str)
         {
-            BLL.UserBLL _UserBLL = new UserBLL();
             retValue ret = new retValue();
+            if (!authorize.checkFilterContext())
+            {
+                ret.result = true;
+                ret.data = "NEEDLOGIN";
+                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
+            }
+
+            BLL.UserBLL _UserBLL = new UserBLL();
+           
 
             string content = string.Empty;
             int count = 0;
@@ -110,7 +138,7 @@ namespace PMS.Controllers
 
                 foreach (string item in ids)
                 {
-                    ret = _UserBLL.UpdateByPK(item._ToInt32(), "", "", "", "", "", "", "1", "");
+                    ret = _UserBLL.UpdateByPK(item._ToInt32(), "", "", "", "", "", "", "1", "","");
                     if (ret.result)
                     {
                         count++;
@@ -136,6 +164,10 @@ namespace PMS.Controllers
         #region 加载用户编辑页面
         public ActionResult UserInfo_AddEdit()
         {
+            if (!authorize.checkFilterContext())
+            {
+                return Redirect("/Account/Login");
+            }
             int addeditcode = Request["addeditcode"]._ToInt32();
             if (addeditcode > 0)
             {
@@ -162,11 +194,16 @@ namespace PMS.Controllers
         [HttpPost]
         public JsonResult UserInfo_AddEdits(string str)
         {
+            retValue ret = new retValue();
+            if (!authorize.checkFilterContext())
+            {
+                ret.result = true;
+                ret.data = "NEEDLOGIN";
+                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
+            }
+            UserModel user = Session["UserModel"] as UserModel;
             BLL.UserBLL _UserBLL = new UserBLL();
             JObject o = null;
-
-            string content = string.Empty;
-            retValue ret = new retValue();
             if (!string.IsNullOrEmpty(str))
             {
                 o = JObject.Parse(str);
@@ -196,35 +233,31 @@ namespace PMS.Controllers
                 //新增
                 if (string.IsNullOrEmpty(ID))
                 {
-                    ret = _UserBLL.Insert(USERNO, NAME, Sex, Role, OrgID, IDCard, Password, PhoneNumber, Address, Email, "");
+                    ret = _UserBLL.Insert(USERNO, NAME, Sex, Role, OrgID, IDCard, Password, PhoneNumber, Address, Email, user._ID._ToStr());
                 }
                 //更新
                 else
                 {
-                    ret = _UserBLL.UpdateByPK(ID._ToInt32(), USERNO, NAME, Sex, Role, OrgID, IDCard, State, MGUID);
+                    ret = _UserBLL.UpdateByPK(ID._ToInt32(), USERNO, NAME, Sex, Role, OrgID, IDCard, State, MGUID, Address);
                 }
             }
-            content = ret.toJson();
-
             var js = JsonConvert.SerializeObject(ret);
 
             return Json(js, JsonRequestBehavior.AllowGet);
-        } 
+        }
         #endregion
 
-        #region 保存用户信息
+        #region 登录
         /// <summary>
-        /// 编辑用户
+        /// 登录
         /// </summary>
         /// <returns></returns>
         [HttpPost]
         public JsonResult UserLogin(string str)
         {
+            retValue ret = new retValue();
             BLL.UserBLL _UserBLL = new UserBLL();
             JObject o = null;
-
-            string content = string.Empty;
-            retValue ret = new retValue();
             if (!string.IsNullOrEmpty(str))
             {
                 o = JObject.Parse(str);
@@ -249,8 +282,22 @@ namespace PMS.Controllers
                     Session["UserModel"] = user;
                 }
             }
-            content = ret.toJson();
+            var js = JsonConvert.SerializeObject(ret);
 
+            return Json(js, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+
+        #region 退出登录
+        /// <summary>
+        /// 退出登录
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult UserLoginOut(string str)
+        {
+            retValue ret = new retValue();
+            Session["UserModel"] = null;
             var js = JsonConvert.SerializeObject(ret);
 
             return Json(js, JsonRequestBehavior.AllowGet);
@@ -262,7 +309,10 @@ namespace PMS.Controllers
         public ActionResult DocInfo()
         {
             if (!authorize.checkFilterContext())
-                return authorize.returnNeedLogin();
+            {
+                
+                return RedirectToAction("../Account/Login");
+            }
             return View();
         }
 
@@ -275,8 +325,15 @@ namespace PMS.Controllers
         [HttpPost]
         public JsonResult DocInfos(string str)
         {
-            BLL.DocBLL _DocBLL = new DocBLL();
             retValue ret = new retValue();
+            if (!authorize.checkFilterContext())
+            {
+                ret.result = true;
+                ret.data = "NEEDLOGIN";
+                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
+            }
+
+            BLL.DocBLL _DocBLL = new DocBLL();
 
             JObject o = null;
 
@@ -303,8 +360,15 @@ namespace PMS.Controllers
         [HttpPost]
         public JsonResult GetAllDocInfo(string str)
         {
-            BLL.DocBLL _BLL = new DocBLL();
             retValue ret = new retValue();
+            if (!authorize.checkFilterContext())
+            {
+                ret.result = true;
+                ret.data = "NEEDLOGIN";
+                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
+            }
+
+            BLL.DocBLL _BLL = new DocBLL();
             ret = _BLL.GetDoc(str, "", "", "", "", "", "", "", "");
             var js = JsonConvert.SerializeObject(ret);
 
@@ -320,7 +384,10 @@ namespace PMS.Controllers
         public ActionResult DocInfo_AddEdit()
         {
             if (!authorize.checkFilterContext())
-                return authorize.returnNeedLogin();
+            {
+                return Redirect("/Account/Login");
+            }
+
             int addeditcode = Request["addeditcode"]._ToInt32();
             if (addeditcode > 0)
             {
@@ -348,11 +415,15 @@ namespace PMS.Controllers
         [HttpPost]
         public JsonResult DocInfo_AddEdits(string str)
         {
+            retValue ret = new retValue();
+            if (!authorize.checkFilterContext())
+            {
+                ret.result = true;
+                ret.data = "NEEDLOGIN";
+                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
+            }
             BLL.DocBLL _DocBLL = new DocBLL();
             JObject o = null;
-
-            string content = string.Empty;
-            retValue ret = new retValue();
             if (!string.IsNullOrEmpty(str))
             {
                 o = JObject.Parse(str);
@@ -378,8 +449,6 @@ namespace PMS.Controllers
                     ret = _DocBLL.UpdateByPK(ID._ToInt32(),Name,ISSN,Type,PublishArea,Publisher,Price,PL,BKDH,NGUID);
                 }
             }
-            content = ret.toJson();
-
             var js = JsonConvert.SerializeObject(ret);
 
             return Json(js, JsonRequestBehavior.AllowGet);
@@ -389,8 +458,15 @@ namespace PMS.Controllers
         [HttpPost]
         public JsonResult DocInfo_Delete(string str)
         {
-            BLL.DocBLL _DocBLL = new DocBLL();
             retValue ret = new retValue();
+            if (!authorize.checkFilterContext())
+            {
+                ret.result = true;
+                ret.data = "NEEDLOGIN";
+                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
+            }
+
+            BLL.DocBLL _DocBLL = new DocBLL();
 
             string content = string.Empty;
 
@@ -411,7 +487,9 @@ namespace PMS.Controllers
         public ActionResult OrgInfo()
         {
             if (!authorize.checkFilterContext())
-                return authorize.returnNeedLogin();
+            {
+                return Redirect("/Account/Login");
+            }
             return View();
         }
 
@@ -419,8 +497,15 @@ namespace PMS.Controllers
         [HttpPost]
         public JsonResult OrgInfos(string str)
         {
-            BLL.OrgInfoBLL _BLL = new OrgInfoBLL();
             retValue ret = new retValue();
+            if (!authorize.checkFilterContext())
+            {
+                ret.result = true;
+                ret.data = "NEEDLOGIN";
+                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
+            }
+
+            BLL.OrgInfoBLL _BLL = new OrgInfoBLL();
             string content = string.Empty;
 
             ret = _BLL.GetOrgByParentID(str._ToInt32());
@@ -436,7 +521,9 @@ namespace PMS.Controllers
         public ActionResult OrgInfo_AddEdit()
         {
             if (!authorize.checkFilterContext())
-                return authorize.returnNeedLogin();
+            {
+                return Redirect("/Account/Login");
+            }
             string ID = Request["ID"]._ToStrTrim();
             string ParentID = Request["ParentID"]._ToStrTrim();
             List<retValue> resultList = new List<retValue>();
@@ -472,13 +559,16 @@ namespace PMS.Controllers
         [HttpPost]
         public ActionResult OrgInfo_AddEdits(string str)
         {
+            retValue ret = new retValue();
             if (!authorize.checkFilterContext())
-                return authorize.returnNeedLogin();
+            {
+                ret.result = true;
+                ret.data = "NEEDLOGIN";
+                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
+            }
+
             BLL.OrgInfoBLL _BLL = new OrgInfoBLL();
             JObject o = null;
-
-            string content = string.Empty;
-            retValue ret = new retValue();
             if (!string.IsNullOrEmpty(str))
             {
                 o = JObject.Parse(str);
@@ -499,8 +589,6 @@ namespace PMS.Controllers
                     ret = _BLL.update(ID._ToInt32(), OrgCode, NAME, Address);
                 }
             }
-            content = ret.toJson();
-
             var js = JsonConvert.SerializeObject(ret);
 
             return Json(js, JsonRequestBehavior.AllowGet);
@@ -511,17 +599,20 @@ namespace PMS.Controllers
         [HttpPost]
         public JsonResult OrgInfo_Deletes(string str)
         {
-            BLL.OrgInfoBLL _BLL = new OrgInfoBLL();
             retValue ret = new retValue();
+            if (!authorize.checkFilterContext())
+            {
+                ret.result = true;
+                ret.data = "NEEDLOGIN";
+                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
+            }
 
-            string content = string.Empty;
+            BLL.OrgInfoBLL _BLL = new OrgInfoBLL();
 
             if (!string.IsNullOrEmpty(str))
             {
                 ret = _BLL.DeleteByPK(str);
             }
-            content = ret.toJson();
-
             var js = JsonConvert.SerializeObject(ret);
 
             return Json(js, JsonRequestBehavior.AllowGet);

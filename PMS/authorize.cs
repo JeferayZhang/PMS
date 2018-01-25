@@ -10,6 +10,7 @@ namespace PMS
     {
         public static bool checkFilterContext()
         {
+            //return false;
             string[] path = HttpContext.Current.Request.Path.Split('/');
             if (path.Length < 3)
                 return true;
@@ -27,8 +28,6 @@ namespace PMS
             {
                 return false;
             }
-            if (controllername == "HOME")
-                return true;
             int user_id = user._ID;
             if (user_id <= 0)
                 return false;

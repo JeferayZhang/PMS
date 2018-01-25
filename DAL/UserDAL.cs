@@ -28,7 +28,7 @@ namespace DAL
         /// <param name="userRegData_End">用户注册时间范围,截止值</param>
         /// <returns></returns>
         public DataTable GetUser(string userNo, string userName, string sex, string userRole, string userOrg,
-            string IDCard, string userState, string userRegData_Begin, string userRegData_End)
+            string IDCard, string userState, string userRegData_Begin, string userRegData_End,string orgid)
         {
             DataTable dt = new DataTable();
             string sql = @"SELECT ID, USERNO, USERS.NAME, ISNULL(ROLE.ROLENAME, '未知角色') ROLE,
@@ -50,6 +50,12 @@ namespace DAL
 FROM USERS
 LEFT JOIN ORG ON ORG.ORGID = USERS.ORGID
 LEFT JOIN ROLE ON ROLE.ROLEID = USERS.ROLE WHERE 1=1 ";
+            if (!string.IsNullOrEmpty(orgid._ToStrTrim()))
+            {
+                OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
+                string ids = orgInfoDAL.getChilds(orgid);
+                sql += " AND USERS.ORGID in ("+ ids.Substring(0,ids.Length-1) + ")";
+            }
             if (!string.IsNullOrEmpty(userNo._ToStrTrim()))
             {
                 SqlParameter Para = new SqlParameter("USERNO", userNo._ToStrTrim());
@@ -135,7 +141,7 @@ LEFT JOIN ROLE ON ROLE.ROLEID = USERS.ROLE WHERE 1=1 ";
         /// <param name="guid">唯一标识,每次修改数据会同时修改此列</param>
         /// <returns>成功返回空值,否则返回提示</returns>
         public  string UpdateByPK(int ID,string userNo, string userName, string sex, string userRole, string userOrg, 
-            string IDCard, string userState, string guid)
+            string IDCard, string userState, string guid,string Address)
         {
             string res = "";
             try
@@ -188,6 +194,12 @@ LEFT JOIN ROLE ON ROLE.ROLEID = USERS.ROLE WHERE 1=1 ";
                     {
                         sql += " USERNO =@USERNO ,";
                         SqlParameter Para = new SqlParameter("USERNO", userNo._ToStrTrim());
+                        dbhelper.SqlParameterList.Add(Para);
+                    }
+                    if (!string.IsNullOrEmpty(Address._ToStrTrim()))
+                    {
+                        sql += " Address =@Address ,";
+                        SqlParameter Para = new SqlParameter("Address", Address._ToStrTrim());
                         dbhelper.SqlParameterList.Add(Para);
                     }
                     if (ID > 0)

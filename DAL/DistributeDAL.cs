@@ -23,13 +23,18 @@ namespace DAL
         public DataTable GetTableByOrg(string orgid)
         {
             DataTable dt = new DataTable();
-            string sql = @" select sum([Order].OrderNum) as allnums,org.Name OrgName,Doc.Name DocName 
-from [Order]  left join OrderPeople on [Order].PersonID=OrderPeople.ID 
+            string sql = @" SELECT t.BKDH ,org.Name OrgName,Doc.Name DocName ,
+STUFF((SELECT ','+ltrim([order].ID)  FROM [order]    
+  WHERE bkdh=t.bkdh FOR XML PATH('')), 1, 1, '') AS ids,
+  SUM(t.OrderNum)OrderNum
+FROM [order] t  
+left join OrderPeople on t.PersonID=OrderPeople.ID 
 left join Org on org.OrgID=OrderPeople.OrgID
-left join Doc on Doc.bkdh=[Order].bkdh
-where   dateadd(MONTH,[Order].OrderMonths,[Order].Indate)>GETDATE()
-and Org.ParentID=@orgid and not exists(select 1 from log where log.orderid=[Order].id and CONVERT(varchar(100), log.date, 23)=CONVERT(varchar(100), getdate(), 23))
-group by org.Name,Doc.Name ";
+left join Doc on Doc.bkdh=t.bkdh
+where   dateadd(MONTH,t.OrderMonths,t.Indate)>GETDATE()
+and Org.ParentID=@orgid
+and not exists(select 1 from log where log.orderid=t.id and CONVERT(varchar(100), log.date, 23)=CONVERT(varchar(100), getdate(), 23))
+GROUP BY t.BKDH ,org.Name,Doc.Name";
             SqlParameter Para = null;
             Para = new SqlParameter("orgid", orgid._ToInt32());
             dbhelper.SqlParameterList.Add(Para);
@@ -45,13 +50,18 @@ group by org.Name,Doc.Name ";
         public DataTable GetTableByBK(string BKDH)
         {
             DataTable dt = new DataTable();
-            string sql = @" select sum([Order].OrderNum) as allnums,org.Name OrgName,Doc.Name DocName 
-from [Order]  left join OrderPeople on [Order].PersonID=OrderPeople.ID 
+            string sql = @" SELECT t.BKDH ,org.Name OrgName,Doc.Name DocName ,
+STUFF((SELECT ','+ltrim([order].ID)  FROM [order]    
+  WHERE bkdh=t.bkdh FOR XML PATH('')), 1, 1, '') AS ids,
+  SUM(t.OrderNum)OrderNum
+FROM [order] t  
+left join OrderPeople on t.PersonID=OrderPeople.ID 
 left join Org on org.OrgID=OrderPeople.OrgID
-left join Doc on Doc.bkdh=[Order].bkdh
-where   dateadd(MONTH,[Order].OrderMonths,[Order].Indate)>GETDATE()
-and [Order].BKDH=@BKDH and not exists(select 1 from log where log.orderid=[Order].id and CONVERT(varchar(100), log.date, 23)=CONVERT(varchar(100), getdate(), 23))
-group by org.Name,Doc.Name ";
+left join Doc on Doc.bkdh=t.bkdh
+where   dateadd(MONTH,t.OrderMonths,t.Indate)>GETDATE()
+and t.BKDH=@BKDH
+and not exists(select 1 from log where log.orderid=t.id and CONVERT(varchar(100), log.date, 23)=CONVERT(varchar(100), getdate(), 23))
+GROUP BY t.BKDH ,org.Name,Doc.Name";
             SqlParameter Para = null;
             Para = new SqlParameter("BKDH", BKDH);
             dbhelper.SqlParameterList.Add(Para);

@@ -27,17 +27,17 @@ namespace BLL
         /// <param name="dt2">录入时间</param>
         /// <returns>data为DataTable</returns>
         public PageModel GetSubscriber(int ID, string OrderNo, string UnitName, string name, int OrgID,
-            string dt1, string dt2, int pageLimit = 1, int pageIndex = 0)
+            string dt1, string dt2,string oporgid, int pageLimit = 1, int pageIndex = 0)
         {
             PageModel pg = new PageModel();
             try
             {
-                DataTable dt = dal.GetSubscriber(ID, OrderNo, UnitName, name, OrgID, dt1, dt2, pageLimit, pageIndex);
+                DataTable dt = dal.GetSubscriber(ID, OrderNo, UnitName, name, OrgID, dt1, dt2, oporgid, pageLimit, pageIndex);
                 if (dt.Rows.Count > 0 && dt != null)
                 {
                     pg.code = 0;
                     pg.msg = "";
-                    pg.count = dal.GetCount(ID, OrderNo, UnitName, name, OrgID, dt1, dt2);
+                    pg.count = dal.GetCount(ID, OrderNo, UnitName, name, OrgID, dt1, dt2, oporgid);
                     pg.data = dt;
                 }
                 else

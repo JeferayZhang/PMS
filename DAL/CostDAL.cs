@@ -33,7 +33,8 @@ a.moneypayed,CONVERT(varchar(100), a.updatetime, 23)updatetime,d.NAME updateuser
 b.indate,b.ordermonths,
 ROW_NUMBER() over (order by a.ID) as rownumber ,
 case isnull(b.state,0) when 0 then '正常' when -1 then '退订' when 1 then '过期' end as OrderState,
-case ISNULL(a.state,0) when 0 then '已缴清' when '1' then '未缴清' end as CostState from cost a
+case ISNULL(a.state,0) when 0 then '已缴清' when '1' then '未缴清' when -1 then '退订未处理' when '-2' then '退订已处理' 
+end as CostState from cost a
 left join [Order] b on a.orderid=b.ID
 left join OrderPeople c on b.PersonID=c.ID
 left join USERS d on a.updateuser=d.ID ", pagesize);
@@ -59,7 +60,7 @@ left join USERS d on a.updateuser=d.ID ", pagesize);
             {
                 SqlParameter Para = new SqlParameter("state", state._ToInt32());
                 dbhelper.SqlParameterList.Add(Para);
-                sql += " AND  state=@state";
+                sql += " AND  a.state=@state";
             }
             if (!string.IsNullOrEmpty(unitname._ToStrTrim()))
             {
@@ -144,7 +145,13 @@ left join USERS d on a.updateuser=d.ID  ");
                     Para = new SqlParameter("id", id);
                     dbhelper.SqlParameterList.Add(Para);
                     int num = dbhelper.ExecuteNonQuery(tran, sql);
+                    //更新费用已缴清的状态为0
                     sql = "update cost set state=0 where id=@id and money=moneypayed";
+                    Para = new SqlParameter("id", id._ToInt32());
+                    dbhelper.SqlParameterList.Add(Para);
+                    num = dbhelper.ExecuteNonQuery(tran, sql);
+                    //更新退订记录 ,费用已结清的状态为-2
+                    sql = "update cost set state=-2 where id=@id and moneypayed=0 and state=-1";
                     Para = new SqlParameter("id", id._ToInt32());
                     dbhelper.SqlParameterList.Add(Para);
                     num = dbhelper.ExecuteNonQuery(tran, sql);
@@ -160,7 +167,7 @@ left join USERS d on a.updateuser=d.ID  ");
             return res;
         }
 
-        public string UpdateStateByPK(string ids)
+        public string UpdateStateByPK(string ids, string state = "0")
         {
             string res = "";
             SqlConnection conn = new SqlConnection(dbhelper.SqlConnectionString);
@@ -173,7 +180,9 @@ left join USERS d on a.updateuser=d.ID  ");
                     string[] pk = ids.Split(',');
                     foreach (string item in pk)
                     {
-                        string sql = "update cost set state=0 where id=@id";
+                        string sql = "update cost set state=@state where id=@id";
+                        Para = new SqlParameter("state", state._ToInt32());
+                        dbhelper.SqlParameterList.Add(Para);
                         Para = new SqlParameter("id", item._ToInt32());
                         dbhelper.SqlParameterList.Add(Para);
                         int num = dbhelper.ExecuteNonQuery(tran, sql);

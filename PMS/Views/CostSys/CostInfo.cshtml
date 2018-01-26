@@ -14,16 +14,16 @@
                     url: '/CostSys/CostInfos/',
                     cols: [[
                         { type: 'checkbox' },
-                        { field: 'id',  title: '缴费记录流水号', sort: true },
+                        { field: 'id',  title: '费用流水号', sort: true },
                         { field: 'OrderNo', align: 'center', title: '单位编码', sort: true },
                         { field: 'UnitName', align: 'center', title: '单位名称', sort: true },
                         { field: 'indate', align: 'center', title: '起订日期' },
                         { field: 'ordermonths', align: 'center', title: '订购月数' },
                         { field: 'money', align: 'center', title: '应缴费用' },
                         { field: 'moneypayed', align: 'center', title: '已缴费用' },
-                        { field: 'updatetime', align: 'center', title: '上次更新时间', sort: true },
-                        { field: 'updateuser', align: 'center', title: '上次更新人' },
-                        { field: 'state', align: 'center', title: '状态' }
+                        { field: 'updatetime', align: 'center', title: '更新时间', sort: true },
+                        { field: 'updateuser', align: 'center', title: '更新人' },
+                        { field: 'CostState', align: 'center', title: '缴费状态' }
                     ]],
                     page: true,
                     id: 'testReload'
@@ -31,7 +31,7 @@
                 var $ = layui.$, active = {
                     reload: function () {
                         var OrderID = $('#OrderID').val();
-                        var State = $('#State').val();
+                        var State = $('#CostState').val();
                         var OrderNo = $('#OrderNo').val();
                         var UnitName = $('#UnitName').val();
                         //执行重载
@@ -66,56 +66,27 @@
                 form.render();
                 //缴费
                 $("#edit").click(function () {
-                    var addeditcode = $("[name=table_ck]:checked:eq(0)").val();
-                    if ($("#t_UserInfo").find("[name=table_ck]:checked").length == 0) {
+                    var checkStatus = table.checkStatus('testReload')
+                         , data = checkStatus.data;
+                    if (data.length == 0 || data.length == undefined) {
                         layer.open({
                             title: '提示', content: '请勾选需要进行操作的数据!', time: 2000
                         });
-                        return;
+                        return false;
                     }
                     layer.open({
                         type: 2,
-                        title: '修改用户',
+                        title: '费用处理',
                         closeBtn: 1,
                         shade: [0],
-                        area: ['700px', '550px'],
+                        area: ['700px', '380px'],
                         anim: 2,
                         moveOut: true,
-                        content: ['/BasicSys/UserInfo_AddEdit?addeditcode=' + addeditcode, 'no'],//iframe的url，no代表不显示滚动条
+                        content: ['/OrderSys/Order_AddEdit?addeditcode=' + addeditcode, 'no'],//iframe的url，no代表不显示滚动条
                         end: function () {
                             $("#search").click();
                         }
                     });
-                });
-                //批量删除
-                $("#delete").click(function () {
-                    if ($("#t_UserInfo").find("[name=table_ck]:checked").length == 0) {
-                        layer.open({
-                            title: '提示', content: '请勾选需要进行操作的数据!',time:2000
-                        });
-                        return;
-                    }
-                    var delkeys = "";
-                    $("#t_UserInfo").find("[name=table_ck]:checked").each(function () {
-                        delkeys += $(this).val() + ",";
-                    });
-                    delkeys = delkeys.substring(0, delkeys.length - 1);
-                    var senddata = { str: delkeys };
-                    ajaxHelper.post("/BasicSys/UserInfo_Deletes/", senddata, function (da) {
-                        var jsonObj = JSON.parse(da);
-                        if (jsonObj.result) {
-                            layer.open({
-                                title: '提示', content: jsonObj.data, time: 2000
-                            });
-                            $("#search").click();
-                        }
-                        else {
-                            layer.open({
-                                title: '提示', content: jsonObj.result, time: 2000
-                            });
-                        }
-                    });
-                    return false;
                 });
             });
         })
@@ -137,12 +108,14 @@
         </div>
     </div>
     <div class=" layui-form-item">
-        <label class="layui-form-label">状态</label>
+        <label class="layui-form-label">缴费状态</label>
         <div class="layui-input-inline">
-            <select id="State" style="width:150px;" name="State">
+            <select id="CostState" style="width:150px;" name="CostState">
                 <option value="">请选择状态</option>
-                <option value="0">已交清</option>
-                <option value="1">未交清</option>
+                <option value="0">已缴清</option>
+                <option value="1">未缴清</option>
+                <option value="-1">退订未处理</option>
+                <option value="-2">退订已处理</option>
             </select>
         </div>
         <button class="layui-btn layui-btn-normal" data-type="reload" type="button">
@@ -153,9 +126,6 @@
         </button>
         <button class="layui-btn layui-btn-danger" type="button" id="delete">
             全部置为已缴
-        </button>
-        <button class="layui-btn layui-btn-danger" type="button" id="delete">
-            删除
         </button>
     </div>
 </form>

@@ -42,11 +42,7 @@ namespace PMS.Controllers
                 return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
             }
             BLL.OrderInfoBLL _BLL = new OrderInfoBLL();
-
-            JObject o = null;
             PMS.Models.UserModel userModel = Session["UserModel"] as PMS.Models.UserModel;
-            string content = string.Empty;
-
             string OrgID = "";
             if (Province._ToInt32() > 0)
             {
@@ -64,8 +60,8 @@ namespace PMS.Controllers
             {
                 OrgID = CompanyUnderArea;
             }
-            PageModel pg = _BLL.GetOrderInfo(0, BKDH, OrderNo, UnitName, test1, test2, userModel.OrgID._ToStr(),OrgID,OrderState,CostState, limit, page);
-
+            PageModel pg = _BLL.GetOrderInfo(0, BKDH, OrderNo, UnitName, test1, test2, 
+                userModel.OrgID._ToStr(),OrgID,OrderState,CostState, limit, page);
             var js = JsonConvert.SerializeObject(pg);
             return Content(js);
         }
@@ -115,10 +111,7 @@ namespace PMS.Controllers
             PMS.Models.UserModel userModel = Session["UserModel"] as PMS.Models.UserModel;
             int userid = userModel._ID;
             BLL.OrderInfoBLL _BLL = new OrderInfoBLL();
-            JObject o = null;
-
-            string content = string.Empty;
-            
+            JObject o = null;            
             if (!string.IsNullOrEmpty(str))
             {
                 o = JObject.Parse(str);
@@ -129,6 +122,7 @@ namespace PMS.Controllers
                 string Month = o["Month"]._ToStrTrim();
                 string OrderNum = o["OrderNumber"]._ToStrTrim();
                 string PersonID = o["OrderPeople"]._ToStrTrim();
+                string Poster = o["Poster"]._ToStrTrim();
                 string BKDH = o["NewspaperName"]._ToStrTrim();
                 string FullPrice = o["FullPrice"]._ToStrTrim();
                 string MoneyPayed = o["Pay"]._ToStrTrim();
@@ -141,7 +135,8 @@ namespace PMS.Controllers
                     {
                         try
                         {
-                            ret = _BLL.Insert(tran, BKDH, PersonID._ToInt32(), OrderNum._ToInt32(), Month._ToInt32(), System.DateTime.Now.ToShortDateString(), userid._ToStr(), 0);
+                            ret = _BLL.Insert(tran, BKDH, PersonID._ToInt32(), OrderNum._ToInt32(), Month._ToInt32(),
+                                System.DateTime.Now.ToShortDateString(), userid._ToStr(), Poster._ToInt32());
                             tran.Commit();
                         }
                         catch (Exception ex)
@@ -155,7 +150,8 @@ namespace PMS.Controllers
                 }
                 else
                 {
-                    ret = _BLL.UpdateByPK(ID._ToInt32(), Month._ToInt32(), OrderNum._ToInt32(), BKDH, PersonID._ToInt32(), userid, NGUID);
+                    ret = _BLL.UpdateByPK(ID._ToInt32(), Month._ToInt32(), OrderNum._ToInt32(), BKDH,
+                        PersonID._ToInt32(), userid, Poster._ToInt32(), NGUID);
                     if (ret.result)
                     {
                         CostBLL costBLL = new CostBLL();
@@ -163,8 +159,6 @@ namespace PMS.Controllers
                     }
                 }                
             }
-            content = ret.toJson();
-
             var js = JsonConvert.SerializeObject(ret);
 
             return Json(js, JsonRequestBehavior.AllowGet);

@@ -15,6 +15,8 @@ namespace DAL
     public class OrderInfoDAL
     {
         SqlHelp dbhelper = new SqlHelp();
+
+        #region 查询
         /// <summary>
         /// 查询
         /// </summary>
@@ -29,19 +31,19 @@ namespace DAL
         /// <param name="pageindex">页码</param>
         /// <returns></returns>
         public DataTable GetOrderInfo(int id, string BKDH, string OrderNo, string unitname, string dt1, string dt2,
-            int pagesize, int pageindex, string orgid, string chooseorg, string orderstate, string coststate) 
+            int pagesize, int pageindex, string orgid, string chooseorg, string orderstate, string coststate)
         {
             DataTable dt = new DataTable();
             string top = "";
             if (pagesize > 0)
             {
-                top = "top "+ pagesize;
+                top = "top " + pagesize;
             }
-            string sql = string.Format(@"select "+ top + @" * from (
+            string sql = string.Format(@"select " + top + @" * from (
 select a.ID ,b.Name docname ,a.BKDH,c.UnitName,c.Name ToUser,a.OrderDate,a.OrderMonths,
 a.OrderNum,CONVERT(varchar(100), a.Indate, 23) Indate,a.PosterID,d.Name as GetUser,e.NAME as InUser ,a.PersonID,a.NGUID,Cost.Money,Cost.MoneyPayed,Cost.ID as CostID,
 ROW_NUMBER() over (order by a.ID) as rownumber,b.Price, case isnull(a.state,0) when 0 then '正常' when -1 then '退订' when 1 then '过期' end as OrderState,
-case ISNULL(Cost.state,0) when 0 then '已缴清' when '1' then '未缴清' end as CostState
+case ISNULL(Cost.state,0) when 0 then '已缴清' when '1' then '未缴清' when -1 then '退订未处理' when '-2' then '退订已处理' end as CostState
 from [Order]  a 
 inner join dbo.OrderPeople c on a.PersonID=c.ID
 left join Cost on Cost.OrderID=a.ID
@@ -121,7 +123,7 @@ where 1=1 ");
 
 
         public int GetCount(int id, string BKDH, string OrderNo, string unitname,
-            string dt1, string dt2, string orgid, string chooseorg, string orderstate, string coststate) 
+            string dt1, string dt2, string orgid, string chooseorg, string orderstate, string coststate)
         {
             string sql = string.Format(@"
 select count(1) as num
@@ -200,24 +202,26 @@ where 1=1 ");
             }
             int num = dbhelper.Count(sql);
             return num;
-        }
+        } 
+        #endregion
 
+        #region 更新订购记录
         /// <summary>
-        /// 
+        /// 更新订购记录
         /// </summary>
         /// <param name="ID"></param>
         /// <param name="ordernum"></param>
         /// <param name="months"></param>
         /// <param name="guid"></param>
         /// <returns></returns>
-        public string update(int ID, int ordernum, int months, string guid, string bkdh, int PersonID, int ModifyUser) 
+        public string update(int ID, int ordernum, int months, string guid, string bkdh, int PersonID, int ModifyUser, int PosterID)
         {
             string res = check(ID, guid);
             if (!string.IsNullOrEmpty(res))
             {
                 return res;
             }
-            
+
             SqlConnection conn = new SqlConnection(dbhelper.SqlConnectionString);
             conn.Open();
             using (SqlTransaction tran = conn.BeginTransaction())
@@ -226,7 +230,7 @@ where 1=1 ");
                 {
                     SqlParameter Para = null;
                     string sql = @"update [order] set ordernum=@ordernum,ordermonths=@ordermonths,nguid=newid() ,
-bkdh = @bkdh,PersonID = @PersonID,ModifyDate = GETDATE(),ModifyUser = @ModifyUser where id=@id";
+bkdh = @bkdh,PersonID = @PersonID,ModifyDate = GETDATE(),ModifyUser = @ModifyUser,PosterID=@PosterID where id=@id";
                     Para = new SqlParameter("ordernum", ordernum);
                     dbhelper.SqlParameterList.Add(Para);
                     Para = new SqlParameter("ordermonths", months);
@@ -239,6 +243,8 @@ bkdh = @bkdh,PersonID = @PersonID,ModifyDate = GETDATE(),ModifyUser = @ModifyUse
                     dbhelper.SqlParameterList.Add(Para);
                     Para = new SqlParameter("ModifyUser", ModifyUser);
                     dbhelper.SqlParameterList.Add(Para);
+                    Para = new SqlParameter("PosterID", PosterID);
+                    dbhelper.SqlParameterList.Add(Para);
                     int num = dbhelper.ExecuteNonQuery(tran, sql);
                     tran.Commit();
                 }
@@ -250,8 +256,10 @@ bkdh = @bkdh,PersonID = @PersonID,ModifyDate = GETDATE(),ModifyUser = @ModifyUse
             }
             conn.Close();
             return res;
-        }
+        } 
+        #endregion
 
+        #region 退订,会将缴费记录同时更新
         public string TD(string ids, int ModifyUser)
         {
             string res = "";
@@ -272,9 +280,9 @@ ModifyDate = GETDATE(),ModifyUser = @ModifyUser where id=@id and isnull(state,0)
                         Para = new SqlParameter("ModifyUser", ModifyUser);
                         dbhelper.SqlParameterList.Add(Para);
                         int num = dbhelper.ExecuteNonQuery(tran, sql);
-                        if (num>0)
+                        if (num > 0)
                         {
-                            sql = " update cost set moneypayed=moneypayed*-1 where  orderid=@id ";
+                            sql = " update cost set moneypayed=moneypayed*-1,state=-1 where  orderid=@id ";
                             Para = new SqlParameter("id", item);
                             dbhelper.SqlParameterList.Add(Para);
                             num = dbhelper.ExecuteNonQuery(tran, sql);
@@ -290,7 +298,8 @@ ModifyDate = GETDATE(),ModifyUser = @ModifyUser where id=@id and isnull(state,0)
             }
             conn.Close();
             return res;
-        }
+        } 
+        #endregion
         private string check( int ID = 0, string guid = "")
         {
             string sql = @"";
@@ -308,6 +317,7 @@ ModifyDate = GETDATE(),ModifyUser = @ModifyUser where id=@id and isnull(state,0)
             return "";
         }
 
+        #region 新增订购
         /// <summary>
         /// 新增
         /// </summary>
@@ -341,8 +351,8 @@ values(@BKDH,@personid,@userid,@ordernum,@orderdate,@posterid,@ordermonths) ";
                 dbhelper.SqlParameterList.Add(Para);
                 Para = new SqlParameter("ordermonths", ordermonths._ToInt32());
                 dbhelper.SqlParameterList.Add(Para);
-                int num = dbhelper.ExecuteInsert(tran,sql);
-                if (num==0)
+                int num = dbhelper.ExecuteInsert(tran, sql);
+                if (num == 0)
                 {
                     res = "保存失败";
                 }
@@ -357,8 +367,16 @@ values(@BKDH,@personid,@userid,@ordernum,@orderdate,@posterid,@ordermonths) ";
             }
             return res;
         }
+        
+        #endregion
 
-        public string DeleteByPK(string ids) 
+        #region 删除订购
+        /// <summary>
+        /// 删除订购记录,在删除之前验证了缴费记录,如果删除成功,则同时删除缴费记录
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <returns></returns>
+        public string DeleteByPK(string ids)
         {
             string res = "";
             SqlConnection conn = new SqlConnection(dbhelper.SqlConnectionString);
@@ -371,6 +389,12 @@ values(@BKDH,@personid,@userid,@ordernum,@orderdate,@posterid,@ordermonths) ";
                     string[] pk = ids.Split(',');
                     foreach (string item in pk)
                     {
+                        res = check(item);
+                        if (!string.IsNullOrEmpty(res))
+                        {
+                            tran.Rollback();
+                            return res;
+                        }
                         string sql = "delete from  [order] where id=@id";
                         Para = new SqlParameter("id", item._ToInt32());
                         dbhelper.SqlParameterList.Add(Para);
@@ -387,5 +411,23 @@ values(@BKDH,@personid,@userid,@ordernum,@orderdate,@posterid,@ordermonths) ";
             conn.Close();
             return res;
         }
+
+        public string check(string orderid)
+        {
+            string sql = @"";
+            SqlParameter Para = null;
+            if (!string.IsNullOrEmpty(orderid))
+            {
+                sql = @" select 1 from cost where OrderID =@OrderID and moneypayed<>0";
+                Para = new SqlParameter("OrderID", orderid._ToStrTrim());
+                dbhelper.SqlParameterList.Add(Para);
+                if (dbhelper.ExecuteSql(sql).Rows.Count > 0)
+                {
+                    return "订购流水号:" + orderid + "费用非结清!不能删除!";
+                }
+            }
+            return "";
+        } 
+        #endregion
     }
 }

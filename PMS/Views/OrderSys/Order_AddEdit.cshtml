@@ -54,6 +54,13 @@
                         });
                         return false;
                     }
+                    var result = $('#Pay').val().match(/(^[1-9]([0-9]+)?(\.[0-9]{1,2})?$)|(^(0){1}$)|(^[0-9]\.[0-9]([0-9])?$)/);
+                    if (result == null) {
+                        layer.open({
+                            title: '提示', content: '价格格式不正确!', time: 2000
+                        });
+                        return false;
+                    }
                     var ddd = { str: JSON.stringify(data.field) };
                     ajaxHelper.post("/OrderSys/Order_AddEdits/", ddd, function (da) {
                         var jsonObj = JSON.parse(da);
@@ -68,7 +75,7 @@
                         }
                         else {
                             layer.open({
-                                title: '提示', content: jsonObj.result
+                                title: '提示', content: jsonObj.reason, time: 2000
                             });
                         }
 
@@ -253,12 +260,20 @@
     <div class=" layui-form-item">
         <label class="layui-form-label">已缴金额</label>
         <div class="layui-input-inline">
-            <input type="text" id="MoneyPayed" name="MoneyPayed" value="@(dr == null ? "" : dr["MoneyPayed"]._ToStrTrim())" placeholder="" autocomplete="off" class="layui-input" maxlength="50">
+            <input type="text" id="MoneyPayed" readonly name="MoneyPayed" value="@(dr == null ? "" : dr["MoneyPayed"]._ToStrTrim())" placeholder="" autocomplete="off" class="layui-input" maxlength="50">
         </div>
-        <label class="layui-form-label" hidden>缴费</label>
-        <div class="layui-input-inline" hidden>
-            <input type="text" id="Pay" name="Pay" value="0" placeholder="" autocomplete="off" class="layui-input" maxlength="50">
-        </div>
+        @* 只有财务人员才能缴费 *@
+        @if (Session["UserModel"] != null)
+        {
+            PMS.Models.UserModel user = Session["UserModel"] as PMS.Models.UserModel;
+            if (user.Role == 4)
+            {
+                <label class="layui-form-label" hidden>缴费</label>
+                <div class="layui-input-inline" hidden>
+                    <input type="text" id="Pay" name="Pay" value="" placeholder="费用总是正数" autocomplete="off" class="layui-input" maxlength="50">
+                </div>
+            }
+        }
     </div>
     <div class=" layui-form-item">
         <button class="layui-btn" lay-filter="save1" lay-submit="" data-type="save">保存</button>

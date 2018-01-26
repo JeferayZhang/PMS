@@ -41,11 +41,14 @@ USERS.NAME InUser,CONVERT(varchar(100),OrderPeople.INDATE, 23) Indate,
 Org.Name OrgName FROM  OrderPeople
 LEFT JOIN USERS ON OrderPeople.InUser=USERS.ID
 LEFT JOIN Org ON Org.OrgID=OrderPeople.OrgID WHERE 1=1 ");
+            string all = "";
+            string getfrompage = "";
             if (!string.IsNullOrEmpty(orgid._ToStrTrim()))
             {
                 OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
                 string ids = orgInfoDAL.getChilds(orgid);
-                sql += " AND OrderPeople.ORGID in (" + ids.Substring(0, ids.Length - 1) + ")";
+                all = ids.Substring(0, ids.Length - 1);
+                //sql += " AND OrderPeople.ORGID in (" + ids.Substring(0, ids.Length - 1) + ")";
             }
             if (!string.IsNullOrEmpty(OrderNo._ToStrTrim()))
             {
@@ -67,9 +70,11 @@ LEFT JOIN Org ON Org.OrgID=OrderPeople.OrgID WHERE 1=1 ");
             }
             if (OrgID > 0)
             {
-                SqlParameter Para = new SqlParameter("OrgID", OrgID._ToInt32());
-                dbhelper.SqlParameterList.Add(Para);
-                sql += " AND OrderPeople.OrgID =@OrgID";
+                OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
+                string ids = orgInfoDAL.getChilds(OrgID._ToStr());
+                getfrompage = ids.Substring(0, ids.Length - 1);
+                string[] str = getfrompage.Split(',').Intersect(all.Split(',')).ToArray();
+                all = string.Join(",", str);
             }
             if (ID > 0)
             {
@@ -77,6 +82,7 @@ LEFT JOIN Org ON Org.OrgID=OrderPeople.OrgID WHERE 1=1 ");
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND OrderPeople.ID =@ID";
             }
+            sql += " AND OrderPeople.ORGID in (" + all + ")";
             if (!string.IsNullOrEmpty(dt1._ToStrTrim()))
             {
                 SqlParameter Para = new SqlParameter("INDATE1", dt1._ToDateTime());
@@ -92,6 +98,8 @@ LEFT JOIN Org ON Org.OrgID=OrderPeople.OrgID WHERE 1=1 ");
             dt = dbhelper.ExecuteSql(sql + string.Format(") OrderPeople where rownumber > {0} ", (pageIndex - 1) * pageLimit));
             return dt;
         }
+
+        
 
         public int GetCount(int ID, string OrderNo, string UnitName, string name, 
             int OrgID, string dt1, string dt2,string orgid) 

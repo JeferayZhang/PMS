@@ -8,8 +8,8 @@
             var ajaxHelper = new AjaxHelper();
 
 
-            layui.use(['laydate', 'laypage', 'layer', 'element', 'form', 'laytpl'], function () {
-                var laydate = layui.laydate,laypage = layui.laypage, layer = layui.layer, element = layui.element, form = layui.form, $ = layui.jquery, laytpl = layui.laytpl;
+            layui.use(['laydate',  'layer', 'element', 'form', 'laytpl'], function () {
+                var laydate = layui.laydate, layer = layui.layer, element = layui.element, form = layui.form, $ = layui.jquery, laytpl = layui.laytpl;
 
                 var start = {
                     min: laydate.now
@@ -50,15 +50,11 @@
                         }
                         else {
                             $("#t_DocInfo").html("");
-                            layer.open({
-                                title: '提示', content: jsonObj.reason, time: 2000
-                            });
                         }
                         form.render();
                     });
                     return false;
                 });
-
                 //全选
                 form.on('checkbox(allChoose)', function (data) {
                     var child = $(data.elem).parents('table').find('tbody input[type="checkbox"]');
@@ -113,27 +109,31 @@
                         });
                         return;
                     }
-                    var delkeys = "";
-                    $("#t_DocInfo").find("[name=table_ck]:checked").each(function () {
-                        delkeys += $(this).val() + ",";
-                    });
-                    delkeys = delkeys.substring(0, delkeys.length - 1);
-                    var senddata = { str: delkeys };
-                    ajaxHelper.post("/BasicSys/DocInfo_Delete/", senddata, function (da) {
-                        var jsonObj = JSON.parse(da);
-                        if (jsonObj.result) {
-                            layer.open({
-                                title: '提示', content: jsonObj.data, time: 2000
+                    layer.confirm('确认要删除吗？', {
+                        btn: ['是', '否'] //可以无限个按钮
+                        , btn1: function (index, layero) {
+                            var delkeys = "";
+                            $("#t_DocInfo").find("[name=table_ck]:checked").each(function () {
+                                delkeys += $(this).val() + ",";
                             });
-                            $("#search").click();
-                        }
-                        else {
-                            layer.open({
-                                title: '提示', content: jsonObj.reason, time: 2000
+                            delkeys = delkeys.substring(0, delkeys.length - 1);
+                            var senddata = { str: delkeys };
+                            ajaxHelper.post("/BasicSys/DocInfo_Delete/", senddata, function (da) {
+                                var jsonObj = JSON.parse(da);
+                                if (jsonObj.result) {
+                                    layer.open({
+                                        title: '提示', content: jsonObj.data, time: 2000
+                                    });
+                                    $("#search").click();
+                                }
+                                else {
+                                    layer.open({
+                                        title: '提示', content: jsonObj.reason, time: 2000
+                                    });
+                                }
                             });
                         }
-                    });
-                    return false;
+                    });                    
                 });
             });
         })
@@ -186,6 +186,10 @@
                         <label class="layui-form-label">ISSN</label>
                         <div class="layui-input-inline">
                             <input type="text" id="" name="ISSN" autocomplete="off" class="layui-input" maxlength="50" value="">
+                        </div>
+                        <label class="layui-form-label">报刊代号</label>
+                        <div class="layui-input-inline">
+                            <input type="text" id="" name="BKDH" autocomplete="off" class="layui-input" maxlength="50" value="">
                         </div>
                         <label class="layui-form-label">出版地</label>
                         <div class="layui-input-inline">

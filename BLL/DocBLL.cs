@@ -26,10 +26,10 @@ namespace BLL
         /// <param name="DocRegData_Begin">新增报刊时间范围,起始值</param>
         /// <param name="DocRegData_End">新增报刊时间范围,截止值</param>
         /// <returns></returns>
-        public retValue GetDoc(string ID, string TYPEID, string NAME, string ISSN, string PUBLISHAREA, string PUBLISHER, string ADDPERSON, string DocRegData_Begin, string DocRegData_End)
+        public retValue GetDoc(string ID, string TYPEID, string NAME, string ISSN, string PUBLISHAREA, string PUBLISHER, string ADDPERSON, string DocRegData_Begin, string DocRegData_End, string BKDH)
         {
             retValue ret = new retValue();
-            DataTable dt = dal.GetDoc(ID, TYPEID, NAME, ISSN, PUBLISHAREA, PUBLISHER, ADDPERSON, DocRegData_Begin, DocRegData_End);
+            DataTable dt = dal.GetDoc(ID, TYPEID, NAME, ISSN, PUBLISHAREA, PUBLISHER, ADDPERSON, DocRegData_Begin, DocRegData_End, BKDH);
             if (dt != null && dt.Rows.Count > 0)
             {
                 ret.result = true;

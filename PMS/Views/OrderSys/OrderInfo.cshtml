@@ -50,7 +50,8 @@
                         { field: 'OrderMonths', align: 'center', title: '订购月数' },
                         { field: 'Money', align: 'center', title: '总价' },
                         { field: 'MoneyPayed', align: 'center', title: '已缴费用' },
-                        { field: 'State', align: 'center', title: '状态' },
+                        { field: 'OrderState', align: 'center', title: '订购状态' },
+                        { field: 'CostState', align: 'center', title: '缴费状态' },
                         { field: 'GetUser', align: 'center', title: '收订员' },
                         { field: 'InUser', align: 'center', title: '录入员', sort: true },
                         { field: 'Indate', align: 'center', title: '录入时间', sort: true }
@@ -137,6 +138,8 @@
                         var CompanyCity = $('#CompanyCity option:selected').val();
                         var CompanyUnderCity = $('#CompanyUnderCity option:selected').val();
                         var CompanyUnderArea = $('#CompanyUnderArea option:selected').val();
+                        var OrderState = $('#OrderState option:selected').val();
+                        var CostState = $('#CostState option:selected').val();
                         var OrderNo = $('#OrderNo').val();
                         var UnitName = $('#UnitName').val();
                         var BKDH = $('#BKDH').val();
@@ -158,7 +161,9 @@
                               CompanyUnderArea: CompanyUnderArea,
                               OrderNo: OrderNo,
                               UnitName: UnitName,
-                              BKDH: BKDH
+                              BKDH: BKDH,
+                              OrderState: OrderState,
+                              CostState: CostState,
                           }
                         });
                     }
@@ -177,7 +182,7 @@
                         title: '新增订单',
                         closeBtn: 1,
                         shade: [0],
-                        area: ['700px', '350px'],
+                        area: ['700px', '380px'],
                         anim: 2,
                         moveOut: true,
                         content: ['/OrderSys/Order_AddEdit', 'no'],//iframe的url，no代表不显示滚动条
@@ -202,7 +207,7 @@
                         title: '修改订单',
                         closeBtn: 1,
                         shade: [0],
-                        area: ['700px', '350px'],
+                        area: ['700px', '380px'],
                         anim: 2,
                         moveOut: true,
                         content: ['/OrderSys/Order_AddEdit?addeditcode=' + addeditcode, 'no'],//iframe的url，no代表不显示滚动条
@@ -219,24 +224,29 @@
                         layer.open({
                             title: '提示', content: '请勾选需要进行操作的数据!', time: 2000
                         });
-                        return;
+                        return false;
                     }
-                    var senddata = { str: JSON.stringify(data) };
-                    ajaxHelper.post("/OrderSys/Order_Deletes/", senddata, function (da) {
-                        var jsonObj = JSON.parse(da);
-                        if (jsonObj.data == "NEEDLOGIN") {
-                            top.location = "../Account/Login";
-                            return false;
-                        }
-                        if (jsonObj.result) {
-                            layer.open({
-                                title: '提示', content: jsonObj.data, time: 2000
-                            });
-                            $("#search").click();
-                        }
-                        else {
-                            layer.open({
-                                title: '提示', content: jsonObj.reason, time: 2000
+                    layer.confirm('确认要删除吗？', {
+                        btn: ['是', '否'] //可以无限个按钮
+                        , btn1: function (index, layero) {
+                            var senddata = { str: JSON.stringify(data) };
+                            ajaxHelper.post("/OrderSys/Order_Deletes/", senddata, function (da) {
+                                var jsonObj = JSON.parse(da);
+                                if (jsonObj.data == "NEEDLOGIN") {
+                                    top.location = "../Account/Login";
+                                    return false;
+                                }
+                                if (jsonObj.result) {
+                                    layer.open({
+                                        title: '提示', content: jsonObj.data, time: 2000
+                                    });
+                                    $("#search").click();
+                                }
+                                else {
+                                    layer.open({
+                                        title: '提示', content: jsonObj.reason, time: 2000
+                                    });
+                                }
                             });
                         }
                     });
@@ -250,24 +260,29 @@
                         layer.open({
                             title: '提示', content: '请勾选需要进行操作的数据!', time: 2000
                         });
-                        return;
+                        return false;
                     }
-                    var senddata = { str: JSON.stringify(data) };
-                    ajaxHelper.post("/OrderSys/Order_TD/", senddata, function (da) {
-                        var jsonObj = JSON.parse(da);
-                        if (jsonObj.data == "NEEDLOGIN") {
-                            top.location = "../Account/Login";
-                            return false;
-                        }
-                        if (jsonObj.result) {
-                            layer.open({
-                                title: '提示', content: jsonObj.data, time: 2000
-                            });
-                            $("#search").click();
-                        }
-                        else {
-                            layer.open({
-                                title: '提示', content: jsonObj.reason, time: 2000
+                    layer.confirm('确认要退订吗？', {
+                        btn: ['是', '否'] //可以无限个按钮
+                        , btn1: function (index, layero) {
+                            var senddata = { str: JSON.stringify(data) };
+                            ajaxHelper.post("/OrderSys/Order_TD/", senddata, function (da) {
+                                var jsonObj = JSON.parse(da);
+                                if (jsonObj.data == "NEEDLOGIN") {
+                                    top.location = "../Account/Login";
+                                    return false;
+                                }
+                                if (jsonObj.result) {
+                                    layer.open({
+                                        title: '提示', content: jsonObj.data, time: 2000
+                                    });
+                                    $("#search").click();
+                                }
+                                else {
+                                    layer.open({
+                                        title: '提示', content: jsonObj.reason, time: 2000
+                                    });
+                                }
                             });
                         }
                     });
@@ -336,13 +351,29 @@
                         <input type="text" class="layui-input" name="test2" id="test2" placeholder="年-月-日">
                     </div>
                 </div>
-                <label class="layui-form-label">省</label>
+                <label class="layui-form-label">订购状态</label>
                 <div class="layui-input-inline">
-                    <select id="Province"  lay-filter="Province" style="width:150px;" name="Province">
+                    <select id="OrderState" style="width:150px;" name="OrderState">
+                        <option value="">请选择状态</option>
+                        <option value="0">正常</option>
+                        <option value="-1">退订</option>
+                        <option value="1">过期</option>
+                    </select>
+                </div>
+                <label class="layui-form-label">缴费状态</label>
+                <div class="layui-input-inline">
+                    <select id="CostState" style="width:150px;" name="CostState">
+                        <option value="">请选择状态</option>
+                        <option value="0">已缴清</option>
+                        <option value="1">未缴清</option>
                     </select>
                 </div>
             </div>
             <div class="layui-form-item">
+                <label class="layui-form-label">省</label>
+                <div class="layui-input-inline">
+                    <select id="Province" lay-filter="Province" style="width:150px;" name="Province"></select>
+                </div>
                 <label class="layui-form-label">市分公司</label>
                 <div class="layui-input-inline">
                     <select id="CompanyCity" lay-filter="CompanyCity"  style="width:150px;" name="CompanyCity">
@@ -358,13 +389,9 @@
                     <select id="CompanyUnderArea" lay-filter="CompanyUnderArea"  style="width:150px;" name="CompanyUnderArea">
                     </select>
                 </div>
-                <button class="layui-btn" lay-filter="search" lay-submit=""  type="button" id="search" data-type="reload">查询</button>
             </div>
-        </form>
-    </div>
-    <div>
-        <form class="layui-form" style="margin-left: 5px; margin-top: 20px;" action="" method="get" id="mainform">
-            <div class=" layui-form-item">         
+            <div class=" layui-form-item">
+                <button class="layui-btn" lay-filter="search" lay-submit="" type="button" id="search" data-type="reload"><i class="layui-icon">&#xe615;</i>查询</button>
                 <button class="layui-btn layui-btn-warm" type="button" id="add">
                     <i class="layui-icon">&#xe654;</i> 新增
                 </button>
@@ -380,6 +407,11 @@
                 <button type="button" class="layui-btn" name="file" id="file"><i class="layui-icon"></i>批量导入订购</button>
                 <button class="layui-btn test" id="test4">下载导入模板</button>
             </div>
+        </form>
+    </div>
+    <div>
+        <form class="layui-form" style="margin-left: 5px; margin-top: 20px;" action="" method="get" id="mainform">
+            
         </form>
     </div>
     <div>

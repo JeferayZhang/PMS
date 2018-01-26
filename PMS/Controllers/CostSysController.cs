@@ -24,6 +24,13 @@ namespace PMS.Controllers
          [HttpGet]
         public ActionResult CostInfos(int page, int limit, string OrderNo, string OrderID, string State, string UnitName)
         {
+            PageModel ret = new PageModel();
+            if (!authorize.checkFilterContext())
+            {
+                ret.code = 2;
+                ret.msg = "NEEDLOGIN";
+                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
+            }
             BLL.CostBLL _BLL = new CostBLL();
 
             JObject o = null;

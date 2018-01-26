@@ -206,35 +206,40 @@
                         layer.open({
                             title: '提示', content: '请勾选需要进行操作的数据!', time: 2000
                         });
-                        return;
+                        return false;
                     }
-                    var senddata = { str: JSON.stringify(data) };
-                    ajaxHelper.post("/OrderSys/OrderPeopleInfo_Deletes/", senddata, function (da) {
-                        var jsonObj = JSON.parse(da);
-                        if (jsonObj.data == "NEEDLOGIN") {
-                            top.location = "../Account/Login";
+                    layer.confirm('确认要删除吗？', {
+                        btn: ['是', '否'] //可以无限个按钮
+                        , btn1: function (index, layero) {
+                            var senddata = { str: JSON.stringify(data) };
+                            ajaxHelper.post("/OrderSys/OrderPeopleInfo_Deletes/", senddata, function (da) {
+                                var jsonObj = JSON.parse(da);
+                                if (jsonObj.msg == "NEEDLOGIN") {
+                                    top.location = "../Account/Login";
+                                    return false;
+                                }
+                                if (jsonObj.result) {
+                                    layer.open({
+                                        title: '提示', content: jsonObj.data, time: 2000
+                                    });
+                                    $("#search").click();
+                                }
+                                else {
+                                    layer.open({
+                                        title: '提示', content: jsonObj.reason, time: 2000
+                                    });
+                                }
+                            });
                             return false;
                         }
-                        if (jsonObj.result) {
-                            layer.open({
-                                title: '提示', content: jsonObj.data, time: 2000
-                            });
-                            $("#search").click();
-                        }
-                        else {
-                            layer.open({
-                                title: '提示', content: jsonObj.reason, time: 2000
-                            });
-                        }
                     });
-                    return false;
                 });
             });
         })
     </script>
 }
 <script id="orginfo" type="text/html">
-    <option value="">请选择</option>
+    <option value="0">请选择</option>
     {{#  layui.each(d, function(index, item){ }}
     <option value="{{item.OrgID}}">{{item.Name}}</option>
     {{#  }); }}

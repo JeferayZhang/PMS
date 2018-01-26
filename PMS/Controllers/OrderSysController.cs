@@ -32,21 +32,39 @@ namespace PMS.Controllers
         [HttpGet]
         public ActionResult OrderInfos(int page, int limit, string test1, string test2,
             string Province, string CompanyCity, string CompanyUnderCity,
-            string CompanyUnderArea, string OrderNo, string UnitName, string BKDH)
+            string CompanyUnderArea, string OrderNo, string UnitName, string BKDH, string OrderState, string CostState)
         {
+            PageModel ret = new PageModel();
+            if (!authorize.checkFilterContext())
+            {
+                ret.code = 2;
+                ret.msg = "NEEDLOGIN";
+                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
+            }
             BLL.OrderInfoBLL _BLL = new OrderInfoBLL();
 
             JObject o = null;
             PMS.Models.UserModel userModel = Session["UserModel"] as PMS.Models.UserModel;
             string content = string.Empty;
 
-            string OrgID = CompanyUnderArea == "" ? (CompanyUnderCity == "" ?
-                    (CompanyCity == "" ?
-                    Province :
-                    CompanyCity) :
-                    CompanyUnderCity) :
-                    CompanyUnderArea;
-            PageModel pg = _BLL.GetOrderInfo(0, BKDH, OrderNo, UnitName, test1, test2, userModel.OrgID._ToStr(), limit, page);
+            string OrgID = "";
+            if (Province._ToInt32() > 0)
+            {
+                OrgID = Province;
+            }
+            if (CompanyCity._ToInt32() > 0)
+            {
+                OrgID = CompanyCity;
+            }
+            if (CompanyUnderCity._ToInt32() > 0)
+            {
+                OrgID = CompanyUnderCity;
+            }
+            if (CompanyUnderArea._ToInt32() > 0)
+            {
+                OrgID = CompanyUnderArea;
+            }
+            PageModel pg = _BLL.GetOrderInfo(0, BKDH, OrderNo, UnitName, test1, test2, userModel.OrgID._ToStr(),OrgID,OrderState,CostState, limit, page);
 
             var js = JsonConvert.SerializeObject(pg);
             return Content(js);
@@ -60,11 +78,19 @@ namespace PMS.Controllers
         /// <returns></returns>
         public ActionResult Order_AddEdit()
         {
+            PageModel ret = new PageModel();
+            if (!authorize.checkFilterContext())
+            {
+                ret.code = 2;
+                ret.msg = "NEEDLOGIN";
+                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
+            }
+            PMS.Models.UserModel userModel = Session["UserModel"] as PMS.Models.UserModel;
             int addeditcode = Request["addeditcode"]._ToInt32();
             if (addeditcode > 0)
             {
                 BLL.OrderInfoBLL _BLL = new BLL.OrderInfoBLL();
-                PageModel pg = _BLL.GetOrderInfo(addeditcode, "", "", "","", "", "");
+                PageModel pg = _BLL.GetOrderInfo(addeditcode, "", "", "", "", "", userModel.OrgID._ToStr(), "","","");
                 ViewData.Model = pg;
             }
             else
@@ -79,12 +105,6 @@ namespace PMS.Controllers
         [HttpPost]
         public ActionResult Order_AddEdits(string str)
         {
-            PMS.Models.UserModel userModel = Session["UserModel"] as PMS.Models.UserModel;
-            int userid = userModel._ID;
-            BLL.OrderInfoBLL _BLL = new OrderInfoBLL();
-            JObject o = null;
-
-            string content = string.Empty;
             retValue ret = new retValue();
             if (!authorize.checkFilterContext())
             {
@@ -92,7 +112,13 @@ namespace PMS.Controllers
                 ret.data = "NEEDLOGIN";
                 return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
             }
+            PMS.Models.UserModel userModel = Session["UserModel"] as PMS.Models.UserModel;
+            int userid = userModel._ID;
+            BLL.OrderInfoBLL _BLL = new OrderInfoBLL();
+            JObject o = null;
 
+            string content = string.Empty;
+            
             if (!string.IsNullOrEmpty(str))
             {
                 o = JObject.Parse(str);
@@ -100,19 +126,42 @@ namespace PMS.Controllers
                 string ID = o["ID"]._ToStrTrim();
                 string NGUID = o["NGUID"]._ToStrTrim();
                 string CostID = o["CostID"]._ToStrTrim();
-                string DocID = o["DocID"]._ToStrTrim();
                 string Month = o["Month"]._ToStrTrim();
-                string OrderNum = o["OrderNum"]._ToStrTrim();
-                string PersonID = o["PersonID"]._ToStrTrim();
-                string BKDH = o["BKDH"]._ToStrTrim();
+                string OrderNum = o["OrderNumber"]._ToStrTrim();
+                string PersonID = o["OrderPeople"]._ToStrTrim();
+                string BKDH = o["NewspaperName"]._ToStrTrim();
                 string FullPrice = o["FullPrice"]._ToStrTrim();
                 string MoneyPayed = o["Pay"]._ToStrTrim();
-                ret = _BLL.UpdateByPK(ID._ToInt32(), Month._ToInt32(), OrderNum._ToInt32(), BKDH, PersonID._ToInt32(), userid, NGUID);
-                if (ret.result)
+                if (string.IsNullOrEmpty(ID))
                 {
-                    CostBLL costBLL = new CostBLL();
-                    costBLL.UpdateByPK(CostID._ToInt32(), FullPrice._ToDecimal(), MoneyPayed._ToDecimal(), userid);
+                    SqlHelp dbhelper = new SqlHelp();
+                    SqlConnection conn = new SqlConnection(dbhelper.SqlConnectionString);
+                    conn.Open();
+                    using (SqlTransaction tran = conn.BeginTransaction())
+                    {
+                        try
+                        {
+                            ret = _BLL.Insert(tran, BKDH, PersonID._ToInt32(), OrderNum._ToInt32(), Month._ToInt32(), System.DateTime.Now.ToShortDateString(), userid._ToStr(), 0);
+                            tran.Commit();
+                        }
+                        catch (Exception ex)
+                        {
+                            ret.result = false;
+                            ret.reason = ex.Message;
+                            tran.Rollback();
+                            throw;
+                        }
+                    }
                 }
+                else
+                {
+                    ret = _BLL.UpdateByPK(ID._ToInt32(), Month._ToInt32(), OrderNum._ToInt32(), BKDH, PersonID._ToInt32(), userid, NGUID);
+                    if (ret.result)
+                    {
+                        CostBLL costBLL = new CostBLL();
+                        costBLL.UpdateByPK(CostID._ToInt32(), FullPrice._ToDecimal(), MoneyPayed._ToDecimal(), userid);
+                    }
+                }                
             }
             content = ret.toJson();
 
@@ -427,13 +476,24 @@ namespace PMS.Controllers
 
             string content = string.Empty;
             Models.UserModel user = Session["UserModel"] as Models.UserModel;
-            string OrgID = CompanyUnderArea == "" ? (CompanyUnderCity == "" ?
-                    (CompanyCity == "" ?
-                    Province :
-                    CompanyCity) :
-                    CompanyUnderCity) :
-                    CompanyUnderArea;
-            PageModel pg = _SubscriberBLL.GetSubscriber(0, OrderNo, Name, "", OrgID._ToInt32(), test1, test2, user._ID._ToStr(), limit, page);
+            string OrgID = "";
+            if (Province._ToInt32() > 0)
+            {
+                OrgID = Province;
+            }
+            if (CompanyCity._ToInt32()>0)
+            {
+                OrgID = CompanyCity;
+            }
+            if (CompanyUnderCity._ToInt32() > 0)
+            {
+                OrgID = CompanyUnderCity;
+            }
+            if (CompanyUnderArea._ToInt32() > 0)
+            {
+                OrgID = CompanyUnderArea;
+            }
+            PageModel pg = _SubscriberBLL.GetSubscriber(0, OrderNo, Name, "", OrgID._ToInt32(), test1, test2, user.OrgID._ToStr(), limit, page);
             var js = JsonConvert.SerializeObject(pg);
             return Content(js);
         }
@@ -452,7 +512,7 @@ namespace PMS.Controllers
             }
             Models.UserModel user = Session["UserModel"] as Models.UserModel;
             BLL.SubscriberBLL _SubscriberBLL = new SubscriberBLL();
-            PageModel pg = _SubscriberBLL.GetSubscriber(0, "", "", "", 0, "", "", user._ID._ToStr(), 0, 0);
+            PageModel pg = _SubscriberBLL.GetSubscriber(0, "", "", "", 0, "", "", user.OrgID._ToStr(), 0, 0);
             var js = JsonConvert.SerializeObject(pg);
             return Json(js, JsonRequestBehavior.AllowGet);
         }
@@ -470,7 +530,7 @@ namespace PMS.Controllers
             if (addeditcode > 0)
             {
                 BLL.SubscriberBLL _SubscriberBLL = new SubscriberBLL();
-                PageModel pg = _SubscriberBLL.GetSubscriber(addeditcode, "", "", "", 0, "", "", user._ID._ToStr());
+                PageModel pg = _SubscriberBLL.GetSubscriber(addeditcode, "", "", "", 0, "", "", user.OrgID._ToStr());
                 ViewData.Model = pg;
             }
             else

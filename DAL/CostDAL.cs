@@ -32,7 +32,8 @@ select a.id,a.orderid,c.UnitName,c.OrderNo,a.money,
 a.moneypayed,CONVERT(varchar(100), a.updatetime, 23)updatetime,d.NAME updateuser ,
 b.indate,b.ordermonths,
 ROW_NUMBER() over (order by a.ID) as rownumber ,
-case a.state when 1 then '未缴清' when 0 then'已缴清' else '异常状态' end as state from cost a
+case isnull(b.state,0) when 0 then '正常' when -1 then '退订' when 1 then '过期' end as OrderState,
+case ISNULL(a.state,0) when 0 then '已缴清' when '1' then '未缴清' end as CostState from cost a
 left join [Order] b on a.orderid=b.ID
 left join OrderPeople c on b.PersonID=c.ID
 left join USERS d on a.updateuser=d.ID ", pagesize);

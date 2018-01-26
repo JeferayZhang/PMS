@@ -74,15 +74,10 @@
                     var ddd = { str: parentid }
                     ajaxHelper.post("/BasicSys/OrgInfos/", ddd, function (da) {
                         var jsonObj = JSON.parse(da);
-                        var getTpl = $("#tuserinfo").html()
-                            , view = $("#t_UserInfo");
                         var getTpl2 = $("#orginfo").html()
                             , view2 = $("#" + elem + "");
                         if (jsonObj.result) {
                             if (jsonObj.data.length > 0) {
-                                laytpl(getTpl).render(jsonObj.data, function (a) {
-                                    $(view).html(a);
-                                });
                                 laytpl(getTpl2).render(jsonObj.data, function (a2) {
                                     $(view2).html(a2);
                                 });
@@ -101,7 +96,6 @@
                     document.getElementById('CompanyUnderArea').innerHTML = "";
                     $("#CompanyUnderCity").empty();
                     $("#CompanyUnderArea").empty();
-                    $("#t_UserInfo").html("");
                     var parentid = $("#Province option:selected").val();
                     if (parentid == "") {
                         return false;
@@ -114,7 +108,6 @@
                 form.on('select(CompanyCity)', function (data) {
                     $("#CompanyUnderCity").html("");
                     $("#CompanyUnderArea").html("");
-                    $("#t_UserInfo").html("");
                     var parentid = $("#CompanyCity option:selected").val();
                     if (parentid == "") {
                         return false;
@@ -124,7 +117,6 @@
                 });
                 form.on('select(CompanyUnderCity)', function (data) {
                     $("#CompanyUnderArea").html("");
-                    $("#t_UserInfo").html("");
                     var parentid = $("#CompanyUnderCity option:selected").val();
                     if (parentid == "") {
                         return false;
@@ -187,29 +179,34 @@
                         layer.open({
                             title: '提示', content: '请勾选需要进行操作的数据!',time:2000
                         });
-                        return;
+                        return false; 
                     }
-                    var delkeys = "";
-                    $("#t_UserInfo").find("[name=table_ck]:checked").each(function () {
-                        delkeys += $(this).val() + ",";
-                    });
-                    delkeys = delkeys.substring(0, delkeys.length - 1);
-                    var senddata = { str: delkeys };
-                    ajaxHelper.post("/BasicSys/UserInfo_Deletes/", senddata, function (da) {
-                        var jsonObj = JSON.parse(da);
-                        if (jsonObj.data == "NEEDLOGIN") {
-                            top.location = "../Account/Login";
-                            return false;
-                        }
-                        if (jsonObj.result) {
-                            layer.open({
-                                title: '提示', content: jsonObj.data, time: 2000
+                    layer.confirm('确认要删除吗？', {
+                        btn: ['是', '否'] //可以无限个按钮
+                        , btn1: function (index, layero) {
+                            var delkeys = "";
+                            $("#t_UserInfo").find("[name=table_ck]:checked").each(function () {
+                                delkeys += $(this).val() + ",";
                             });
-                            $("#search").click();
-                        }
-                        else {
-                            layer.open({
-                                title: '提示', content: jsonObj.reason, time: 2000
+                            delkeys = delkeys.substring(0, delkeys.length - 1);
+                            var senddata = { str: delkeys };
+                            ajaxHelper.post("/BasicSys/UserInfo_Deletes/", senddata, function (da) {
+                                var jsonObj = JSON.parse(da);
+                                if (jsonObj.data == "NEEDLOGIN") {
+                                    top.location = "../Account/Login";
+                                    return false;
+                                }
+                                if (jsonObj.result) {
+                                    layer.open({
+                                        title: '提示', content: jsonObj.data, time: 2000
+                                    });
+                                    $("#search").click();
+                                }
+                                else {
+                                    layer.open({
+                                        title: '提示', content: jsonObj.reason, time: 2000
+                                    });
+                                }
                             });
                         }
                     });
@@ -219,32 +216,37 @@
                 $("#updatestate").click(function () {
                     if ($("#t_UserInfo").find("[name=table_ck]:checked").length == 0) {
                         layer.open({
-                            title: '提示', content: '请勾选需要进行操作的数据!'
+                            title: '提示', content: '请勾选需要进行操作的数据!', time: 2000
                         });
                         return;
                     }
-                    var delkeys = "";
-                    $("#t_UserInfo").find("[name=table_ck]:checked").each(function () {
-                        delkeys += $(this).val() + ",";
-                    });
-                    delkeys = delkeys.substring(0, delkeys.length - 1);
-                    var senddata = { str: delkeys };
-                    ajaxHelper.post("/BasicSys/UserInfo_Update/", senddata, function (da) {
-                        var jsonObj = JSON.parse(da);
-                        var jsonObj = JSON.parse(da);
-                        if (jsonObj.data == "NEEDLOGIN") {
-                            top.location = "../Account/Login";
-                            return false;
-                        }
-                        if (jsonObj.result) {
-                            layer.open({
-                                title: '提示', content: jsonObj.data, time: 2000
+                    layer.confirm('确认要注销吗？', {
+                        btn: ['是', '否'] //可以无限个按钮
+                        , btn1: function (index, layero) {
+                            var delkeys = "";
+                            $("#t_UserInfo").find("[name=table_ck]:checked").each(function () {
+                                delkeys += $(this).val() + ",";
                             });
-                            $("#search").click();
-                        }
-                        else {
-                            layer.open({
-                                title: '提示', content: jsonObj.reason, time: 2000
+                            delkeys = delkeys.substring(0, delkeys.length - 1);
+                            var senddata = { str: delkeys };
+                            ajaxHelper.post("/BasicSys/UserInfo_Update/", senddata, function (da) {
+                                var jsonObj = JSON.parse(da);
+                                var jsonObj = JSON.parse(da);
+                                if (jsonObj.data == "NEEDLOGIN") {
+                                    top.location = "../Account/Login";
+                                    return false;
+                                }
+                                if (jsonObj.result) {
+                                    layer.open({
+                                        title: '提示', content: jsonObj.data, time: 2000
+                                    });
+                                    $("#search").click();
+                                }
+                                else {
+                                    layer.open({
+                                        title: '提示', content: jsonObj.reason, time: 2000
+                                    });
+                                }
                             });
                         }
                     });

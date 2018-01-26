@@ -23,10 +23,13 @@ namespace DAL
         /// <param name="unitname">单位名称</param>
         /// <param name="dt1">录入时间</param>
         /// <param name="dt2">录入时间</param>
+        /// <param name="orgid">当前登录用户所属机构ID</param>
+        /// <param name="chooseorg">界面上机构选择的</param>
         /// <param name="pagesize">每页显示数量</param>
         /// <param name="pageindex">页码</param>
         /// <returns></returns>
-        public DataTable GetOrderInfo(int id, string BKDH, string OrderNo, string unitname, string dt1, string dt2, int pagesize, int pageindex,string orgid) 
+        public DataTable GetOrderInfo(int id, string BKDH, string OrderNo, string unitname, string dt1, string dt2,
+            int pagesize, int pageindex, string orgid, string chooseorg, string orderstate, string coststate) 
         {
             DataTable dt = new DataTable();
             string top = "";
@@ -36,21 +39,34 @@ namespace DAL
             }
             string sql = string.Format(@"select "+ top + @" * from (
 select a.ID ,b.Name docname ,a.BKDH,c.UnitName,c.Name ToUser,a.OrderDate,a.OrderMonths,
-a.OrderNum,CONVERT(varchar(100), a.Indate, 23) Indate,d.Name as GetUser,e.NAME as InUser ,a.PersonID,a.NGUID,Cost.Money,Cost.MoneyPayed,Cost.ID as CostID,
-ROW_NUMBER() over (order by a.ID) as rownumber,b.Price, case isnull(a.state,0) when 0 then '正常' when -1 then '退订' when 1 then '过期' end as State
+a.OrderNum,CONVERT(varchar(100), a.Indate, 23) Indate,a.PosterID,d.Name as GetUser,e.NAME as InUser ,a.PersonID,a.NGUID,Cost.Money,Cost.MoneyPayed,Cost.ID as CostID,
+ROW_NUMBER() over (order by a.ID) as rownumber,b.Price, case isnull(a.state,0) when 0 then '正常' when -1 then '退订' when 1 then '过期' end as OrderState,
+case ISNULL(Cost.state,0) when 0 then '已缴清' when '1' then '未缴清' end as CostState
 from [Order]  a 
 inner join dbo.OrderPeople c on a.PersonID=c.ID
 left join Cost on Cost.OrderID=a.ID
 left join dbo.Doc b on a.BKDH=b.BKDH
 left join dbo.USERS d on a.PosterID=d.ID
-left join dbo.USERS e on a.userid=d.ID  
+left join dbo.USERS e on a.userid=e.ID  
 where 1=1 ");
+            string all = "";
+            string getfrompage = "";
+            //这里加载当前登录人可以操作的用户
             if (!string.IsNullOrEmpty(orgid._ToStrTrim()))
             {
                 OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
                 string ids = orgInfoDAL.getChilds(orgid);
-                sql += " AND e.ORGID in (" + ids.Substring(0, ids.Length - 1) + ")";
+                all = ids.Substring(0, ids.Length - 1);
             }
+            if (!string.IsNullOrEmpty(chooseorg._ToStrTrim()))
+            {
+                OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
+                string ids = orgInfoDAL.getChilds(chooseorg);
+                getfrompage = ids.Substring(0, ids.Length - 1);
+                string[] str = getfrompage.Split(',').Intersect(all.Split(',')).ToArray();
+                all = string.Join(",", str);
+            }
+            sql += " AND c.ORGID in (" + all + ")";
             if (!string.IsNullOrEmpty(OrderNo._ToStrTrim()))
             {
                 SqlParameter Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim());
@@ -75,6 +91,18 @@ where 1=1 ");
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND a.BKDH=@BKDH";
             }
+            if (!string.IsNullOrEmpty(orderstate._ToStrTrim()))
+            {
+                SqlParameter Para = new SqlParameter("orderstate", orderstate._ToStrTrim());
+                dbhelper.SqlParameterList.Add(Para);
+                sql += " AND ISNULL(a.state,0)=@orderstate";
+            }
+            if (!string.IsNullOrEmpty(coststate._ToStrTrim()))
+            {
+                SqlParameter Para = new SqlParameter("coststate", coststate._ToStrTrim());
+                dbhelper.SqlParameterList.Add(Para);
+                sql += " AND ISNULL(Cost.state,0)=@coststate";
+            }
             if (!string.IsNullOrEmpty(dt1._ToStrTrim()))
             {
                 SqlParameter Para = new SqlParameter("INDATE1", dt1._ToDateTime());
@@ -92,7 +120,8 @@ where 1=1 ");
         }
 
 
-        public int GetCount(int id, string BKDH, string OrderNo, string unitname, string dt1, string dt2, string orgid) 
+        public int GetCount(int id, string BKDH, string OrderNo, string unitname,
+            string dt1, string dt2, string orgid, string chooseorg, string orderstate, string coststate) 
         {
             string sql = string.Format(@"
 select count(1) as num
@@ -103,17 +132,41 @@ left join dbo.Doc b on a.BKDH=b.BKDH
 left join dbo.USERS d on a.PosterID=d.ID
 left join dbo.USERS e on a.userid=d.ID  
 where 1=1 ");
+            string all = "";
+            string getfrompage = "";
+            //这里加载当前登录人可以操作的用户
             if (!string.IsNullOrEmpty(orgid._ToStrTrim()))
             {
                 OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
                 string ids = orgInfoDAL.getChilds(orgid);
-                sql += " AND c.ORGID in (" + ids.Substring(0, ids.Length - 1) + ")";
+                all = ids.Substring(0, ids.Length - 1);
             }
+            if (!string.IsNullOrEmpty(chooseorg._ToStrTrim()))
+            {
+                OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
+                string ids = orgInfoDAL.getChilds(chooseorg);
+                getfrompage = ids.Substring(0, ids.Length - 1);
+                string[] str = getfrompage.Split(',').Intersect(all.Split(',')).ToArray();
+                all = string.Join(",", str);
+            }
+            sql += " AND c.ORGID in (" + all + ")";
             if (!string.IsNullOrEmpty(OrderNo._ToStrTrim()))
             {
                 SqlParameter Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim());
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND c.OrderNo LIKE '%'+@OrderNo+'%'";
+            }
+            if (!string.IsNullOrEmpty(orderstate._ToStrTrim()))
+            {
+                SqlParameter Para = new SqlParameter("orderstate", orderstate._ToStrTrim());
+                dbhelper.SqlParameterList.Add(Para);
+                sql += " AND a.state=@orderstate";
+            }
+            if (!string.IsNullOrEmpty(coststate._ToStrTrim()))
+            {
+                SqlParameter Para = new SqlParameter("coststate", coststate._ToStrTrim());
+                dbhelper.SqlParameterList.Add(Para);
+                sql += " AND Cost.state=@coststate";
             }
             if (id > 0)
             {

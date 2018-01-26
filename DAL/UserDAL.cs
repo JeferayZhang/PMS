@@ -31,30 +31,36 @@ namespace DAL
             string IDCard, string userState, string userRegData_Begin, string userRegData_End,string orgid)
         {
             DataTable dt = new DataTable();
-            string sql = @"SELECT ID, USERNO, USERS.NAME, ISNULL(ROLE.ROLENAME, '未知角色') ROLE,
-       PASSWORD,
-       CASE SEX
+            string sql = @"SELECT USERS.ID, USERS.USERNO, USERS.NAME, ISNULL(ROLE.ROLENAME, '未知角色') ROLE,
+       USERS.PASSWORD,
+       CASE USERS.SEX
           WHEN 0 THEN
            '女'
           ELSE
            '男'
         END AS SEX, ISNULL(ORG.NAME, '未知机构') ORGNAME,
-       ISNULL(IDCARD, '') IDCARD, ISNULL(PHONENUMBER, '') PHONENUMBER,
+       ISNULL(USERS.IDCARD, '') IDCARD, ISNULL(USERS.PHONENUMBER, '') PHONENUMBER,
        ISNULL(USERS.ADDRESS, '') ADDRESS, ISNULL(USERS.EMAIL, '') EMAIL,
        CASE USERS.STATE
           WHEN 0 THEN
            '有效'
           ELSE
            '无效'
-        END AS STATE, OPERATOR, CONVERT(varchar(100), USERS.INDATE, 23) INDATE, MGUID
+        END AS STATE,B.NAME OPERATOR, 
+        CONVERT(varchar(100), USERS.INDATE, 23) INDATE, USERS.MGUID
 FROM USERS
 LEFT JOIN ORG ON ORG.ORGID = USERS.ORGID
-LEFT JOIN ROLE ON ROLE.ROLEID = USERS.ROLE WHERE 1=1 ";
+LEFT JOIN ROLE ON ROLE.ROLEID = USERS.ROLE 
+LEFT JOIN USERS B ON B.ID=USERS.Operator WHERE 1=1 ";
+            string all = "";
+            string getfrompage = "";
+            //这里加载当前登录人可以操作的用户
             if (!string.IsNullOrEmpty(orgid._ToStrTrim()))
             {
                 OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
                 string ids = orgInfoDAL.getChilds(orgid);
-                sql += " AND USERS.ORGID in ("+ ids.Substring(0,ids.Length-1) + ")";
+                all = ids.Substring(0, ids.Length - 1);
+                //sql += " AND USERS.ORGID in (" + ids.Substring(0, ids.Length - 1) + ")";
             }
             if (!string.IsNullOrEmpty(userNo._ToStrTrim()))
             {
@@ -80,12 +86,16 @@ LEFT JOIN ROLE ON ROLE.ROLEID = USERS.ROLE WHERE 1=1 ";
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND USERS.ROLE =@ROLE";
             }
+            //如果没有选择界面上面的机构,那么用户就是想查询出所有能操作的用户
             if (!string.IsNullOrEmpty(userOrg._ToStrTrim()))
             {
-                SqlParameter Para = new SqlParameter("ORGID", userOrg._ToStrTrim());
-                dbhelper.SqlParameterList.Add(Para);
-                sql += " AND USERS.ORGID =@ORGID";
+                OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
+                string ids = orgInfoDAL.getChilds(userOrg);
+                getfrompage = ids.Substring(0, ids.Length - 1);
+                string[] str = getfrompage.Split(',').Intersect(all.Split(',')).ToArray();
+                all = string.Join(",",str);
             }
+            sql += " AND USERS.ORGID in (" + all + ")";
             if (!string.IsNullOrEmpty(IDCard._ToStrTrim()))
             {
                 SqlParameter Para = new SqlParameter("IDCARD", IDCard._ToStrTrim());
@@ -110,6 +120,26 @@ LEFT JOIN ROLE ON ROLE.ROLEID = USERS.ROLE WHERE 1=1 ";
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND  CONVERT(varchar(100),USERS.INDATE, 23)  <= CONVERT(varchar(100),@INDATE2, 23) ";
             }
+            dt = dbhelper.ExecuteSql(sql + " ORDER BY USERNO");
+            return dt;
+        }
+
+        public DataTable GetPosters(string orgid)
+        {
+            DataTable dt = new DataTable();
+            string sql = @"SELECT USERS.ID, USERS.USERNO, USERS.NAME
+FROM USERS WHERE 1=1 ";
+            string all = "";
+            //这里加载当前登录人可以操作的用户
+            if (!string.IsNullOrEmpty(orgid._ToStrTrim()))
+            {
+                OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
+                string ids = orgInfoDAL.getChilds(orgid);
+                all = ids.Substring(0, ids.Length - 1);
+                sql += " AND USERS.ORGID in (" + all + ") ";
+            }
+            sql += " AND USERS.ROLE=3 AND STATE=0";
+            
             dt = dbhelper.ExecuteSql(sql + " ORDER BY USERNO");
             return dt;
         }

@@ -50,7 +50,7 @@ namespace DAL
             dt = dbh.ExecuteSql(" select * from org where ParentID=@ParentID");
             return dt;
         }
-        public string childs = "";
+        public string childs = "0,";
         public string getChilds(string orgid)
         {
             string sql = @"SELECT t.orgid,STUFF((SELECT ','+ltrim(org.orgID)  FROM org    

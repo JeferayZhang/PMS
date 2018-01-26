@@ -26,11 +26,6 @@ namespace PMS.Controllers
         /// <returns></returns>
         public ActionResult UserInfo()
         {
-            if (!authorize.checkFilterContext())
-            {
-                return Redirect("/Account/Login");
-            }
-
             return View();
         }
 
@@ -60,7 +55,7 @@ namespace PMS.Controllers
                 string test1 = o["test1"]._ToStrTrim();
                 string test2 = o["test2"]._ToStrTrim();
                 string UserNo = o["UserNo"]._ToStrTrim();
-                string NAME = o["NAME"]._ToStrTrim();
+                string NAME = o["Name"]._ToStrTrim();
                 string Sex = o["Sex"]._ToStrTrim();
                 string Role = o["Role"]._ToStrTrim();
                 string IDCard = o["IDCard"]._ToStrTrim();
@@ -69,12 +64,23 @@ namespace PMS.Controllers
                 string CompanyUnderCity = o["CompanyUnderCity"]._ToStrTrim();
                 string CompanyUnderArea = o["CompanyUnderArea"]._ToStrTrim();
                 string State = o["State"]._ToStrTrim();
-                string OrgID = CompanyUnderArea == "" ? (CompanyUnderCity == "" ?
-                    (CompanyCity == "" ?
-                    Province :
-                    CompanyCity) :
-                    CompanyUnderCity) :
-                    CompanyUnderArea;
+                string OrgID = "";
+                if (Province._ToInt32() > 0)
+                {
+                    OrgID = Province;
+                }
+                if (CompanyCity._ToInt32() > 0)
+                {
+                    OrgID = CompanyCity;
+                }
+                if (CompanyUnderCity._ToInt32() > 0)
+                {
+                    OrgID = CompanyUnderCity;
+                }
+                if (CompanyUnderArea._ToInt32() > 0)
+                {
+                    OrgID = CompanyUnderArea;
+                }
                 ret = _UserBLL.GetUser(UserNo, NAME, Sex, Role,
                     OrgID, IDCard, State, test1, test2, user.OrgID._ToStr());
             }
@@ -161,13 +167,34 @@ namespace PMS.Controllers
         } 
         #endregion
 
+        #region 获取当前用户所有能操作的投递员
+        /// <summary>
+        /// 获取当前用户所有能操作的投递员
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult GetPosters()
+        {
+            retValue ret = new retValue();
+            if (!authorize.checkFilterContext())
+            {
+                ret.result = true;
+                ret.data = "NEEDLOGIN";
+                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
+            }
+            UserModel user = Session["UserModel"] as UserModel;
+            BLL.UserBLL _BLL = new UserBLL();
+            ret.result = true;
+            ret.data = _BLL.GetPosters(user.OrgID._ToStr());
+            var js = JsonConvert.SerializeObject(ret);
+            return Json(js, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+
         #region 加载用户编辑页面
         public ActionResult UserInfo_AddEdit()
         {
-            if (!authorize.checkFilterContext())
-            {
-                return Redirect("/Account/Login");
-            }
             int addeditcode = Request["addeditcode"]._ToInt32();
             if (addeditcode > 0)
             {
@@ -308,11 +335,6 @@ namespace PMS.Controllers
         #region 文献管理
         public ActionResult DocInfo()
         {
-            if (!authorize.checkFilterContext())
-            {
-                
-                return RedirectToAction("../Account/Login");
-            }
             return View();
         }
 
@@ -348,8 +370,9 @@ namespace PMS.Controllers
                 string Type = o["Type"]._ToStrTrim();
                 string Name = o["Name"]._ToStrTrim();
                 string ISSN = o["ISSN"]._ToStrTrim();
+                string BKDH = o["BKDH"]._ToStrTrim().ToUpper();
                 string PublishArea = o["PublishArea"]._ToStrTrim();
-                ret = _DocBLL.GetDoc("", Type, Name, ISSN, PublishArea, "", "", test1, test2);
+                ret = _DocBLL.GetDoc("", Type, Name, ISSN, PublishArea, "", "", test1, test2, BKDH);
             }
             content = ret.toJson();
 
@@ -357,6 +380,13 @@ namespace PMS.Controllers
 
             return Json(js, JsonRequestBehavior.AllowGet);
         }
+
+        #region 获取所有的报纸信息
+        /// <summary>
+        /// 获取所有的报纸信息
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
         [HttpPost]
         public JsonResult GetAllDocInfo(string str)
         {
@@ -369,11 +399,14 @@ namespace PMS.Controllers
             }
 
             BLL.DocBLL _BLL = new DocBLL();
-            ret = _BLL.GetDoc(str, "", "", "", "", "", "", "", "");
+            ret = _BLL.GetDoc(str, "", "", "", "", "", "", "", "", "");
             var js = JsonConvert.SerializeObject(ret);
 
             return Json(js, JsonRequestBehavior.AllowGet);
-        }
+        } 
+        #endregion
+
+        
         #endregion
 
         #region 初始化子页面(Get)
@@ -383,18 +416,13 @@ namespace PMS.Controllers
         /// <returns></returns>
         public ActionResult DocInfo_AddEdit()
         {
-            if (!authorize.checkFilterContext())
-            {
-                return Redirect("/Account/Login");
-            }
-
             int addeditcode = Request["addeditcode"]._ToInt32();
             if (addeditcode > 0)
             {
                 List<retValue> resultList = new List<retValue>();
                 retValue ret = new retValue();
                 BLL.DocBLL _DocBLL = new DocBLL();
-                ret = _DocBLL.GetDoc(addeditcode._ToStr(), "", "", "", "", "", "", "", "");
+                ret = _DocBLL.GetDoc(addeditcode._ToStr(), "", "", "", "", "", "", "", "","");
                 resultList.Add(ret);
                 ViewData.Model = resultList;
             }
@@ -423,6 +451,7 @@ namespace PMS.Controllers
                 return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
             }
             BLL.DocBLL _DocBLL = new DocBLL();
+            UserModel usermodel = Session["UserModel"] as UserModel;
             JObject o = null;
             if (!string.IsNullOrEmpty(str))
             {
@@ -437,11 +466,11 @@ namespace PMS.Controllers
                 string Publisher = o["Publisher"]._ToStrTrim();
                 string Price = o["Price"]._ToStrTrim();
                 string PL = o["PL"]._ToStrTrim();
-                string BKDH = o["BKDH"]._ToStrTrim();
+                string BKDH = o["BKDH"]._ToStrTrim().ToUpper();
                 //新增
                 if (string.IsNullOrEmpty(ID))
                 {
-                    ret = _DocBLL.Insert(Name, ISSN, Type, PublishArea, Publisher, Price, PL, BKDH, "");
+                    ret = _DocBLL.Insert(Name, ISSN, Type, PublishArea, Publisher, Price, PL, BKDH, usermodel._ID._ToStr());
                 }
                 //更新
                 else
@@ -455,6 +484,7 @@ namespace PMS.Controllers
         } 
         #endregion
 
+        #region 删除数据
         [HttpPost]
         public JsonResult DocInfo_Delete(string str)
         {
@@ -480,16 +510,13 @@ namespace PMS.Controllers
             var js = JsonConvert.SerializeObject(ret);
 
             return Json(js, JsonRequestBehavior.AllowGet);
-        }
+        } 
+        #endregion
         #endregion
 
         #region 机构管理
         public ActionResult OrgInfo()
         {
-            if (!authorize.checkFilterContext())
-            {
-                return Redirect("/Account/Login");
-            }
             return View();
         }
 
@@ -520,10 +547,6 @@ namespace PMS.Controllers
         #region 加载机构新增修改页面
         public ActionResult OrgInfo_AddEdit()
         {
-            if (!authorize.checkFilterContext())
-            {
-                return Redirect("/Account/Login");
-            }
             string ID = Request["ID"]._ToStrTrim();
             string ParentID = Request["ParentID"]._ToStrTrim();
             List<retValue> resultList = new List<retValue>();
@@ -586,7 +609,7 @@ namespace PMS.Controllers
                 //更新
                 else
                 {
-                    ret = _BLL.update(ID._ToInt32(), OrgCode, NAME, Address);
+                    ret = _BLL.update(ID._ToInt32(), NAME, OrgCode, Address);
                 }
             }
             var js = JsonConvert.SerializeObject(ret);

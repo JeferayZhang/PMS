@@ -27,7 +27,7 @@ namespace DAL
         /// <param name="DocRegData_Begin">新增报刊时间范围,起始值</param>
         /// <param name="DocRegData_End">新增报刊时间范围,截止值</param>
         /// <returns></returns>
-        public DataTable GetDoc(string ID, string TYPEID, string NAME, string ISSN, string PUBLISHAREA, string PUBLISHER, string ADDPERSON, string DocRegData_Begin, string DocRegData_End)
+        public DataTable GetDoc(string ID, string TYPEID, string NAME, string ISSN, string PUBLISHAREA, string PUBLISHER, string ADDPERSON, string DocRegData_Begin, string DocRegData_End,string BKDH)
         {
             DataTable dt = new DataTable();
             string sql = @"SELECT DOC.ID,DOC.TYPEID, DOCTYPE.TYPENAME, DOC.NAME DOCNAME, ISSN, PUBLISHAREA,
@@ -41,6 +41,12 @@ LEFT JOIN USERS ON USERS.ID = DOC.ADDPERSON  WHERE 1=1 ";
                 SqlParameter Para = new SqlParameter("ID", ID._ToInt32());
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND DOC.ID =@ID";
+            }
+            if (!string.IsNullOrEmpty(BKDH._ToStrTrim()))
+            {
+                SqlParameter Para = new SqlParameter("BKDH", BKDH._ToStrTrim());
+                dbhelper.SqlParameterList.Add(Para);
+                sql += " AND DOC.BKDH =@BKDH";
             }
             if (!string.IsNullOrEmpty(TYPEID._ToStrTrim()))
             {

@@ -30,13 +30,15 @@
                         });
                         return false;
                     }
-                    if ($('#Roads option:selected').val() == "" || $('#Roads option:selected').val() == undefined) {
-                        layer.open({
-                            title: '提示',
-                            content: '必须选择单位所属段道!',
-                            time: 2000
-                        });
-                        return false;
+                    if ($('#ID').val() == "" || $('#ID').val() == undefined) {
+                        if ($('#Roads option:selected').val() == "" || $('#Roads option:selected').val() == undefined) {
+                            layer.open({
+                                title: '提示',
+                                content: '必须选择单位所属段道!',
+                                time: 2000
+                            });
+                            return false;
+                        }
                     }
                     var ddd = { str: JSON.stringify(data.field) };
                     ajaxHelper.post("/OrderSys/OrderPeopleInfo_AddEdits/", ddd, function (da) {
@@ -73,8 +75,9 @@
                 });
                 //下拉框绑定
                 $(function () {
-                    var ddd = { str: '' };
-                    selectchanged('', "Province");
+                    if ($('#ID').val() == "" || $('#ID').val() == undefined) {
+                        selectchanged('', "Province");
+                    }
                 });
                 function selectchanged(parentid, elem) {
                     $("#" + elem + "").empty();
@@ -152,7 +155,7 @@
 </script>
 @* 本功能用户所属机构和负责机构都没有设置 *@
 <form class="layui-form layui-form-pane" style="margin-left: 20px;margin-top:20px;" action="" method="get" id="mainform">
-    <input type="hidden" name="ID" value="@(dr == null ? "" : dr["ID"]._ToStrTrim())" />
+    <input type="hidden" id="ID" name="ID" value="@(dr == null ? "" : dr["ID"]._ToStrTrim())" />
     <input type="hidden" name="MGuid" value="@(dr == null ? "" : dr["MGUID"]._ToStrTrim())" />
     <div class=" layui-form-item">
         <label class="layui-form-label">单位编号</label>
@@ -179,33 +182,39 @@
         <div class="layui-input-inline">
             <input type="text" id="" name="Phone" lay-verify="required|phone" placeholder="" autocomplete="off" class="layui-input" maxlength="50" value="@(dr == null ? "" : dr["Phone"]._ToStrTrim())">
         </div>
-        <label class="layui-form-label">省</label>
-        <div class="layui-input-inline">
-            <select id="Province" lay-filter="Province" style="width:150px;" name="Province"></select>
-        </div>
+        @if (dr == null)
+        {
+            <label class="layui-form-label">省</label>
+            <div class="layui-input-inline">
+                <select id="Province" lay-filter="Province" style="width:150px;" name="Province"></select>
+            </div>
+        }
     </div>
+    @if (dr == null)
+    {
+        <div class=" layui-form-item">
+            <label class="layui-form-label">市分公司</label>
+            <div class="layui-input-inline">
+                <select id="CompanyCity" lay-filter="CompanyCity" style="width:150px;" name="CompanyCity"></select>
+            </div>
+            <label class="layui-form-label">县分公司</label>
+            <div class="layui-input-inline">
+                <select id="CompanyUnderCity" style="width:150px;" lay-filter="CompanyUnderCity" name="CompanyUnderCity"></select>
+            </div>
+        </div>
+        <div class=" layui-form-item">
+            <label class="layui-form-label">网点</label>
+            <div class="layui-input-inline">
+                <select id="CompanyUnderArea" style="width:150px;" lay-filter="CompanyUnderArea" name="CompanyUnderArea"></select>
+            </div>
+            <label class="layui-form-label">段道</label>
+            <div class="layui-input-inline">
+                <select id="Roads" style="width:150px;" lay-filter="Roads" name="Roads"></select>
+            </div>
+        </div>
+    }
     <div class=" layui-form-item">
-        <label class="layui-form-label">市分公司</label>
-        <div class="layui-input-inline">
-            <select id="CompanyCity" lay-filter="CompanyCity" style="width:150px;" name="CompanyCity"></select>
-        </div>
-        <label class="layui-form-label">县分公司</label>
-        <div class="layui-input-inline">
-            <select id="CompanyUnderCity" style="width:150px;" lay-filter="CompanyUnderCity" name="CompanyUnderCity"></select>
-        </div>
-    </div>
-    <div class=" layui-form-item">
-        <label class="layui-form-label">网点</label>
-        <div class="layui-input-inline">
-            <select id="CompanyUnderArea" style="width:150px;" lay-filter="CompanyUnderArea" name="CompanyUnderArea"></select>
-        </div>
-        <label class="layui-form-label">段道</label>
-        <div class="layui-input-inline">
-            <select id="Roads" style="width:150px;" lay-filter="Roads"  name="Roads"></select>
-        </div>
-    </div>
-    <div class=" layui-form-item">
-        <button class="layui-btn" lay-filter="save1" lay-submit="" data-type="save">保存</button>
-        <button class="layui-btn" lay-filter="close" lay-submit="" data-type="close">关闭</button>
+        <button class="layui-btn" type="button"  lay-filter="save1" lay-submit="" data-type="save">保存</button>
+        <button class="layui-btn"  type="button" lay-filter="close" lay-submit="" data-type="close">关闭</button>
     </div>
 </form>

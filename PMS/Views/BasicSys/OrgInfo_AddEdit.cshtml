@@ -36,6 +36,10 @@
                     var ddd = { str: JSON.stringify(data.field) };
                     ajaxHelper.post("/BasicSys/OrgInfo_AddEdits/", ddd, function (da) {
                         var jsonObj = JSON.parse(da);
+                        if (jsonObj.data == "NEEDLOGIN") {
+                            top.location = "../Account/Login";
+                            return false;
+                        }
                         if (jsonObj.result) {
                             layer.open({
                                 title: '提示', content: jsonObj.data, time: 2000,
@@ -47,7 +51,7 @@
                         }
                         else {
                             layer.open({
-                                title: '提示', content: jsonObj.reason
+                                title: '提示', content: jsonObj.reason, time: 2000
                             });
                         }
                     });
@@ -84,7 +88,7 @@
         </div>
     </div>
     <div class=" layui-form-item">
-        <button class="layui-btn" lay-filter="save1" lay-submit="" data-type="save">保存</button>
-        <button class="layui-btn" lay-filter="close" lay-submit="" data-type="close">关闭</button>
+        <button class="layui-btn" type="button"  lay-filter="save1" lay-submit="" data-type="save">保存</button>
+        <button class="layui-btn"  type="button" lay-filter="close" lay-submit="" data-type="close">关闭</button>
     </div>
 </form>

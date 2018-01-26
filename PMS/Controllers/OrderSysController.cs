@@ -136,7 +136,7 @@ namespace PMS.Controllers
                         try
                         {
                             ret = _BLL.Insert(tran, BKDH, PersonID._ToInt32(), OrderNum._ToInt32(), Month._ToInt32(),
-                                System.DateTime.Now.ToShortDateString(), userid._ToStr(), Poster._ToInt32());
+                                System.DateTime.Now.ToShortDateString(), userid._ToStr(), Poster._ToInt32(), FullPrice._ToDecimal());
                             tran.Commit();
                         }
                         catch (Exception ex)
@@ -320,7 +320,7 @@ namespace PMS.Controllers
                                 else
                                 {
                                     _bll.Insert(item["BKDH"]._ToStrTrim(), item["OrderNum"]._ToInt32(), item["OrderMonths"]._ToInt32(), item["Indate"]._ToStrTrim(), userid._ToStr(),
-                                        0, item["OrderNo"]._ToStrTrim(), item["UnitName"]._ToStrTrim(), item["Address"]._ToStrTrim(), item["Name"]._ToStrTrim(), item["Phone"]._ToStrTrim(), orgid, tran, userid._ToStr());
+                                        0, item["OrderNo"]._ToStrTrim(), item["UnitName"]._ToStrTrim(), item["Address"]._ToStrTrim(), item["Name"]._ToStrTrim(), item["Phone"]._ToStrTrim(), orgid._ToStr(), tran, userid._ToStr());
                                     count++;
                                 }
                             }
@@ -487,7 +487,7 @@ namespace PMS.Controllers
             {
                 OrgID = CompanyUnderArea;
             }
-            PageModel pg = _SubscriberBLL.GetSubscriber(0, OrderNo, Name, "", OrgID._ToInt32(), test1, test2, user.OrgID._ToStr(), limit, page);
+            PageModel pg = _SubscriberBLL.GetSubscriber(0, OrderNo, Name, "", OrgID, test1, test2, user.OrgID._ToStr(), limit, page);
             var js = JsonConvert.SerializeObject(pg);
             return Content(js);
         }
@@ -506,7 +506,7 @@ namespace PMS.Controllers
             }
             Models.UserModel user = Session["UserModel"] as Models.UserModel;
             BLL.SubscriberBLL _SubscriberBLL = new SubscriberBLL();
-            PageModel pg = _SubscriberBLL.GetSubscriber(0, "", "", "", 0, "", "", user.OrgID._ToStr(), 0, 0);
+            PageModel pg = _SubscriberBLL.GetSubscriber(0, "", "", "", "", "", "", user.OrgID._ToStr(), 0, 0);
             var js = JsonConvert.SerializeObject(pg);
             return Json(js, JsonRequestBehavior.AllowGet);
         }
@@ -524,7 +524,7 @@ namespace PMS.Controllers
             if (addeditcode > 0)
             {
                 BLL.SubscriberBLL _SubscriberBLL = new SubscriberBLL();
-                PageModel pg = _SubscriberBLL.GetSubscriber(addeditcode, "", "", "", 0, "", "", user.OrgID._ToStr());
+                PageModel pg = _SubscriberBLL.GetSubscriber(addeditcode, "", "", "", "", "", "", user.OrgID._ToStr());
                 ViewData.Model = pg;
             }
             else
@@ -572,12 +572,12 @@ namespace PMS.Controllers
                 //新增
                 if (string.IsNullOrEmpty(ID))
                 {
-                    ret = _SubscriberBLL.Insert(OrderNo, UnitName, Name, Phone, Address, Roads._ToInt32(), userid);
+                    ret = _SubscriberBLL.Insert(OrderNo, UnitName, Name, Phone, Address, Roads, userid);
                 }
                 //更新
                 else
                 {
-                    ret = _SubscriberBLL.UpdateByPK(ID._ToInt32(), OrderNo, UnitName, Name, Phone, Address, Roads._ToInt32(), MGUID);
+                    ret = _SubscriberBLL.UpdateByPK(ID._ToInt32(), OrderNo, UnitName, Name, Phone, Address, "", MGUID);
                 }
             }
             content = ret.toJson();

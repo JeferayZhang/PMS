@@ -27,8 +27,8 @@ namespace DAL
         /// <param name="userRegData_Begin">用户注册时间范围,起始值</param>
         /// <param name="userRegData_End">用户注册时间范围,截止值</param>
         /// <returns></returns>
-        public DataTable GetUser(string userNo, string userName, string sex, string userRole, string userOrg,
-            string IDCard, string userState, string userRegData_Begin, string userRegData_End,string orgid)
+        public DataTable GetUser(string userNo, string userName, string sex, string userRole, string orgid,
+            string IDCard, string userState, string userRegData_Begin, string userRegData_End,string userOrg)
         {
             DataTable dt = new DataTable();
             string sql = @"SELECT USERS.ID, USERS.USERNO, USERS.NAME, ISNULL(ROLE.ROLENAME, '未知角色') ROLE,
@@ -52,16 +52,6 @@ FROM USERS
 LEFT JOIN ORG ON ORG.ORGID = USERS.ORGID
 LEFT JOIN ROLE ON ROLE.ROLEID = USERS.ROLE 
 LEFT JOIN USERS B ON B.ID=USERS.Operator WHERE 1=1 ";
-            string all = "";
-            string getfrompage = "";
-            //这里加载当前登录人可以操作的用户
-            if (!string.IsNullOrEmpty(orgid._ToStrTrim()))
-            {
-                OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
-                string ids = orgInfoDAL.getChilds(orgid);
-                all = ids.Substring(0, ids.Length - 1);
-                //sql += " AND USERS.ORGID in (" + ids.Substring(0, ids.Length - 1) + ")";
-            }
             if (!string.IsNullOrEmpty(userNo._ToStrTrim()))
             {
                 SqlParameter Para = new SqlParameter("USERNO", userNo._ToStrTrim());
@@ -86,15 +76,8 @@ LEFT JOIN USERS B ON B.ID=USERS.Operator WHERE 1=1 ";
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND USERS.ROLE =@ROLE";
             }
-            //如果没有选择界面上面的机构,那么用户就是想查询出所有能操作的用户
-            if (!string.IsNullOrEmpty(userOrg._ToStrTrim()))
-            {
-                OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
-                string ids = orgInfoDAL.getChilds(userOrg);
-                getfrompage = ids.Substring(0, ids.Length - 1);
-                string[] str = getfrompage.Split(',').Intersect(all.Split(',')).ToArray();
-                all = string.Join(",",str);
-            }
+            OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
+            string all = orgInfoDAL.getChilds(userOrg, orgid);
             sql += " AND USERS.ORGID in (" + all + ")";
             if (!string.IsNullOrEmpty(IDCard._ToStrTrim()))
             {

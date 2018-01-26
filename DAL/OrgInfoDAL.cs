@@ -65,6 +65,28 @@ group by t.OrgID";
             }
             return childs;
         }
+
+        /// <summary>
+        /// 获取用户和用户界面上选择的机构的交集,即可操作的机构ID
+        /// </summary>
+        /// <param name="userorg">用户所属机构</param>
+        /// <param name="chooseorg">选择的机构</param>
+        /// <returns></returns>
+        public string getChilds(string userorg,string chooseorg)
+        {
+            string str1 = getChilds(userorg);
+            str1= str1.Substring(0, str1.Length - 1);
+            childs = "0,";
+            if (string.IsNullOrEmpty(chooseorg))
+            {
+                return str1;
+            }
+            string str2 = getChilds(chooseorg);
+            str2 = str2.Substring(0, str2.Length - 1);
+            string[] str = str1.Split(',').Intersect(str2.Split(',')).ToArray();
+            string str3 = string.Join(",", str);
+            return str3;
+        }
         public string insert(string Name,string address,string OrgCode,int parentID=0) 
         {
             if (GetOrgByName(OrgCode)>0)

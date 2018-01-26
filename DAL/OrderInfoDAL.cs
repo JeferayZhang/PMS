@@ -51,23 +51,8 @@ left join dbo.Doc b on a.BKDH=b.BKDH
 left join dbo.USERS d on a.PosterID=d.ID
 left join dbo.USERS e on a.userid=e.ID  
 where 1=1 ");
-            string all = "";
-            string getfrompage = "";
-            //这里加载当前登录人可以操作的用户
-            if (!string.IsNullOrEmpty(orgid._ToStrTrim()))
-            {
-                OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
-                string ids = orgInfoDAL.getChilds(orgid);
-                all = ids.Substring(0, ids.Length - 1);
-            }
-            if (!string.IsNullOrEmpty(chooseorg._ToStrTrim()))
-            {
-                OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
-                string ids = orgInfoDAL.getChilds(chooseorg);
-                getfrompage = ids.Substring(0, ids.Length - 1);
-                string[] str = getfrompage.Split(',').Intersect(all.Split(',')).ToArray();
-                all = string.Join(",", str);
-            }
+            OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
+            string all = orgInfoDAL.getChilds(orgid, chooseorg);
             sql += " AND c.ORGID in (" + all + ")";
             if (!string.IsNullOrEmpty(OrderNo._ToStrTrim()))
             {
@@ -134,23 +119,8 @@ left join dbo.Doc b on a.BKDH=b.BKDH
 left join dbo.USERS d on a.PosterID=d.ID
 left join dbo.USERS e on a.userid=d.ID  
 where 1=1 ");
-            string all = "";
-            string getfrompage = "";
-            //这里加载当前登录人可以操作的用户
-            if (!string.IsNullOrEmpty(orgid._ToStrTrim()))
-            {
-                OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
-                string ids = orgInfoDAL.getChilds(orgid);
-                all = ids.Substring(0, ids.Length - 1);
-            }
-            if (!string.IsNullOrEmpty(chooseorg._ToStrTrim()))
-            {
-                OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
-                string ids = orgInfoDAL.getChilds(chooseorg);
-                getfrompage = ids.Substring(0, ids.Length - 1);
-                string[] str = getfrompage.Split(',').Intersect(all.Split(',')).ToArray();
-                all = string.Join(",", str);
-            }
+            OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
+            string all = orgInfoDAL.getChilds(orgid, chooseorg);
             sql += " AND c.ORGID in (" + all + ")";
             if (!string.IsNullOrEmpty(OrderNo._ToStrTrim()))
             {
@@ -329,7 +299,7 @@ ModifyDate = GETDATE(),ModifyUser = @ModifyUser where id=@id and isnull(state,0)
         /// <param name="inuser">录入员</param>
         /// <param name="posterid">投递员,相当于收订人</param>
         /// <returns></returns>
-        public string Insert(string BKDH, int orderpeopleid, int ordernum, int ordermonths, string orderDate, string inuser, int posterid, SqlTransaction tran)
+        public string Insert(string BKDH, int orderpeopleid, int ordernum, int ordermonths, string orderDate,string inuser, int posterid, SqlTransaction tran, decimal FullPrice = 0)
         {
             string res = "";
             try
@@ -357,9 +327,13 @@ values(@BKDH,@personid,@userid,@ordernum,@orderdate,@posterid,@ordermonths) ";
                     res = "保存失败";
                 }
                 CostDAL dal = new CostDAL();
-                DocDAL doc = new DocDAL();
-                decimal money = doc.GetPrice(BKDH);
-                dal.insert(tran, num, money * ordernum * ordermonths, 0, inuser._ToInt32());
+                if (FullPrice==0)
+                {
+                    DocDAL doc = new DocDAL();
+                    decimal money = doc.GetPrice(BKDH);
+                    FullPrice = money * ordernum * ordermonths;
+                }
+                dal.insert(tran, num, FullPrice, 0, inuser._ToInt32());
             }
             catch (Exception ex)
             {

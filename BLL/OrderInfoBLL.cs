@@ -121,10 +121,10 @@ namespace BLL
         /// <param name="inuser">录入员</param>
         /// <param name="posterid">投递员,相当于收订人</param>
         /// <returns></returns>
-        public retValue Insert(SqlTransaction tran, string BKDH, int orderpeopleid, int ordernum, int ordermonths, string orderDate, string inuser, int posterid)
+        public retValue Insert(SqlTransaction tran, string BKDH, int orderpeopleid, int ordernum, int ordermonths, string orderDate, string inuser, int posterid, decimal FullPrice = 0)
         {
             retValue ret = new retValue();
-            string res = dal.Insert(BKDH, orderpeopleid, ordernum, ordermonths, orderDate, inuser, posterid,tran);
+            string res = dal.Insert(BKDH, orderpeopleid, ordernum, ordermonths, orderDate, inuser, posterid, tran, FullPrice);
             if (string.IsNullOrEmpty(res))
             {
                 ret.result = true;
@@ -156,14 +156,14 @@ namespace BLL
         /// <returns></returns>
         public retValue Insert(string BKDH, int ordernum, int ordermonths, string orderDate,
             string inuser, int posterid, string OrderNo,string unitname,
-            string address,string name,string phone,int orgID,SqlTransaction tran,string oporgid) 
+            string address,string name,string phone,string orgID,SqlTransaction tran,string oporgid) 
         {
-            int checkOrderPeople = _SubscriberDAL.GetCount(0, OrderNo, "", "", 0, "", "", oporgid);
+            int checkOrderPeople = _SubscriberDAL.GetCount(0, OrderNo, "", "", "", "", "", oporgid);
             int orderpeopleid = 0;
             retValue ret=new retValue();
             if (checkOrderPeople > 0)
             {
-                orderpeopleid = _SubscriberDAL.GetSubscriber(0, OrderNo, "", "", 0, "", "", oporgid).Rows[0]["ID"]._ToInt32();
+                orderpeopleid = _SubscriberDAL.GetSubscriber(0, OrderNo, "", "", orgID, "", "", oporgid).Rows[0]["ID"]._ToInt32();
             }
             else
             {

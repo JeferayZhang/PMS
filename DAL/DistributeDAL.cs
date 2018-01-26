@@ -18,9 +18,9 @@ namespace DAL
         /// <summary>
         /// 根据机构统计
         /// </summary>
-        /// <param name="orgid"></param>
+        /// <param name="chooseorg">所选机构ID</param>
         /// <returns></returns>
-        public DataTable GetTableByOrg(string orgid)
+        public DataTable GetTableByOrg(string chooseorg, string userorg)
         {
             DataTable dt = new DataTable();
             string sql = @" SELECT t.BKDH ,org.Name OrgName,Doc.Name DocName ,
@@ -32,12 +32,11 @@ left join OrderPeople on t.PersonID=OrderPeople.ID
 left join Org on org.OrgID=OrderPeople.OrgID
 left join Doc on Doc.bkdh=t.bkdh
 where   dateadd(MONTH,t.OrderMonths,t.Indate)>GETDATE()
-and Org.ParentID=@orgid
 and not exists(select 1 from log where log.orderid=t.id and CONVERT(varchar(100), log.date, 23)=CONVERT(varchar(100), getdate(), 23))
-GROUP BY t.BKDH ,org.Name,Doc.Name";
-            SqlParameter Para = null;
-            Para = new SqlParameter("orgid", orgid._ToInt32());
-            dbhelper.SqlParameterList.Add(Para);
+";
+            OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
+            string all = orgInfoDAL.getChilds(userorg, chooseorg);
+            sql += " AND OrderPeople.ORGID in (" + all + ") GROUP BY t.BKDH ,org.Name,Doc.Name";
             dt = dbhelper.ExecuteSql(sql);
             return dt;
         }
@@ -47,10 +46,10 @@ GROUP BY t.BKDH ,org.Name,Doc.Name";
         /// </summary>
         /// <param name="orgid"></param>
         /// <returns></returns>
-        public DataTable GetTableByBK(string BKDH)
+        public DataTable GetTableByBK(string BKDH,string userorg,string chooseorg)
         {
             DataTable dt = new DataTable();
-            string sql = @" SELECT t.BKDH ,org.Name OrgName,Doc.Name DocName ,
+            string sql = @" SELECT t.BKDH ,Doc.Name DocName,org.Name OrgName ,
 STUFF((SELECT ','+ltrim([order].ID)  FROM [order]    
   WHERE bkdh=t.bkdh FOR XML PATH('')), 1, 1, '') AS ids,
   SUM(t.OrderNum)OrderNum
@@ -60,8 +59,10 @@ left join Org on org.OrgID=OrderPeople.OrgID
 left join Doc on Doc.bkdh=t.bkdh
 where   dateadd(MONTH,t.OrderMonths,t.Indate)>GETDATE()
 and t.BKDH=@BKDH
-and not exists(select 1 from log where log.orderid=t.id and CONVERT(varchar(100), log.date, 23)=CONVERT(varchar(100), getdate(), 23))
-GROUP BY t.BKDH ,org.Name,Doc.Name";
+and not exists(select 1 from log where log.orderid=t.id and CONVERT(varchar(100), log.date, 23)=CONVERT(varchar(100), getdate(), 23))";
+            OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
+            string all = orgInfoDAL.getChilds(userorg, chooseorg);
+            sql += " AND OrderPeople.ORGID in (" + all + ") GROUP BY t.BKDH ,org.Name,Doc.Name";
             SqlParameter Para = null;
             Para = new SqlParameter("BKDH", BKDH);
             dbhelper.SqlParameterList.Add(Para);
@@ -75,7 +76,7 @@ GROUP BY t.BKDH ,org.Name,Doc.Name";
        /// <param name="orderids">订购流水号</param>
        /// <param name="nianjuanqi">报纸年卷期</param>
        /// <returns></returns>
-        public string insertLog(string orderids,string nianjuanqi)
+        public string insertLog(string orderids,string nianjuanqi, int UserID)
         {
             string res = "";
             SqlConnection conn = new SqlConnection(dbhelper.SqlConnectionString);
@@ -88,10 +89,12 @@ GROUP BY t.BKDH ,org.Name,Doc.Name";
                     string[] pk = orderids.Split(',');
                     foreach (string item in pk)
                     {
-                        string sql = @"INSERT INTO LOG(ORDERID,DATE,NIANJUANQI) VALUES(@ORDERID,getdate(),@NIANJUANQI)";
+                        string sql = @"INSERT INTO LOG(ORDERID,DATE,NIANJUANQI,UserID) VALUES(@ORDERID,getdate(),@NIANJUANQI,@UserID)";
                         Para = new SqlParameter("ORDERID", item._ToInt32());
                         dbhelper.SqlParameterList.Add(Para);
                         Para = new SqlParameter("NIANJUANQI", nianjuanqi._ToStrTrim());
+                        dbhelper.SqlParameterList.Add(Para);
+                        Para = new SqlParameter("UserID", UserID);
                         dbhelper.SqlParameterList.Add(Para);
                         int num = dbhelper.ExecuteNonQuery(tran, sql);
                     }

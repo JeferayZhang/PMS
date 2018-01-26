@@ -120,6 +120,10 @@
                             var senddata = { str: delkeys };
                             ajaxHelper.post("/BasicSys/DocInfo_Delete/", senddata, function (da) {
                                 var jsonObj = JSON.parse(da);
+                                if (jsonObj.data == "NEEDLOGIN") {
+                                    top.location = "../Account/Login";
+                                    return false;
+                                }
                                 if (jsonObj.result) {
                                     layer.open({
                                         title: '提示', content: jsonObj.data, time: 2000

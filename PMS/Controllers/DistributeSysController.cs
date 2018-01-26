@@ -46,25 +46,37 @@ namespace PMS.Controllers
             if (!string.IsNullOrEmpty(str))
             {
                 o = JObject.Parse(str);
-
+                UserModel userModel = Session["userModel"] as UserModel;
                 string Group_Type = o["Group_Type"]._ToStrTrim();
                 string NewspaperName = o["NewspaperName"]._ToStrTrim();
                 string CompanyCity = o["CompanyCity"]._ToStrTrim();
                 string CompanyUnderCity = o["CompanyUnderCity"]._ToStrTrim();
+                string CompanyUnderArea = o["CompanyUnderArea"]._ToStrTrim();
+                string Roads = o["Roads"]._ToStrTrim();
+                string OrgID = "";
+                if (CompanyCity._ToInt32() > 0)
+                {
+                    OrgID = CompanyCity;
+                }
+                if (CompanyUnderCity._ToInt32() > 0)
+                {
+                    OrgID = CompanyUnderCity;
+                }
+                if (CompanyUnderArea._ToInt32() > 0)
+                {
+                    OrgID = CompanyUnderArea;
+                }
+                if (Roads._ToInt32() > 0)
+                {
+                    OrgID = Roads;
+                }
                 if (Group_Type=="1")
                 {
-                    ret = _BLL.GetTableByBK(NewspaperName);
+                    ret = _BLL.GetTableByBK(NewspaperName,userModel.OrgID._ToStr(), OrgID);
                 }
                 else
                 {
-                    if (string.IsNullOrEmpty(CompanyUnderCity))
-                    {
-                        ret = _BLL.GetTableByOrg(CompanyCity);
-                    }
-                    else
-                    {
-                        ret = _BLL.GetTableByOrg(CompanyUnderCity);
-                    }
+                    ret = _BLL.GetTableByOrg(OrgID, userModel.OrgID._ToStr());
                 }
             }
             var js = JsonConvert.SerializeObject(ret);

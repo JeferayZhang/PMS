@@ -3,9 +3,9 @@
     Layout = "~/Views/Shared/Normal.cshtml";
 }
 <script id="qk" type="text/html">
-    <option value="" tag="0">请选择</option>
+    <option value="">请选择</option>
     {{#  layui.each(d, function(index, item){ }}
-    <option value="{{item.BKDH}}" tag="{{item.PRICE}}">{{item.DOCNAME}}</option>
+    <option value="{{item.BKDH}}">{{item.DOCNAME}}</option>
     {{#  }); }}
 </script>
 <script id="orginfo" type="text/html">
@@ -20,7 +20,7 @@
         <td hidden>{{item.ids}}</td>
         <td>{{item.DocName}}</td>
         <td>{{item.OrgName}}</td>
-        <td>{{item.allnums}}</td>
+        <td>{{item.OrderNum}}</td>
     </tr>
     {{#  }); }}
 </script>
@@ -80,13 +80,11 @@
 
                 //下拉框绑定
                 $(function () {
-                    var ddd = { str: '' };
+                    bindqk();
                     selectchanged('', "Province");
-                    qk( "NewspaperName");
                 });
                 function selectchanged(parentid, elem) {
                     $("#" + elem + "").empty();
-
                     var ddd = { str: parentid }
                     ajaxHelper.post("/BasicSys/OrgInfos/", ddd, function (da) {
                         var jsonObj = JSON.parse(da);
@@ -124,14 +122,31 @@
                     selectchanged(parentid, "CompanyUnderCity");
                     return false;
                 });
-
+                form.on('select(CompanyUnderCity)', function (data) {
+                    $("#CompanyUnderArea").html("");
+                    var parentid = $("#CompanyUnderCity option:selected").val();
+                    if (parentid == "") {
+                        return false;
+                    }
+                    selectchanged(parentid, "CompanyUnderArea");
+                    return false;
+                });
+                form.on('select(CompanyUnderArea)', function (data) {
+                    $("#Roads").html("");
+                    var parentid = $("#CompanyUnderArea option:selected").val();
+                    if (parentid == "") {
+                        return false;
+                    }
+                    selectchanged(parentid, "Roads");
+                    return false;
+                });
                 //绑定报纸信息
-                function qk( elem) {
+                function bindqk() {
                     var ddd = { str: '' };
                     ajaxHelper.post("/BasicSys/GetAllDocInfo/", ddd, function (da) {
                         var jsonObj = JSON.parse(da);
                         var getTpl2 = $("#qk").html()
-                            , view2 = $("#" + elem + "");
+                            , view2 = $("#NewspaperName");
                         if (jsonObj.result) {
                             if (jsonObj.data.length > 0) {
                                 laytpl(getTpl2).render(jsonObj.data, function (a2) {
@@ -202,8 +217,18 @@
         <div class="layui-input-inline">
             <select id="CompanyUnderCity" style="width:150px;" lay-filter="CompanyUnderCity" name="CompanyUnderCity"></select>
         </div>
-        <button class="layui-btn" lay-filter="search" lay-submit="" data-type="search">统计</button>
-        <button class="layui-btn" lay-filter="save1" lay-submit="" data-type="save">分发</button>
+    </div>
+    <div class=" layui-form-item">
+        <label class="layui-form-label">网点</label>
+        <div class="layui-input-inline">
+            <select id="CompanyUnderArea" style="width:150px;" lay-filter="CompanyUnderArea" name="CompanyUnderArea"></select>
+        </div>
+        <label class="layui-form-label">段道</label>
+        <div class="layui-input-inline">
+            <select id="Roads" style="width:150px;" lay-filter="Roads" name="Roads"></select>
+        </div>
+        <button class="layui-btn" type="button" lay-filter="search" lay-submit="" data-type="search">统计</button>
+        <button class="layui-btn" type="button" lay-filter="save1" lay-submit="" data-type="save">分发</button>
     </div>
 </form>
 <div>

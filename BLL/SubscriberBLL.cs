@@ -26,7 +26,7 @@ namespace BLL
         /// <param name="dt1">录入时间</param>
         /// <param name="dt2">录入时间</param>
         /// <returns>data为DataTable</returns>
-        public PageModel GetSubscriber(int ID, string OrderNo, string UnitName, string name, int OrgID,
+        public PageModel GetSubscriber(int ID, string OrderNo, string UnitName, string name, string OrgID,
             string dt1, string dt2,string oporgid, int pageLimit = 1, int pageIndex = 0)
         {
             PageModel pg = new PageModel();
@@ -71,7 +71,7 @@ namespace BLL
         /// <param name="guid"></param>
         /// <returns></returns>
         public retValue UpdateByPK(int ID, string OrderNo, string UnitName, string name, string phone,
-            string address, int OrgID, string guid = "")
+            string address, string OrgID, string guid = "")
         {
             retValue ret = new retValue();
             string res = dal.UpdateByPK(ID, OrderNo, UnitName, name, phone, address, OrgID, guid);
@@ -123,7 +123,7 @@ namespace BLL
         /// <param name="InUser">录入人</param>
         /// <returns>成功返回空值,否则返回提示</returns>
         public retValue Insert(string OrderNo, string UnitName, string name, string phone,
-            string address, int OrgID, int InUser)
+            string address, string OrgID, int InUser)
         {
             retValue ret = new retValue();
             ret = dal.Insert(OrderNo, UnitName, name, phone, address, OrgID, InUser);

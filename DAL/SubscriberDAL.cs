@@ -25,7 +25,7 @@ namespace DAL
         /// <param name="dt2">录入时间</param>
         /// <returns>返回DataTable</returns>
         public DataTable GetSubscriber(int ID, string OrderNo, string UnitName, string name, 
-            int OrgID, string dt1, string dt2,string orgid, int pageLimit = 0, int pageIndex = 0)
+            string OrgID, string dt1, string dt2,string orgid, int pageLimit = 0, int pageIndex = 0)
         {
             DataTable dt = new DataTable();
             string sql = "";
@@ -41,48 +41,35 @@ USERS.NAME InUser,CONVERT(varchar(100),OrderPeople.INDATE, 23) Indate,
 Org.Name OrgName FROM  OrderPeople
 LEFT JOIN USERS ON OrderPeople.InUser=USERS.ID
 LEFT JOIN Org ON Org.OrgID=OrderPeople.OrgID WHERE 1=1 ");
-            string all = "";
-            string getfrompage = "";
-            if (!string.IsNullOrEmpty(orgid._ToStrTrim()))
-            {
-                OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
-                string ids = orgInfoDAL.getChilds(orgid);
-                all = ids.Substring(0, ids.Length - 1);
-                //sql += " AND OrderPeople.ORGID in (" + ids.Substring(0, ids.Length - 1) + ")";
-            }
+            
             if (!string.IsNullOrEmpty(OrderNo._ToStrTrim()))
             {
-                SqlParameter Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim());
+                SqlParameter Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND OrderPeople.OrderNo LIKE '%'+@OrderNo+'%'";
             }
             if (!string.IsNullOrEmpty(UnitName._ToStrTrim()))
             {
-                SqlParameter Para = new SqlParameter("UnitName", UnitName._ToStrTrim());
+                SqlParameter Para = new SqlParameter("UnitName", UnitName._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND OrderPeople.UnitName LIKE '%'+@UnitName+'%'";
             }
             if (!string.IsNullOrEmpty(name._ToStrTrim()))
             {
-                SqlParameter Para = new SqlParameter("name", name._ToStrTrim());
+                SqlParameter Para = new SqlParameter("name", name._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND OrderPeople.Name LIKE '%'+@name+'%'";
             }
-            if (OrgID > 0)
-            {
-                OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
-                string ids = orgInfoDAL.getChilds(OrgID._ToStr());
-                getfrompage = ids.Substring(0, ids.Length - 1);
-                string[] str = getfrompage.Split(',').Intersect(all.Split(',')).ToArray();
-                all = string.Join(",", str);
-            }
+            OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
+            string all = orgInfoDAL.getChilds(orgid, OrgID._ToStr());
+            sql += " AND OrderPeople.ORGID in (" + all + ")";
             if (ID > 0)
             {
                 SqlParameter Para = new SqlParameter("ID", ID._ToInt32());
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND OrderPeople.ID =@ID";
             }
-            sql += " AND OrderPeople.ORGID in (" + all + ")";
+           
             if (!string.IsNullOrEmpty(dt1._ToStrTrim()))
             {
                 SqlParameter Para = new SqlParameter("INDATE1", dt1._ToDateTime());
@@ -101,42 +88,33 @@ LEFT JOIN Org ON Org.OrgID=OrderPeople.OrgID WHERE 1=1 ");
 
         
 
-        public int GetCount(int ID, string OrderNo, string UnitName, string name, 
-            int OrgID, string dt1, string dt2,string orgid) 
+        public int GetCount(int ID, string OrderNo, string UnitName, string name,
+            string OrgID, string dt1, string dt2,string orgid) 
         {
             string sql = "";
             sql = string.Format(@"select  count(1) as count FROM  OrderPeople
 LEFT JOIN USERS ON OrderPeople.InUser=USERS.ID
 LEFT JOIN Org ON Org.OrgID=OrderPeople.OrgID WHERE 1=1 ");
-            if (!string.IsNullOrEmpty(orgid._ToStrTrim()))
-            {
-                OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
-                string ids = orgInfoDAL.getChilds(orgid);
-                sql += " AND OrderPeople.ORGID in (" + ids.Substring(0, ids.Length - 1) + ")";
-            }
+            OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
+            string all = orgInfoDAL.getChilds(orgid, OrgID._ToStr());
+            sql += " AND OrderPeople.ORGID in (" + all + ")";
             if (!string.IsNullOrEmpty(OrderNo._ToStrTrim()))
             {
-                SqlParameter Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim());
+                SqlParameter Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND OrderPeople.OrderNo LIKE '%'+@OrderNo+'%'";
             }
             if (!string.IsNullOrEmpty(UnitName._ToStrTrim()))
             {
-                SqlParameter Para = new SqlParameter("UnitName", UnitName._ToStrTrim());
+                SqlParameter Para = new SqlParameter("UnitName", UnitName._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND OrderPeople.UnitName LIKE '%'+@UnitName+'%'";
             }
             if (!string.IsNullOrEmpty(name._ToStrTrim()))
             {
-                SqlParameter Para = new SqlParameter("name", name._ToStrTrim());
+                SqlParameter Para = new SqlParameter("name", name._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND OrderPeople.Name LIKE '%'+@name+'%'";
-            }
-            if (OrgID > 0)
-            {
-                SqlParameter Para = new SqlParameter("OrgID", OrgID._ToInt32());
-                dbhelper.SqlParameterList.Add(Para);
-                sql += " AND OrderPeople.OrgID =@OrgID";
             }
             if (ID > 0)
             {
@@ -175,7 +153,7 @@ LEFT JOIN Org ON Org.OrgID=OrderPeople.OrgID WHERE 1=1 ");
         /// <param name="guid"></param>
         /// <returns></returns>
         public string UpdateByPK(int ID, string OrderNo, string UnitName, string name, string phone,
-            string address, int OrgID, string guid = "")
+            string address, string OrgID, string guid = "")
         {
             string res = "";
             try
@@ -190,19 +168,19 @@ LEFT JOIN Org ON Org.OrgID=OrderPeople.OrgID WHERE 1=1 ");
                 if (!string.IsNullOrEmpty(OrderNo._ToStrTrim()))
                 {
                     sql += " OrderNo=@OrderNo, ";
-                    Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim());
+                    Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim().ToUpper());
                     dbhelper.SqlParameterList.Add(Para);
                 }
                 if (!string.IsNullOrEmpty(UnitName._ToStrTrim()))
                 {
                     sql += " UnitName=@UnitName, ";
-                    Para = new SqlParameter("UnitName", UnitName._ToStrTrim());
+                    Para = new SqlParameter("UnitName", UnitName._ToStrTrim().ToUpper());
                     dbhelper.SqlParameterList.Add(Para);
                 }
                 if (!string.IsNullOrEmpty(name._ToStrTrim()))
                 {
                     sql += " name=@name, ";
-                    Para = new SqlParameter("name", name._ToStrTrim());
+                    Para = new SqlParameter("name", name._ToStrTrim().ToUpper());
                     dbhelper.SqlParameterList.Add(Para);
                 }
                 if (!string.IsNullOrEmpty(phone._ToStrTrim()))
@@ -217,7 +195,7 @@ LEFT JOIN Org ON Org.OrgID=OrderPeople.OrgID WHERE 1=1 ");
                     Para = new SqlParameter("address", address._ToStrTrim());
                     dbhelper.SqlParameterList.Add(Para);
                 }
-                if (OrgID > 0)
+                if (OrgID._ToInt32() > 0)
                 {
                     sql += " OrgID=@OrgID, ";
                     Para = new SqlParameter("OrgID", OrgID);
@@ -243,7 +221,7 @@ LEFT JOIN Org ON Org.OrgID=OrderPeople.OrgID WHERE 1=1 ");
         private string check(string OrderNo, int ID = 0, string guid = "")
         {
             string sql = @" select 1 from OrderPeople where OrderNo =@OrderNo ";
-            SqlParameter Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim());
+            SqlParameter Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim().ToUpper());
             dbhelper.SqlParameterList.Add(Para);
             if (ID > 0)
             {
@@ -281,7 +259,7 @@ LEFT JOIN Org ON Org.OrgID=OrderPeople.OrgID WHERE 1=1 ");
         /// <param name="InUser">录入人</param>
         /// <returns></returns>
         public retValue Insert(string OrderNo, string UnitName, string name, string phone,
-            string address, int OrgID, int InUser)
+            string address, string OrgID, int InUser)
         {
             retValue ret = new retValue();
             string res = "";
@@ -297,11 +275,11 @@ LEFT JOIN Org ON Org.OrgID=OrderPeople.OrgID WHERE 1=1 ");
                 string sql = @" insert into OrderPeople(OrderNo,UnitName,name,phone,address,OrgID,InUser) 
 values(@OrderNo,@UnitName,@name,@phone,@address,@OrgID,@InUser) ";
                 SqlParameter Para = null;
-                Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim());
+                Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
-                Para = new SqlParameter("UnitName", UnitName._ToStrTrim());
+                Para = new SqlParameter("UnitName", UnitName._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
-                Para = new SqlParameter("name", name._ToStrTrim());
+                Para = new SqlParameter("name", name._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
                 Para = new SqlParameter("phone", phone._ToStrTrim());
                 dbhelper.SqlParameterList.Add(Para);

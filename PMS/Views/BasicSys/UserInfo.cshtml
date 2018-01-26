@@ -231,7 +231,6 @@
                             var senddata = { str: delkeys };
                             ajaxHelper.post("/BasicSys/UserInfo_Update/", senddata, function (da) {
                                 var jsonObj = JSON.parse(da);
-                                var jsonObj = JSON.parse(da);
                                 if (jsonObj.data == "NEEDLOGIN") {
                                     top.location = "../Account/Login";
                                     return false;

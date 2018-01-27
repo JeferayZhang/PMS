@@ -60,8 +60,12 @@ group by t.OrgID";
             DataTable dt = dbh.ExecuteSql(sql);
             if (dt.Rows.Count>0 && !string.IsNullOrEmpty(dt.Rows[0]["ids"]._ToStr()))
             {
-                childs += dt.Rows[0]["ids"]._ToStr() + ",";
-                getChilds(dt.Rows[0]["ids"]._ToStr());
+                foreach (DataRow item in dt.Rows)
+                {
+                    childs += item["ids"]._ToStr() + ",";
+                    getChilds(item["ids"]._ToStr());
+                }
+                
             }
             return childs;
         }
@@ -87,7 +91,7 @@ group by t.OrgID";
             string str3 = string.Join(",", str);
             return str3;
         }
-        public string insert(string Name,string address,string OrgCode,int parentID=0) 
+        public string insert(string Name,string address,string OrgCode,int parentID=0,int level=0) 
         {
             if (GetOrgByName(OrgCode)>0)
             {
@@ -102,7 +106,9 @@ group by t.OrgID";
             dbh.SqlParameterList.Add(Para);
             Para = new SqlParameter("OrgCode", OrgCode._ToStrTrim());
             dbh.SqlParameterList.Add(Para);
-            string sql = @" insert into org(name,address,parentid,OrgCode) values(@Name,@address,@parentID,@OrgCode)";
+            Para = new SqlParameter("level", level._ToStrTrim());
+            dbh.SqlParameterList.Add(Para);
+            string sql = @" insert into org(name,address,parentid,OrgCode,level) values(@Name,@address,@parentID,@OrgCode,@level)";
             if (dbh.ExecuteInsert(sql) > 0)
             {
                 return "";

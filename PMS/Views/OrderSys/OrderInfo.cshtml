@@ -54,7 +54,7 @@
                         { field: 'CostState', align: 'center', title: '缴费状态' },
                         { field: 'GetUser', align: 'center', title: '收订员' },
                         { field: 'InUser', align: 'center', title: '录入员', sort: true },
-                        { field: 'Indate', align: 'center', title: '录入时间', sort: true }
+                        { field: 'OrderDate', align: 'center', title: '起订日期', sort: true }
                     ]],
                     page: true,
                     id: 'testReload'
@@ -163,7 +163,7 @@
                               UnitName: UnitName,
                               BKDH: BKDH,
                               OrderState: OrderState,
-                              CostState: CostState,
+                              CostState: CostState
                           }
                         });
                     }
@@ -409,11 +409,6 @@
                 <button type="button" class="layui-btn" name="file" id="file"><i class="layui-icon"></i>批量导入订购</button>
                 <button class="layui-btn test" id="test4">下载导入模板</button>
             </div>
-        </form>
-    </div>
-    <div>
-        <form class="layui-form" style="margin-left: 5px; margin-top: 20px;" action="" method="get" id="mainform">
-            
         </form>
     </div>
     <div>

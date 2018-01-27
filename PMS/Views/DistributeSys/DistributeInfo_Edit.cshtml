@@ -1,0 +1,58 @@
+﻿@using Common
+@model object
+@{
+    //表示执行的操作是市-县级分发,或者是县-段道分发
+    string ids = "";
+    if (Model != null)
+    {
+        ids = Model._ToStr();
+    }
+}
+@section scripts{
+    <script>
+        $(function () {
+            var ajaxHelper = new AjaxHelper();
+
+            layui.use([ 'jquery', 'layer', 'form'], function () {
+                var $ = layui.jquery,layer = layui.layer, form = layui.form;
+                form.on('submit(save1)', function (data) {
+                    var ddd = { str: JSON.stringify(data.field) };
+                    ajaxHelper.post("/DistributeSys/DistributeLog_FF/", ddd, function (da) {
+                        var jsonObj = JSON.parse(da);
+                        if (jsonObj.data == "NEEDLOGIN") {
+                            top.location = "../Account/Login";
+                            return false;
+                        }
+                        if (jsonObj.result) {
+                            layer.open({
+                                title: '提示', content: jsonObj.data, time: 2000,
+                                end: function () {
+                                    var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                                    parent.layer.close(index);  // 关闭layer
+                                }
+                            });
+                        }
+                        else {
+                            layer.open({
+                                title: '提示', content: jsonObj.reason, time: 2000
+                            });
+                        }
+                    });
+                    return false;
+                });
+                form.render();
+            });
+        });
+    </script>
+}
+
+<form class="layui-form" style="margin-top:100px">
+    <input type="hidden" id="ids" name="ids" value="@ids" />
+    <div class=" layui-form-item">
+        <label class="layui-form-label">年卷期</label>
+        <div class="layui-input-inline">
+            <input type="text" lay-verify="required"  id="nianjuanqi"  name="nianjuanqi" autocomplete="off" class="layui-input" maxlength="50">
+        </div>
+        <button class="layui-btn" type="button" style="margin-left:50px" lay-filter="save1" lay-submit="" data-type="save">保存</button>
+    </div>
+</form>

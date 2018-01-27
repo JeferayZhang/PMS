@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+﻿using BLL;
 using Common;
-using BLL;
-using System.Data;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Converters;
 using PMS.Models;
+using System.Collections.Generic;
+using System.Data;
+using System.Web.Mvc;
 
 namespace PMS.Controllers
 {
@@ -306,6 +302,17 @@ namespace PMS.Controllers
                     user.Sex = dr["Sex"]._ToInt32();
                     user.IDCard = dr["IDCard"]._ToStrTrim();
                     user.State = dr["State"]._ToInt32();
+                    OrgInfoBLL orgInfoBLL = new OrgInfoBLL();
+                    retValue retValue = orgInfoBLL.GetOrgByPK(user.OrgID);
+                    if (retValue.result)
+                    {
+                        DataTable dt1 = retValue.data as DataTable;
+                        user.Level = dt1.Rows[0]["Level"]._ToInt32();
+                    }
+                    else
+                    {
+                        user.Level = 0;
+                    }
                     Session["UserModel"] = user;
                 }
             }
@@ -601,10 +608,16 @@ namespace PMS.Controllers
                 string OrgCode = o["OrgCode"]._ToStrTrim();
                 string Address = o["Address"]._ToStrTrim();
                 string parentID = o["ParentID"]._ToStrTrim();
+                int level = 0;
+                ret = _BLL.GetOrgByParentID(parentID._ToInt32());
+                if (ret.result)
+                {
+                    level = ((DataTable)ret.data).Rows[0]["Level"]._ToInt32() + 1;
+                }
                 //新增
                 if (string.IsNullOrEmpty(ID))
                 {
-                    ret = _BLL.insert(NAME, Address, OrgCode, parentID._ToInt32());
+                    ret = _BLL.insert(NAME, Address, OrgCode, parentID._ToInt32(), level);
                 }
                 //更新
                 else

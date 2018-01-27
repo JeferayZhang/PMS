@@ -194,7 +194,6 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\AccountModels.cs" />
-    <Compile Include="Models\PageModel.cs" />
     <Compile Include="Models\UserModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -444,6 +443,7 @@
     <Content Include="批量导入订购模板.xlsx" />
     <Content Include="Views\CostSys\CostInfo.cshtml" />
     <Content Include="Views\CostSys\Cost_Pay.cshtml" />
+    <Content Include="Views\DistributeSys\DistributeInfo_Edit.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

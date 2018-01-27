@@ -1,5 +1,134 @@
-﻿@{
-    ViewBag.Title = "分发日志";
+﻿@using System.Data
+@using Common
+@model object
+@{
+    //表示执行的操作是市-县级分发,或者是县-段道分发
+    string action = "";
+    if (Model != null)
+    {
+        action = Model._ToStr();
+    }
 }
+@section scripts{
+    <script>
+        $(function () {
+            var ajaxHelper = new AjaxHelper();
 
-<h2>DistributeLog</h2>
+            layui.use(['laydate', 'layer', 'element', 'form',  'table', 'laytpl'], function () {
+                var laydate = layui.laydate, layer = layui.layer, element = layui.element, form = layui.form,
+                    $ = layui.jquery, table = layui.table, laytpl = layui.laytpl;
+
+                var start = {
+                    min: laydate.now
+                  , max: '2099-06-16 23:59:59'
+                  , istoday: false
+                  , choose: function (datas) {
+                      end.min = datas; //开始日选好后，重置结束日的最小日期
+                      end.start = datas //将结束日的初始值设定为开始日
+                  }
+                };
+
+                var end = {
+                    min: laydate.now
+                  , max: '2099-06-16 23:59:59'
+                  , istoday: true
+                  , choose: function (datas) {
+                      start.max = datas; //结束日选好后，重置开始日的最大日期
+                  }
+                };
+                laydate.render({
+                    elem: '#test1'
+                });
+                laydate.render({
+                    elem: '#test2'
+                });
+                table.render({
+                    elem: '#maintb',
+                    url: '/DistributeSys/GetHistory/',
+                    cols: [[
+                        { field: 'DocName', align: 'center', title: '报刊名称', sort: true },
+                        { field: 'OrgName', align: 'center', title: '机构名称', sort: true },
+                        { field: 'OrderNum', align: 'center', title: '订购数' },
+                        { field: 'Date', align: 'center', title: '分发日期' },
+                        { field: 'NAME', align: 'center', title: '分发员' },
+                        { field: 'NianJuanQi', align: 'center', title: '年卷期' }
+                    ]],
+                    page: true,
+                    id: 'testReload'
+                });
+                var $ = layui.$, active = {
+                    reload: function () {
+                        var test1 = $('#test1').val();
+                        var test2 = $('#test2').val();
+                        var tttttt = $('#action').val();
+                        console.log(tttttt);
+                        var User = $('#User option:selected').val();
+                        //执行重载
+                        table.reload('testReload', {
+                            page: {
+                                curr: 1, //重新从第 1 页开始
+                                layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'],
+                                groups: 5,
+                                last: true,
+                                first: true
+                            }
+                          , where: {
+                              test1: test1,
+                              test2: test2,
+                              User: User,
+                              tttttt: tttttt
+                          }
+                        });
+                    }
+                };
+
+                $('.layui-form .layui-btn').on('click', function () {
+                    var type = $(this).data('type');
+                    active[type] ? active[type].call(this) : '';
+                });
+                form.render();
+            });
+        })
+    </script>
+}
+<div>
+    <div>
+        <form class="layui-form" style="margin-top: 20px;">
+            <input type="hidden" id="action" name="action" value="@action" />
+            <div class="layui-form-item">
+                <label class="layui-form-label">分发起始时间</label>
+                <div class="layui-input-inline">
+                    <input type="text" class="layui-input" name="test1" id="test1" placeholder="年-月-日">
+                </div>
+                <label class="layui-form-label">分发截止时间</label>
+                <div class="layui-input-inline">
+                    <div class="layui-input-inline">
+                        <input type="text" class="layui-input" name="test2" id="test2" placeholder="年-月-日">
+                    </div>
+                </div>
+                @*@{
+                    PMS.Models.UserModel user = new PMS.Models.UserModel();
+                    user = Session["UserModel"] as PMS.Models.UserModel;
+                    if (user != null)
+                    {
+                        if (user.Role == 1)
+                        {
+                            <label class="layui-form-label">分发员</label>
+                            <div class="layui-input-inline">
+                                <select id="User" lay-filter="User" name="User" tag=""></select>
+                            </div>
+                        }
+                    }
+                }*@
+                <label class="layui-form-label">分发员</label>
+                <div class="layui-input-inline">
+                    <select id="User" lay-filter="User" name="User" tag=""></select>
+                </div>
+                <button class="layui-btn" lay-filter="search" lay-submit="" type="button" id="search" data-type="reload"><i class="layui-icon">&#xe615;</i>查询</button>
+            </div>
+        </form>
+    </div>
+    <div>
+        <table class="layui-table" id="maintb" style="width: 99%; margin-left: 5px;"></table>
+    </div>
+</div>

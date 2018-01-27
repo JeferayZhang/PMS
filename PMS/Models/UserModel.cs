@@ -96,5 +96,12 @@ namespace PMS.Models
             get { return _OrgID; }
             set { _OrgID = value; }
         }
+
+        /// <summary>
+        /// 用户机构等级
+        /// </summary>
+        public int Level { get => level; set => level = value; }
+
+        private int level;
     }
 }

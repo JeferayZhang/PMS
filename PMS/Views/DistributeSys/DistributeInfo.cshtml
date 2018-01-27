@@ -1,6 +1,13 @@
-﻿@{
-    ViewBag.Title = "分发";
-    Layout = "~/Views/Shared/Normal.cshtml";
+﻿@using System.Data
+@using Common
+@model object
+@{
+    //表示执行的操作是市-县级分发,或者是县-段道分发
+    string action = "";
+    if (Model != null)
+    {
+        action = Model._ToStr();
+    }
 }
 <script id="qk" type="text/html">
     <option value="">请选择</option>
@@ -17,7 +24,7 @@
 <script id="tuserinfo" type="text/html">
     {{#  layui.each(d, function(index, item){ }}
     <tr>
-        <td hidden>{{item.ids}}</td>
+        <td hidden  name="table_ck" tag="{{item.ids}}">{{item.ids}}</td>
         <td>{{item.DocName}}</td>
         <td>{{item.OrgName}}</td>
         <td>{{item.OrderNum}}</td>
@@ -52,12 +59,16 @@
                 laydate.render({
                     elem: '#test1'
                 });
-                laydate.render({
-                    elem: '#test2'
-                });
 
                 //查询
                 form.on('submit(search)', function (data) {
+                    var result = $('#test1').val();
+                    if (result == "") {
+                        layer.open({
+                            title: '提示', content: '分发日期不能为空!', time: 2000
+                        });
+                        return false;
+                    }
                     var ddd = { str: JSON.stringify(data.field) };
                     ajaxHelper.post("/DistributeSys/GetDis/", ddd, function (da) {
                         var jsonObj = JSON.parse(da);
@@ -157,37 +168,38 @@
                         form.render();
                     });
                 }
-                form.render();
-                //批量删除
-                $("#delete").click(function () {
-                    if ($("#t_UserInfo").find("[name=table_ck]:checked").length == 0) {
-                        layer.open({
-                            title: '提示', content: '请勾选需要进行操作的数据!', time: 2000
-                        });
-                        return;
-                    }
+                //分发
+                form.on('submit(save1)',function () {
                     var delkeys = "";
-                    $("#t_UserInfo").find("[name=table_ck]:checked").each(function () {
-                        delkeys += $(this).val() + ",";
-                    });
+                    var tableObj = document.getElementById("maintb");
+                    //因为表头算一行,所以至少两行才算是有数据
+                    if (tableObj.rows.length < 2) {
+                        layer.open({
+                            title: '提示', content: '没有要分发的数据', time: 2000
+                        });
+                        return false;
+                    }
+                    for (var i = 1; i < tableObj.rows.length; i++) {  //遍历Table的所有Row
+                        delkeys += tableObj.rows[i].cells[0].innerText + ",";
+                    }
                     delkeys = delkeys.substring(0, delkeys.length - 1);
-                    var senddata = { str: delkeys };
-                    ajaxHelper.post("/BasicSys/UserInfo_Deletes/", senddata, function (da) {
-                        var jsonObj = JSON.parse(da);
-                        if (jsonObj.result) {
-                            layer.open({
-                                title: '提示', content: jsonObj.data, time: 2000
-                            });
+                    console.log(delkeys);
+                    layer.open({
+                        type: 2,
+                        title: '报纸分发',
+                        closeBtn: 1,
+                        shade: [0],
+                        area: ['350px', '350px'],
+                        anim: 2,
+                        moveOut: true,
+                        content: ['/DistributeSys/DistributeInfo_Edit?ids=' + delkeys, 'no'],//iframe的url，no代表不显示滚动条
+                        end: function () {
                             $("#search").click();
-                        }
-                        else {
-                            layer.open({
-                                title: '提示', content: jsonObj.reason, time: 2000
-                            });
                         }
                     });
                     return false;
                 });
+                form.render();
             });
         })
     </script>
@@ -195,12 +207,17 @@
 <form class="layui-form" style=" margin-top: 10px;" action="" method="get" id="mainform">
     <div class=" layui-form-item" id="Group_Type">
         <label class="layui-form-label">统计类型</label>
-        <div class="layui-input-block">
+        <div class="layui-input-inline">
             <input type="radio" name="Group_Type" value="1" title="按报刊统计" checked>
             <input type="radio" name="Group_Type" value="2" title="按机构统计">
         </div>
+        <label class="layui-form-label">分发日期</label>
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" value="@System.DateTime.Now.ToString("yyyy-MM-dd")" name="test1" id="test1" placeholder="年-月-日">
+        </div>  
     </div>
     <div class=" layui-form-item" id="Visable_ByMagazine">
+        <input type="hidden" name="action" value="@action" />
         <label class="layui-form-label">报刊名称</label>
         <div class="layui-input-inline">
             <select id="NewspaperName" lay-filter="NewspaperName" name="NewspaperName" tag=""></select>
@@ -217,19 +234,27 @@
         <div class="layui-input-inline">
             <select id="CompanyUnderCity" style="width:150px;" lay-filter="CompanyUnderCity" name="CompanyUnderCity"></select>
         </div>
+        @if (action == "city")
+        {
+            <button class="layui-btn" type="button" lay-filter="search" lay-submit="" data-type="search">统计</button>
+            <button class="layui-btn" type="button" lay-filter="save1" lay-submit="" data-type="save">分发</button>
+        }
     </div>
-    <div class=" layui-form-item">
-        <label class="layui-form-label">网点</label>
-        <div class="layui-input-inline">
-            <select id="CompanyUnderArea" style="width:150px;" lay-filter="CompanyUnderArea" name="CompanyUnderArea"></select>
+    @if (action == "area")
+    {
+        <div class=" layui-form-item">
+            <label class="layui-form-label">网点</label>
+            <div class="layui-input-inline">
+                <select id="CompanyUnderArea" style="width:150px;" lay-filter="CompanyUnderArea" name="CompanyUnderArea"></select>
+            </div>
+            <label class="layui-form-label">段道</label>
+            <div class="layui-input-inline">
+                <select id="Roads" style="width:150px;" lay-filter="Roads" name="Roads"></select>
+            </div>
+            <button class="layui-btn" type="button" lay-filter="search" lay-submit="" data-type="search">统计</button>
+            <button class="layui-btn" id="save1" type="button" lay-filter="save1" lay-submit="" data-type="save">分发</button>
         </div>
-        <label class="layui-form-label">段道</label>
-        <div class="layui-input-inline">
-            <select id="Roads" style="width:150px;" lay-filter="Roads" name="Roads"></select>
-        </div>
-        <button class="layui-btn" type="button" lay-filter="search" lay-submit="" data-type="search">统计</button>
-        <button class="layui-btn" type="button" lay-filter="save1" lay-submit="" data-type="save">分发</button>
-    </div>
+    }
 </form>
 <div>
     <form class="layui-form">
@@ -237,9 +262,9 @@
             <thead>
                 <tr>
                     <td hidden>IDS</td>
-                    <td>报刊名称</td>
-                    <th>机构名称</th>
-                    <th>数量</th>
+                    <td sort="true">报刊名称</td>
+                    <th sort="true">机构名称</th>
+                    <th sort="true">数量</th>
                 </tr>
             </thead>
             <tbody id="t_UserInfo"></tbody>

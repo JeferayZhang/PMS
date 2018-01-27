@@ -52,10 +52,10 @@ namespace BLL
             return ret;
         }
 
-        public retValue insert(string Name, string address, string OrgCode, int parentID = 0) 
+        public retValue insert(string Name, string address, string OrgCode, int parentID = 0,int level=0) 
         {
             retValue ret = new retValue();
-            string res = dal.insert(Name, address, OrgCode, parentID);
+            string res = dal.insert(Name, address, OrgCode, parentID, level);
             if (string.IsNullOrEmpty(res))
             {
                 ret.result = true;

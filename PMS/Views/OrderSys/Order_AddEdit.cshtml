@@ -123,15 +123,13 @@
                         var jsonObj = JSON.parse(da);
                         var getTpl3 = $("#PosterInfo").html()
                             , view3 = $("#Poster");
-                        if (jsonObj.code == 0) {
-                            if (jsonObj.data.length > 0) {
-                                laytpl(getTpl3).render(jsonObj.data, function (a3) {
-                                    $(view3).html(a3);
-                                    var value = $("#Poster").attr("tag");
-                                    $("#Poster option[value='" + value + "']").attr("selected", "selected");
-                                    form.render();
-                                });
-                            }
+                        if (jsonObj.result) {
+                            laytpl(getTpl3).render(jsonObj.data, function (a3) {
+                                $(view3).html(a3);
+                                var value = $("#Poster").attr("tag");
+                                $("#Poster option[value='" + value + "']").attr("selected", "selected");
+                                form.render();
+                            });
                         }
                     });
                 }

@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Converters;
 using PMS.Models;
+using DAL;
 
 namespace PMS.Controllers
 {
@@ -134,7 +135,33 @@ namespace PMS.Controllers
             }
             var js = JsonConvert.SerializeObject(ret);
             return Content(js);
-        } 
+        }
+        #endregion
+
+        #region 获取当前用户所有能看到的分发员,同一机构或者机构下
+        /// <summary>
+        /// 获取当前用户所有能看到的分发员
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult GetFFs()
+        {
+            retValue ret = new retValue();
+            if (!authorize.checkFilterContext())
+            {
+                ret.result = true;
+                ret.data = "NEEDLOGIN";
+                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
+            }
+            UserModel user = Session["UserModel"] as UserModel;
+            BLL.UserBLL _BLL = new UserBLL();
+            OrgInfoDAL _OrgInfoDAL = new OrgInfoDAL();
+            ret.result = true;
+            ret.data = _BLL.GetPosters("",2);
+            var js = JsonConvert.SerializeObject(ret);
+            return Json(js, JsonRequestBehavior.AllowGet);
+        }
         #endregion
 
         #region 执行分发操作

@@ -81,7 +81,29 @@
                         });
                     }
                 };
+                $(function () {
+                    GetPosters();
+                });
+                //绑定投递员信息
+                function GetPosters() {
+                    var ddd = { str: "" };
+                    ajaxHelper.post("/DistributeSys/GetFFs/", ddd, function (da) {
+                        var jsonObj = JSON.parse(da);
+                        if (jsonObj.data == "NEEDLOGIN") {
+                            top.location = "../Account/Login";
+                            return false;
+                        }
+                        var getTpl3 = $("#PosterInfo").html()
+                            , view3 = $("#User");
 
+                        if (jsonObj.result) {
+                            laytpl(getTpl3).render(jsonObj.data, function (a3) {
+                                $(view3).html(a3);
+                                form.render();
+                            });
+                        }
+                    });
+                }
                 $('.layui-form .layui-btn').on('click', function () {
                     var type = $(this).data('type');
                     active[type] ? active[type].call(this) : '';
@@ -91,6 +113,17 @@
         })
     </script>
 }
+<script id="PosterInfo" type="text/html">
+    <option value="" tag="">请选择</option>
+    {{#  layui.each(d, function(index, item){ }}
+    <option value="{{item.ID}}">{{item.NAME}}</option>
+    {{#  }); }}
+</script>
+<style>
+    .layui-form-label {
+        width: 120px;
+    }
+</style>
 <div>
     <div>
         <form class="layui-form" style="margin-top: 20px;">
@@ -106,20 +139,6 @@
                         <input type="text" class="layui-input" name="test2" id="test2" placeholder="年-月-日">
                     </div>
                 </div>
-                @*@{
-                    PMS.Models.UserModel user = new PMS.Models.UserModel();
-                    user = Session["UserModel"] as PMS.Models.UserModel;
-                    if (user != null)
-                    {
-                        if (user.Role == 1)
-                        {
-                            <label class="layui-form-label">分发员</label>
-                            <div class="layui-input-inline">
-                                <select id="User" lay-filter="User" name="User" tag=""></select>
-                            </div>
-                        }
-                    }
-                }*@
                 <label class="layui-form-label">分发员</label>
                 <div class="layui-input-inline">
                     <select id="User" lay-filter="User" name="User" tag=""></select>

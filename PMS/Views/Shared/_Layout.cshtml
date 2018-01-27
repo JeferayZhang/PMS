@@ -18,9 +18,9 @@
             layui.use([ 'layer', 'element', 'form'], function () {
                 var  layer = layui.layer, element = layui.element, form = layui.form,
                     $ = layui.jquery;
-                form.on('submit(exit)', function (data) {
-                    var ddd = { str: JSON.stringify(data.field) };
-                    ajaxHelper.post("../BasinSys/LoginOut/", ddd, function (da) {
+                form.on('submit(exit)', function () {
+                    var ddd = { str: '' };
+                    ajaxHelper.post("/BasinSys/UserLoginOut/", ddd, function (da) {
                         top.location = "../Account/Login";
                         return false;
                     });
@@ -63,9 +63,9 @@
                         if (user != null)
                         {
                             <a href="javascript:;" tag="@user._ID">
-                                @user.Name
+                               欢迎您,@user.Name
                             </a>
-                            <dl class="layui-nav-child">
+                            @*<dl class="layui-nav-child">
                                 <dd>
                                     <form class="layui-form">
                                         <div class=" layui-form-item">
@@ -78,7 +78,7 @@
                                         </div>
                                     </form>
                                 </dd>
-                            </dl>
+                            </dl>*@
                         }
 }                    
                 </li>

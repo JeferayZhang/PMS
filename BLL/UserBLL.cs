@@ -45,9 +45,9 @@ namespace BLL
             }
             return ret;
         }
-        public DataTable GetPosters(string orgid) 
+        public DataTable GetPosters(string orgid, int role =3) 
         {
-            return dal.GetPosters(orgid);
+            return dal.GetPosters(orgid, role);
         }
         /// <summary>
         /// 根据主键获取用户信息

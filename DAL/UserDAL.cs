@@ -107,7 +107,7 @@ LEFT JOIN USERS B ON B.ID=USERS.Operator WHERE 1=1 ";
             return dt;
         }
 
-        public DataTable GetPosters(string orgid)
+        public DataTable GetPosters(string orgid,int role=3)
         {
             DataTable dt = new DataTable();
             string sql = @"SELECT USERS.ID, USERS.USERNO, USERS.NAME
@@ -121,7 +121,7 @@ FROM USERS WHERE 1=1 ";
                 all = ids.Substring(0, ids.Length - 1);
                 sql += " AND USERS.ORGID in (" + all + ") ";
             }
-            sql += " AND USERS.ROLE=3 AND STATE=0";
+            sql += " AND USERS.ROLE="+ role + @" AND STATE=0";
             
             dt = dbhelper.ExecuteSql(sql + " ORDER BY USERNO");
             return dt;

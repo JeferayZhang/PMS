@@ -35,10 +35,57 @@ namespace BLL
             return ret;
         }
 
-        public retValue GetOrgByParentID(int id)
+        /// <summary>
+        /// 根据父节点ID查询子节点数据,筛选出用户所能看到的
+        /// </summary>
+        /// <param name="id">父级ID</param>
+        /// <param name="UserOrgID">用户所属机构ID</param>
+        /// <returns></returns>
+        public retValue GetOrgByParentID(int id, int UserOrgID = 0, int userlevel = 0)
         {
             retValue ret = new retValue();
-            DataTable dt = dal.GetOrgByParentID(id);
+            DataTable dt = new DataTable();
+            //初次加载省分
+            if (id == 0)
+            {
+                if (userlevel != 0)
+                {
+                    //如果用户是市级别
+                    if (userlevel == 1)
+                    {
+                        dt = dal.getAllOrgByUser(UserOrgID, 1);
+                    }
+                    //如果用户是县级别
+                    if (userlevel == 2)
+                    {
+                        dt = dal.getAllOrgByUser(UserOrgID, 2);
+                    }
+                    //如果用户是网点级别
+                    if (userlevel == 3)
+                    {
+                        dt = dal.getAllOrgByUser(UserOrgID, 3);
+                    }
+                }
+                else
+                {
+                    dt = dal.GetOrgByPK(id);
+                }
+            }
+            //如果不等于,那么表示选择了省份,需要加载用户所属市,县,网点
+            else
+            {
+                //当前选择的机构的级别
+                int level = dal.GetOrgByPK(id).Rows[0]["Level"]._ToInt32();
+                //如果当前选择的机构级别大于用户级别
+                if (level < userlevel)
+                {
+                    dt = dal.getAllOrgByUser(UserOrgID, userlevel - level - 1);
+                }
+                else
+                {
+                    dt = dal.GetOrgByParentID(id, UserOrgID._ToStr());
+                }
+            }
             if (dt != null && dt.Rows.Count > 0)
             {
                 ret.result = true;

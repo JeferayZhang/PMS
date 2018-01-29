@@ -30,8 +30,8 @@
         $(function () {
             var ajaxHelper = new AjaxHelper();
 
-            layui.use(['jquery', 'layer', 'form', 'element'], function () {
-                var $ = layui.jquery, layer = layui.layer, form = layui.form, element = layui.element;
+            layui.use(['jquery', 'layer', 'form', 'laytpl', 'element'], function () {
+                var $ = layui.jquery, layer = layui.layer, form = layui.form, laytpl = layui.laytpl, element = layui.element;
                 form.on('submit(save1)', function (data) {
                     var ddd = { str: JSON.stringify(data.field) };
                     ajaxHelper.post("/BasicSys/OrgInfo_AddEdits/", ddd, function (da) {
@@ -61,21 +61,115 @@
                     var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
                     parent.layer.close(index);  // 关闭layer
                 });
+                $(function () {
+                    var ddd = { str: '' };
+                    selectchanged('', "Province");
+                });
+                //下拉框绑定
+                function selectchanged(parentid, elem) {
+                    if (elem != "") {
+                        $("#" + elem + "").empty();
+                    }
+
+                    var ddd = { str: parentid }
+                    ajaxHelper.post("/BasicSys/OrgInfos/", ddd, function (da) {
+                        var jsonObj = JSON.parse(da);
+                        var getTpl2 = $("#orginfo").html()
+                             , view2 = $("#" + elem + "");
+                        if (jsonObj.result) {
+                            if (jsonObj.data.length > 0) {
+                                laytpl(getTpl2).render(jsonObj.data, function (a2) {
+                                    $(view2).html(a2);
+                                });
+                            }
+                        }
+                        form.render();
+                    });
+                }
+                form.on('select(Province)', function (data) {
+                    $("#CompanyCity").empty();
+                    document.getElementById('CompanyCity').innerHTML = "";
+                    document.getElementById('CompanyUnderCity').innerHTML = "";
+                    document.getElementById('CompanyUnderArea').innerHTML = "";
+                    $("#CompanyUnderCity").empty();
+                    $("#CompanyUnderArea").empty();
+                    var parentid = $("#Province option:selected").val();
+                    if (parentid == "") {
+                        return false;
+                    }
+                    else {
+                        selectchanged(parentid, "CompanyCity");
+                    }
+                    return false;
+                });
+                form.on('select(CompanyCity)', function (data) {
+                    $("#CompanyUnderCity").html("");
+                    $("#CompanyUnderArea").html("");
+                    var parentid = $("#CompanyCity option:selected").val();
+                    if (parentid == "") {
+                        return false;
+                    }
+                    selectchanged(parentid, "CompanyUnderCity");
+                    return false;
+                });
+                form.on('select(CompanyUnderCity)', function (data) {
+                    $("#CompanyUnderArea").html("");
+                    var parentid = $("#CompanyUnderCity option:selected").val();
+                    if (parentid == "") {
+                        return false;
+                    }
+                    selectchanged(parentid, "CompanyUnderArea");
+                    return false;
+                });
+                form.on('select(CompanyUnderArea)', function (data) {
+                    var parentid = $("#CompanyUnderArea option:selected").val();
+                    if (parentid == "") {
+                        return false;
+                    }
+                    selectchanged(parentid, "");
+                    return false;
+                });
                 form.render();
             });
         });
     </script>
 }
-<form class="layui-form">
+<script id="orginfo" type="text/html">
+    <option value="">请选择</option>
+    {{#  layui.each(d, function(index, item){ }}
+    <option value="{{item.OrgID}}">{{item.Name}}</option>
+    {{#  }); }}
+</script>
+<form class="layui-form" style="margin-left: 20px;margin-top:30px;">
     <input type="hidden" name="ID" value="@ID" />
-    <input type="hidden" name="ParentID" value="@ParentID" />
+    @if (dr == null)
+    {
+        <div class="layui-form-item">
+            <label class="layui-form-label">省</label>
+            <div class="layui-input-inline">
+                <select id="Province" lay-filter="Province" style="width:150px;" name="Province"></select>
+            </div>
+            <label class="layui-form-label">市分公司</label>
+            <div class="layui-input-inline">
+                <select id="CompanyCity" lay-filter="CompanyCity" style="width:150px;" name="CompanyCity"></select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">县分公司</label>
+            <div class="layui-input-inline">
+                <select id="CompanyUnderCity" style="width:150px;" lay-filter="CompanyUnderCity" name="CompanyUnderCity"></select>
+            </div>
+            <label class="layui-form-label">网点</label>
+            <div class="layui-input-inline">
+                <select id="CompanyUnderArea" style="width:150px;" lay-filter="CompanyUnderArea" name="CompanyUnderArea"></select>
+            </div>
+        </div>
+    }
     <div class=" layui-form-item">
         <label class="layui-form-label">编号</label>
         <div class="layui-input-inline">
             <input type="text" lay-verify="required" id="OrgCode" value="@(dr == null ? "" : dr["OrgCode"]._ToStrTrim())" name="OrgCode" autocomplete="off" class="layui-input" maxlength="50">
         </div>
-    </div>
-    <div class=" layui-form-item">
         <label class="layui-form-label">机构名称</label>
         <div class="layui-input-inline">
             <input type="text" lay-verify="required" id="Name" value="@(dr == null ? "" : dr["Name"]._ToStrTrim())" name="Name" autocomplete="off" class="layui-input" maxlength="50">
@@ -86,9 +180,7 @@
         <div class="layui-input-inline">
             <input type="text" id="Address" name="Address" value="@(dr == null ? "" : dr["ADDRESS"]._ToStrTrim())" autocomplete="off" class="layui-input" maxlength="50">
         </div>
-    </div>
-    <div class=" layui-form-item">
-        <button class="layui-btn" type="button"  lay-filter="save1" lay-submit="" data-type="save">保存</button>
-        <button class="layui-btn"  type="button" lay-filter="close" lay-submit="" data-type="close">关闭</button>
+        <button class="layui-btn" type="button" lay-filter="save1" lay-submit="" data-type="save">保存</button>
+        <button class="layui-btn" type="button" lay-filter="close" lay-submit="" data-type="close">关闭</button>
     </div>
 </form>

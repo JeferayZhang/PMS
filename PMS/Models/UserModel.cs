@@ -108,5 +108,21 @@ namespace PMS.Models
             get { return level; }
             set { level = value; }
         }
+
+        private string OrgName;
+
+        public string _OrgName
+        {
+            get { return OrgName; }
+            set { OrgName = value; }
+        }
+
+        private string orgNo;
+
+        public string OrgNo
+        {
+            get { return orgNo; }
+            set { orgNo = value; }
+        }
     }
 }

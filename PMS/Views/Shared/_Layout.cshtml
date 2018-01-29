@@ -44,6 +44,18 @@
                 });
             });
         });
+        window.onload = function () {
+            var show = document.getElementById("show");
+            setInterval(function () {
+                var time = new Date();
+                // 程序计时的月从0开始取值后+1
+                var m = time.getMonth() + 1;
+                var t = time.getFullYear() + "-" + m + "-"
+                  + time.getDate() + " " + time.getHours() + ":"
+                  + time.getMinutes() + ":" + time.getSeconds();
+                show.innerHTML = t;
+            }, 1000);
+        };
     </script>
 </head>
 
@@ -53,8 +65,8 @@
         <div class="layui-header">
             <a href="/Home/Index" class="layui-hide-xs">
                 <div class="layui-logo">PMS系统</div>
+                <div class="" id="show"></div>
             </a>
-
             <ul class="layui-nav layui-layout-right">
                 <li class="layui-nav-item layui-hide-xs">
                     @{
@@ -63,7 +75,7 @@
                         if (user != null)
                         {
                             <a href="javascript:;" tag="@user._ID">
-                               欢迎您,@user.Name
+                               当前用户:@user.Name  ,  机构代码:@user.OrgNo  ,  机构名称:@user._OrgName
                             </a>
                             @*<dl class="layui-nav-child">
                                 <dd>

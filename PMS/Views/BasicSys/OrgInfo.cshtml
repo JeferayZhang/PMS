@@ -164,7 +164,7 @@
                         title: '新增机构',
                         closeBtn: 1,
                         shade: [0],
-                        area: ['400px', '260px'],
+                        area: ['750px', '350px'],
                         anim: 2,
                         moveOut: true,
                         content: ['/BasicSys/OrgInfo_AddEdit?ParentID=' + orgid, 'yes'],//iframe的url，no代表不显示滚动条
@@ -251,6 +251,7 @@
         <td><input type="checkbox" name="table_ck" value="{{item.OrgID}}" lay-filter="table_ck" lay-skin="primary" title=""></td>
         <td>{{item.OrgCode}}</td>
         <td>{{item.Name}}</td>
+        <td>{{item.ParentName}}</td>
         <td>{{item.Address}}</td>
     </tr>
     {{#  }); }}
@@ -299,6 +300,7 @@
                 <th><input type="checkbox" lay-filter="allChoose" lay-skin="primary" /></th>
                 <td>编号</td>
                 <td>名称</td>
+                <td>上级机构</td>
                 <td>地址</td>
             </tr>
         </thead>

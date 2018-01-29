@@ -302,6 +302,8 @@ namespace PMS.Controllers
                     user.Sex = dr["Sex"]._ToInt32();
                     user.IDCard = dr["IDCard"]._ToStrTrim();
                     user.State = dr["State"]._ToInt32();
+                    user._OrgName = dr["OrgName"]._ToStrTrim();
+                    user.OrgNo = dr["OrgNo"]._ToStrTrim();
                     OrgInfoBLL orgInfoBLL = new OrgInfoBLL();
                     retValue retValue = orgInfoBLL.GetOrgByPK(user.OrgID);
                     if (retValue.result)
@@ -538,13 +540,9 @@ namespace PMS.Controllers
                 ret.data = "NEEDLOGIN";
                 return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
             }
-
             BLL.OrgInfoBLL _BLL = new OrgInfoBLL();
-            string content = string.Empty;
-
-            ret = _BLL.GetOrgByParentID(str._ToInt32());
-            content = ret.toJson();
-
+            UserModel user = Session["UserModel"] as UserModel;
+            ret = _BLL.GetOrgByParentID(str._ToInt32(), user.OrgID,user.Level);
             var js = JsonConvert.SerializeObject(ret);
 
             return Json(js, JsonRequestBehavior.AllowGet);
@@ -607,17 +605,37 @@ namespace PMS.Controllers
                 string NAME = o["Name"]._ToStrTrim();
                 string OrgCode = o["OrgCode"]._ToStrTrim();
                 string Address = o["Address"]._ToStrTrim();
-                string parentID = o["ParentID"]._ToStrTrim();
-                int level = 0;
-                ret = _BLL.GetOrgByParentID(parentID._ToInt32());
-                if (ret.result)
-                {
-                    level = ((DataTable)ret.data).Rows[0]["Level"]._ToInt32() + 1;
-                }
                 //新增
                 if (string.IsNullOrEmpty(ID))
                 {
-                    ret = _BLL.insert(NAME, Address, OrgCode, parentID._ToInt32(), level);
+                    string Province = o["Province"]._ToStrTrim();
+                    string CompanyCity = o["CompanyCity"]._ToStrTrim();
+                    string CompanyUnderCity = o["CompanyUnderCity"]._ToStrTrim();
+                    string CompanyUnderArea = o["CompanyUnderArea"]._ToStrTrim();
+                    string OrgID = "";
+                    if (Province._ToInt32() > 0)
+                    {
+                        OrgID = Province;
+                    }
+                    if (CompanyCity._ToInt32() > 0)
+                    {
+                        OrgID = CompanyCity;
+                    }
+                    if (CompanyUnderCity._ToInt32() > 0)
+                    {
+                        OrgID = CompanyUnderCity;
+                    }
+                    if (CompanyUnderArea._ToInt32() > 0)
+                    {
+                        OrgID = CompanyUnderArea;
+                    }
+                    int level = 0;
+                    ret = _BLL.GetOrgByParentID(OrgID._ToInt32());
+                    if (ret.result)
+                    {
+                        level = ((DataTable)ret.data).Rows[0]["Level"]._ToInt32() + 1;
+                    }
+                    ret = _BLL.insert(NAME, Address, OrgCode, OrgID._ToInt32(), level);
                 }
                 //更新
                 else

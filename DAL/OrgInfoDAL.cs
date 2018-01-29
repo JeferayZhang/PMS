@@ -39,19 +39,67 @@ namespace DAL
             SqlParameter Para = null;
             Para = new SqlParameter("id", id._ToStrTrim());
             dbh.SqlParameterList.Add(Para);
-            dt = dbh.ExecuteSql(" select * from org where orgID=@id");
+            dt = dbh.ExecuteSql(@"  select * ,b.Name ParentName from org 
+  left join Org b on Org.ParentID=b.OrgID  where org.orgID=@id");
             return dt;
         }
 
-        public DataTable GetOrgByParentID(int ParentID)
+        /// <summary>
+        /// 根据父节点ID查询子节点数据,筛选出用户所能看到的
+        /// </summary>
+        /// <param name="ParentID">父级ID</param>
+        /// <param name="UserOrgID">用户所属机构ID</param>
+        /// <returns></returns>
+        public DataTable GetOrgByParentID(int ParentID, string UserOrgID = "")
         {
             DataTable dt = new DataTable();
             SqlParameter Para = null;
+           
+            //string all = getChilds(UserOrgID, "");
             Para = new SqlParameter("ParentID", ParentID._ToStrTrim());
             dbh.SqlParameterList.Add(Para);
-            dt = dbh.ExecuteSql(" select * from org where ParentID=@ParentID");
+            //dt = dbh.ExecuteSql(" select * from org where ParentID=@ParentID and orgid in (" + all + ")");
+            dt = dbh.ExecuteSql(@" select * ,b.Name ParentName from org 
+  left join Org b on Org.ParentID=b.OrgID  where org.ParentID=@ParentID");
             return dt;
         }
+
+        public DataTable getCurr(int UserOrgID)
+        {
+            DataTable dt = new DataTable();
+            SqlParameter Para = null;
+            Para = new SqlParameter("orgid", UserOrgID._ToStrTrim());
+            dbh.SqlParameterList.Add(Para);
+            dt = dbh.ExecuteSql(@" select org.*,b.Name ParentName from org 
+left join Org b on Org.ParentID=b.OrgID
+ where org.orgid in (select ParentID from org where orgid=@orgid)");
+            return dt;
+        }
+
+        public DataTable getAllOrgByUser(int UserOrgID,int userlevel)
+        {
+            DataTable dt =new DataTable();
+            if (userlevel > 0)
+            {
+                for (int i = 0; i < userlevel; i++)
+                {
+                    DataTable nt = getCurr(UserOrgID);
+                    if (nt.Rows.Count > 0)
+                    {
+                        dt = nt;
+                        UserOrgID = nt.Rows[0]["orgid"]._ToInt32();
+                    }
+                }
+            }
+            else
+            {
+                dt = GetOrgByPK(UserOrgID);
+            }
+            return dt;
+        }
+        /// <summary>
+        /// 初始化为0,
+        /// </summary>
         public string childs = "0,";
         public string getChilds(string orgid)
         {
@@ -87,22 +135,25 @@ group by t.OrgID";
         /// <returns></returns>
         public string getChilds(string userorg,string chooseorg)
         {
-            childs = userorg + ",";
-            string str1 = getChilds(userorg);
-            str1= str1.Substring(0, str1.Length - 1);
-            
-            if (string.IsNullOrEmpty(chooseorg))
+            string str1 = "";
+            string str2 = "";
+            if (!string.IsNullOrEmpty(userorg))
             {
-                return str1;
+                childs = userorg._ToInt32() + ",";
+                str1 = getChilds(userorg);
+                str1 = str1.Substring(0, str1.Length - 1);
             }
-            //这里是为了重置机构,免得重复
-            childs = userorg + ",";
-            string str2 = getChilds(chooseorg);
-            str2 = str2.Substring(0, str2.Length - 1);
-            //取交集
-            string[] str = str1.Split(',').Intersect(str2.Split(',')).ToArray();
-            string str3 = string.Join(",", str);
-            return str3;
+            if (!string.IsNullOrEmpty(chooseorg))
+            {
+                //这里是为了重置机构,免得重复
+                childs = userorg + ",";
+                str2 = getChilds(chooseorg);
+                str2 = str2.Substring(0, str2.Length - 1);
+                //取交集
+                string[] str = str1.Split(',').Intersect(str2.Split(',')).ToArray();
+                str1 = string.Join(",", str);
+            }
+            return str1;
         }
         public string insert(string Name,string address,string OrgCode,int parentID=0,int level=0) 
         {

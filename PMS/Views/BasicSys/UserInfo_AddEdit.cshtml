@@ -79,8 +79,6 @@
                     return false;
                 });
                 $(function () {
-                    console.log($('#Province').val());
-                    console.log($('#ID').val());
                     if ($('#ID').val() == "") {
                         var ddd = { str: '' };
                         selectchanged('', "Province");
@@ -150,9 +148,9 @@
     {{#  }); }}
 </script>
 <div>
-    <form class="layui-form">
-        <input type="hidden"  id="ID" name="ID" value="@(dr == null ? "" : dr["ID"]._ToStrTrim())" />
-        <input type="hidden"  id="MGuid" name="MGuid" value="@(dr == null ? "" : dr["MGUID"]._ToStrTrim())" />
+    <form class="layui-form" style="margin-left: 20px;margin-top:20px;">
+        <input type="hidden" id="ID" name="ID" value="@(dr == null ? "" : dr["ID"]._ToStrTrim())" />
+        <input type="hidden" id="MGuid" name="MGuid" value="@(dr == null ? "" : dr["MGUID"]._ToStrTrim())" />
         <div class=" layui-form-item">
             <label class="layui-form-label">用户编号</label>
             <div class="layui-input-inline">
@@ -252,8 +250,8 @@
             </div>
         }
         <div class=" layui-form-item">
-            <button class="layui-btn" type="button"  lay-filter="save1" lay-submit="" data-type="save">保存</button>
-            <button class="layui-btn"  type="button" lay-filter="close" lay-submit="" data-type="close">关闭</button>
+            <button class="layui-btn" type="button" lay-filter="save1" lay-submit="" data-type="save">保存</button>
+            <button class="layui-btn" type="button" lay-filter="close" lay-submit="" data-type="close">关闭</button>
         </div>
     </form>
 </div>

@@ -123,7 +123,11 @@ LEFT JOIN USERS ON USERS.ID = DOC.ADDPERSON  WHERE 1=1 ";
             string res = "";
             try
             {
-                if (!checkDoc(guid))
+                if (dbhelper.Count("select count(1) from Doc where upper(bkdh)='" + BKDH.ToUpper() + "' and id<>" + ID) > 0)
+                {
+                    res = "报刊代号已存在";
+                }
+                else if (!checkDoc(guid))
                 {
                     res = "数据已被修改,请刷新后尝试";
                 }
@@ -267,7 +271,7 @@ LEFT JOIN USERS ON USERS.ID = DOC.ADDPERSON  WHERE 1=1 ";
             string res = "";
             try
             {
-                if (dbhelper.Count("select count(1) from Doc where bkdh='" + BKDH + "'") > 0)
+                if (dbhelper.Count("select count(1) from Doc where upper(bkdh)='" + BKDH.ToUpper() + "'") > 0)
                 {
                     res = "报刊代号已存在";
                 }
@@ -324,7 +328,7 @@ LEFT JOIN USERS ON USERS.ID = DOC.ADDPERSON  WHERE 1=1 ";
 
         public decimal GetPrice(string bkdh) 
         {
-            string sql = @" select price from doc where bkdh =@bkdh";
+            string sql = @" select price from doc where upper(bkdh) =@bkdh";
             SqlParameter Para = new SqlParameter("bkdh", bkdh._ToStr().ToUpper());
             dbhelper.SqlParameterList.Add(Para);
             DataTable dt = dbhelper.ExecuteSql(sql);

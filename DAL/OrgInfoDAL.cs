@@ -17,13 +17,15 @@ namespace DAL
         /// </summary>
         /// <param name="orgname">机构编号唯一</param>
         /// <returns></returns>
-        public int GetOrgByName( string OrgCode) 
+        public int GetOrgByName(string OrgCode, int id = 0) 
         {
             DataTable dt=new DataTable();
             SqlParameter Para = null;
-            Para = new SqlParameter("OrgCode", OrgCode._ToStrTrim());
+            Para = new SqlParameter("OrgCode", OrgCode._ToStrTrim().ToUpper());
             dbh.SqlParameterList.Add(Para);
-            dt = dbh.ExecuteSql(" select orgid from org where OrgCode=@OrgCode");
+            Para = new SqlParameter("id", id);
+            dbh.SqlParameterList.Add(Para);
+            dt = dbh.ExecuteSql(" select orgid from org where OrgCode=@OrgCode and orgid<>@id");
             if (dt!=null &&dt.Rows.Count>0)
             {
                 return dt.Rows[0][0]._ToInt32();
@@ -53,6 +55,10 @@ namespace DAL
         public string childs = "0,";
         public string getChilds(string orgid)
         {
+            if (string.IsNullOrEmpty(orgid))
+            {
+                return childs;
+            }
             string sql = @"SELECT t.orgid,STUFF((SELECT ','+ltrim(org.orgID)  FROM org    
   WHERE parentid=t.orgid FOR XML PATH('')), 1, 1, '') AS ids
 FROM org t  where t.orgid in ("+ orgid + @")
@@ -62,7 +68,10 @@ group by t.OrgID";
             {
                 foreach (DataRow item in dt.Rows)
                 {
-                    childs += item["ids"]._ToStr() + ",";
+                    if (!string.IsNullOrEmpty(item["ids"]._ToStr()))
+                    {
+                        childs += item["ids"]._ToStr() + ",";
+                    }
                     getChilds(item["ids"]._ToStr());
                 }
                 
@@ -78,15 +87,19 @@ group by t.OrgID";
         /// <returns></returns>
         public string getChilds(string userorg,string chooseorg)
         {
+            childs = userorg + ",";
             string str1 = getChilds(userorg);
             str1= str1.Substring(0, str1.Length - 1);
-            childs = "0,";
+            
             if (string.IsNullOrEmpty(chooseorg))
             {
                 return str1;
             }
+            //这里是为了重置机构,免得重复
+            childs = userorg + ",";
             string str2 = getChilds(chooseorg);
             str2 = str2.Substring(0, str2.Length - 1);
+            //取交集
             string[] str = str1.Split(',').Intersect(str2.Split(',')).ToArray();
             string str3 = string.Join(",", str);
             return str3;
@@ -98,13 +111,13 @@ group by t.OrgID";
                 return "机构编号已经存在";
             }
             SqlParameter Para = null;
-            Para = new SqlParameter("Name", Name._ToStrTrim());
+            Para = new SqlParameter("Name", Name._ToStrTrim().ToUpper());
             dbh.SqlParameterList.Add(Para);
-            Para = new SqlParameter("address", address._ToStrTrim());
+            Para = new SqlParameter("address", address._ToStrTrim().ToUpper());
             dbh.SqlParameterList.Add(Para);
             Para = new SqlParameter("parentID", parentID._ToStrTrim());
             dbh.SqlParameterList.Add(Para);
-            Para = new SqlParameter("OrgCode", OrgCode._ToStrTrim());
+            Para = new SqlParameter("OrgCode", OrgCode._ToStrTrim().ToUpper());
             dbh.SqlParameterList.Add(Para);
             Para = new SqlParameter("level", level._ToStrTrim());
             dbh.SqlParameterList.Add(Para);
@@ -121,18 +134,18 @@ group by t.OrgID";
 
         public string update(int id, string Name, string OrgCode, string address)
         {
-            if (GetOrgByName(OrgCode) > 0)
+            if (GetOrgByName(OrgCode, id) > 0)
             {
                 return "机构编号已经存在";
             }
             SqlParameter Para = null;
-            Para = new SqlParameter("Name", Name._ToStrTrim());
+            Para = new SqlParameter("Name", Name._ToStrTrim().ToUpper());
             dbh.SqlParameterList.Add(Para);
-            Para = new SqlParameter("address", address._ToStrTrim());
+            Para = new SqlParameter("address", address._ToStrTrim().ToUpper());
             dbh.SqlParameterList.Add(Para);
             Para = new SqlParameter("id", id);
             dbh.SqlParameterList.Add(Para);
-            Para = new SqlParameter("OrgCode", OrgCode._ToStrTrim());
+            Para = new SqlParameter("OrgCode", OrgCode._ToStrTrim().ToUpper());
             dbh.SqlParameterList.Add(Para);
             string sql = @" update org set name=@Name,address=@address,OrgCode=@OrgCode where orgID=@id";
             if (dbh.ExecuteNonQuery(sql)>0)
@@ -169,8 +182,6 @@ group by t.OrgID";
                 res = ex.Message;
             }
             return res;
-        }
-        
-        
+        }        
     }
 }

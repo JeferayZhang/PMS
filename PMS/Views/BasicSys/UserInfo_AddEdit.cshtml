@@ -40,9 +40,7 @@
                     }
                     if ($('#ID').val() == "") {
                         if ($('#Province option:selected').val() === ""
-                            || $('#CompanyCity option:selected').val() === ""
-                            || $('#CompanyUnderCity option:selected').val() === ""
-                            || $('#CompanyUnderArea option:selected').val() === "") {
+                            || $('#CompanyCity option:selected').val() === "") {
                             layer.open({
                                 title: '提示', content: '机构不能为空!', time: 2000
                             });

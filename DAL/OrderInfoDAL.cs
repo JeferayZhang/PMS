@@ -56,7 +56,7 @@ where 1=1 ");
             sql += " AND c.ORGID in (" + all + ")";
             if (!string.IsNullOrEmpty(OrderNo._ToStrTrim()))
             {
-                SqlParameter Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim());
+                SqlParameter Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND c.OrderNo LIKE '%'+@OrderNo+'%'";
             }
@@ -68,13 +68,13 @@ where 1=1 ");
             }
             if (!string.IsNullOrEmpty(unitname._ToStrTrim()))
             {
-                SqlParameter Para = new SqlParameter("unitname", unitname._ToStrTrim());
+                SqlParameter Para = new SqlParameter("unitname", unitname._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND c.UnitName LIKE '%'+@unitname+'%'";
             }
             if (!string.IsNullOrEmpty(BKDH._ToStrTrim()))
             {
-                SqlParameter Para = new SqlParameter("BKDH", BKDH._ToStrTrim());
+                SqlParameter Para = new SqlParameter("BKDH", BKDH._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND a.BKDH=@BKDH";
             }
@@ -124,7 +124,7 @@ where 1=1 ");
             sql += " AND c.ORGID in (" + all + ")";
             if (!string.IsNullOrEmpty(OrderNo._ToStrTrim()))
             {
-                SqlParameter Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim());
+                SqlParameter Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND c.OrderNo LIKE '%'+@OrderNo+'%'";
             }
@@ -148,13 +148,13 @@ where 1=1 ");
             }
             if (!string.IsNullOrEmpty(unitname._ToStrTrim()))
             {
-                SqlParameter Para = new SqlParameter("unitname", unitname._ToStrTrim());
+                SqlParameter Para = new SqlParameter("unitname", unitname._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND c.UnitName LIKE '%'+@unitname+'%'";
             }
             if (!string.IsNullOrEmpty(BKDH._ToStrTrim()))
             {
-                SqlParameter Para = new SqlParameter("BKDH", BKDH._ToStrTrim());
+                SqlParameter Para = new SqlParameter("BKDH", BKDH._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND a.BKDH=@BKDH";
             }
@@ -207,7 +207,7 @@ bkdh = @bkdh,PersonID = @PersonID,ModifyDate = GETDATE(),ModifyUser = @ModifyUse
                     dbhelper.SqlParameterList.Add(Para);
                     Para = new SqlParameter("id", ID);
                     dbhelper.SqlParameterList.Add(Para);
-                    Para = new SqlParameter("bkdh", bkdh);
+                    Para = new SqlParameter("bkdh", bkdh.ToUpper());
                     dbhelper.SqlParameterList.Add(Para);
                     Para = new SqlParameter("PersonID", PersonID);
                     dbhelper.SqlParameterList.Add(Para);
@@ -307,7 +307,7 @@ ModifyDate = GETDATE(),ModifyUser = @ModifyUser where id=@id and isnull(state,0)
                 string sql = @" insert into [Order](BKDH,personid,userid,ordernum,orderdate,posterid,ordermonths) 
 values(@BKDH,@personid,@userid,@ordernum,@orderdate,@posterid,@ordermonths) ";
                 SqlParameter Para = null;
-                Para = new SqlParameter("BKDH", BKDH._ToStrTrim());
+                Para = new SqlParameter("BKDH", BKDH._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
                 Para = new SqlParameter("personid", orderpeopleid._ToStrTrim());
                 dbhelper.SqlParameterList.Add(Para);

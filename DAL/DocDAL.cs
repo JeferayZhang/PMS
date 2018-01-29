@@ -44,7 +44,7 @@ LEFT JOIN USERS ON USERS.ID = DOC.ADDPERSON  WHERE 1=1 ";
             }
             if (!string.IsNullOrEmpty(BKDH._ToStrTrim()))
             {
-                SqlParameter Para = new SqlParameter("BKDH", BKDH._ToStrTrim());
+                SqlParameter Para = new SqlParameter("BKDH", BKDH._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND DOC.BKDH =@BKDH";
             }
@@ -56,25 +56,25 @@ LEFT JOIN USERS ON USERS.ID = DOC.ADDPERSON  WHERE 1=1 ";
             }
             if (!string.IsNullOrEmpty(NAME._ToStrTrim()))
             {
-                SqlParameter Para = new SqlParameter("NAME", NAME._ToStrTrim());
+                SqlParameter Para = new SqlParameter("NAME", NAME._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND DOC.NAME like '%'+@NAME+'%'";
             }
             if (!string.IsNullOrEmpty(ISSN._ToStrTrim()))
             {
-                SqlParameter Para = new SqlParameter("ISSN", ISSN._ToStrTrim());
+                SqlParameter Para = new SqlParameter("ISSN", ISSN._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND DOC.ISSN like '%'+@ISSN+'%'";
             }
             if (!string.IsNullOrEmpty(PUBLISHAREA._ToStrTrim()))
             {
-                SqlParameter Para = new SqlParameter("PUBLISHAREA", PUBLISHAREA._ToStrTrim());
+                SqlParameter Para = new SqlParameter("PUBLISHAREA", PUBLISHAREA._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND DOC.PUBLISHAREA  like '%'+@PUBLISHAREA+'%'";
             }
             if (!string.IsNullOrEmpty(PUBLISHER._ToStrTrim()))
             {
-                SqlParameter Para = new SqlParameter("PUBLISHER", PUBLISHER._ToStrTrim());
+                SqlParameter Para = new SqlParameter("PUBLISHER", PUBLISHER._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND DOC.PUBLISHER  like '%'+@PUBLISHER+'%'";
             }
@@ -141,25 +141,25 @@ LEFT JOIN USERS ON USERS.ID = DOC.ADDPERSON  WHERE 1=1 ";
                     if (!string.IsNullOrEmpty(Name._ToStrTrim()))
                     {
                         sql += " Name  = @Name,";
-                        Para= new SqlParameter("Name", Name._ToStrTrim());
+                        Para = new SqlParameter("Name", Name._ToStrTrim().ToUpper());
                         dbhelper.SqlParameterList.Add(Para);
                     }
                     if (!string.IsNullOrEmpty(ISSN._ToStrTrim()))
                     {
                         sql += " ISSN  = @ISSN,";
-                        Para= new SqlParameter("ISSN", ISSN._ToStrTrim());
+                        Para = new SqlParameter("ISSN", ISSN._ToStrTrim().ToUpper());
                         dbhelper.SqlParameterList.Add(Para);
                     }
                     if (!string.IsNullOrEmpty(PublishArea._ToStrTrim()))
                     {
                         sql += " PublishArea  = @PublishArea,";
-                        Para= new SqlParameter("PublishArea", PublishArea._ToStrTrim());
+                        Para = new SqlParameter("PublishArea", PublishArea._ToStrTrim().ToUpper());
                         dbhelper.SqlParameterList.Add(Para);
                     }
                     if (!string.IsNullOrEmpty(PublishArea._ToStrTrim()))
                     {
                         sql += " Publisher  = @Publisher,";
-                        Para= new SqlParameter("Publisher", Publisher._ToStrTrim());
+                        Para = new SqlParameter("Publisher", Publisher._ToStrTrim().ToUpper());
                         dbhelper.SqlParameterList.Add(Para);
                     }
                     if (!string.IsNullOrEmpty(Price._ToStrTrim()))
@@ -177,7 +177,7 @@ LEFT JOIN USERS ON USERS.ID = DOC.ADDPERSON  WHERE 1=1 ";
                     if (!string.IsNullOrEmpty(BKDH._ToStrTrim()))
                     {
                         sql += " BKDH  = @BKDH,";
-                        Para = new SqlParameter("BKDH", BKDH._ToStrTrim());
+                        Para = new SqlParameter("BKDH", BKDH._ToStrTrim().ToUpper());
                         dbhelper.SqlParameterList.Add(Para);
                     }
                     sql += " NGuid  = NEWID()  WHERE ID = @ID ";
@@ -291,19 +291,19 @@ LEFT JOIN USERS ON USERS.ID = DOC.ADDPERSON  WHERE 1=1 ";
            , @AddPerson)";
                 SqlParameter Para = new SqlParameter("TypeID", TypeID._ToStrTrim());
                 dbhelper.SqlParameterList.Add(Para);
-                Para = new SqlParameter("NAME", Name._ToStrTrim());
+                Para = new SqlParameter("NAME", Name._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
-                Para = new SqlParameter("ISSN", ISSN._ToStrTrim());
+                Para = new SqlParameter("ISSN", ISSN._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
-                Para = new SqlParameter("PublishArea", PublishArea._ToStrTrim());
+                Para = new SqlParameter("PublishArea", PublishArea._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
-                Para = new SqlParameter("Publisher", Publisher._ToStrTrim());
+                Para = new SqlParameter("Publisher", Publisher._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
                 Para = new SqlParameter("Price", Price._ToDecimal());
                 dbhelper.SqlParameterList.Add(Para);
                 Para = new SqlParameter("PL", PL._ToStrTrim());
                 dbhelper.SqlParameterList.Add(Para);
-                Para = new SqlParameter("BKDH", BKDH._ToStrTrim());
+                Para = new SqlParameter("BKDH", BKDH._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
                 Para = new SqlParameter("AddPerson", AddPerson._ToStrTrim());
                 dbhelper.SqlParameterList.Add(Para);
@@ -325,7 +325,7 @@ LEFT JOIN USERS ON USERS.ID = DOC.ADDPERSON  WHERE 1=1 ";
         public decimal GetPrice(string bkdh) 
         {
             string sql = @" select price from doc where bkdh =@bkdh";
-            SqlParameter Para = new SqlParameter("bkdh", bkdh._ToStr());
+            SqlParameter Para = new SqlParameter("bkdh", bkdh._ToStr().ToUpper());
             dbhelper.SqlParameterList.Add(Para);
             DataTable dt = dbhelper.ExecuteSql(sql);
             if (dt != null && dt.Rows.Count > 0)

@@ -35,7 +35,7 @@ namespace DAL
             if (!string.IsNullOrEmpty(BKDH))
             {
                 wheresql += " AND t.BKDH=@BKDH";
-                Para = new SqlParameter("BKDH", BKDH);
+                Para = new SqlParameter("BKDH", BKDH.ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
             }
             string logsql = "";
@@ -106,7 +106,7 @@ GROUP BY a.BKDH,a.DocName,a.OrgName,a.ParentID";
             if (!string.IsNullOrEmpty(BKDH))
             {
                 wheresql += " AND t.BKDH=@BKDH";
-                Para = new SqlParameter("BKDH", BKDH);
+                Para = new SqlParameter("BKDH", BKDH.ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
             }
             string logsql = "";
@@ -176,7 +176,7 @@ GROUP BY a.BKDH,a.DocName,a.OrgName ,a.PersonID ";
                         string sql = @"INSERT INTO LOG(ORDERID,DATE,NIANJUANQI,UserID) VALUES(@ORDERID,getdate(),@NIANJUANQI,@UserID)";
                         Para = new SqlParameter("ORDERID", item._ToInt32());
                         dbhelper.SqlParameterList.Add(Para);
-                        Para = new SqlParameter("NIANJUANQI", nianjuanqi._ToStrTrim());
+                        Para = new SqlParameter("NIANJUANQI", nianjuanqi._ToStrTrim().ToUpper());
                         dbhelper.SqlParameterList.Add(Para);
                         Para = new SqlParameter("UserID", UserID);
                         dbhelper.SqlParameterList.Add(Para);

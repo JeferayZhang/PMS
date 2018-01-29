@@ -1,0 +1,393 @@
+@charset "utf-8";
+
+/*---------------------css.css------------------*/
+/* CSS Document */
+html{height:100%;margin:0; padding:0}
+body{height:100%;margin:0; padding:0}
+.tnoborder { border:none}
+.tnopadd { padding:0}
+body{ margin:0 ; padding:0}
+.jqicon_black{background:url(images/ui-icons_222222_256x240.png) no-repeat; width:16px; height:16px;}
+.jqicon_red{background: url(images/ui-icons_cd0a0a_256x240.png) no-repeat; width:16px; height:16px;}
+.jqicon-at{ background-position:-146px -144px;}
+.jqicon-key{background-position:-112px -128px;}
+p{margin:20px}
+.hide{display:none}
+.showPanel{  text-align:center; margin-left:50%; width:400px; left:-200px; position:absolute;}
+.left_10{left:10%}
+.left_10px{left:10px}
+.left_20{left:20%}
+.left_20px{left:20px}
+.left_30{left:30%}
+.left_30px{left:30px}
+.left_40{left:40%}
+.left_40px{left:40px}
+.left_50{left:50%}
+.left_50px{left:50px}
+.left_60{left:60%}
+.left_60px{left:60px}
+.background-norepeat{background-repeat: no-repeat;}
+.background-repeatx{background-repeat:repeat-x;}
+.background-repeaty{background-repeat:repeat-y;}
+.background-repeat{background-repeat:repeat; }
+.background-positionlt{background-position:left top;}
+.background-positionlm{background-position:left center;}
+.background-positionlb{background-position:left bottom;}
+.background-positionct{background-position:center top;}
+.background-positioncm{background-position:center center;}
+.background-positioncb{background-position:center bottom;}
+.background-positionrt{background-position:right top;}
+.background-positionrm{background-position:right center;}
+.background-positionrb{background-position:right bottom;}
+.text-alignl{ text-align:left}
+.text-alignc{ text-align:center}
+.text-alignr{ text-align:right}
+/*常规边框*/
+.border_grain01 {
+	border-top-width: 1px;
+	border-right-width: 1px;
+	border-bottom-width: 1px;
+	border-left-width: 1px;
+	border-top-style: solid;
+	border-right-style: solid;
+	border-bottom-style: solid;
+	border-left-style: solid;
+	border-top-color: #99bce8;
+	border-right-color: #99bce8;
+	border-bottom-color: #99bce8;
+	border-left-color: #99bce8;
+	
+}
+.border_grain02 {
+ border:dashed 1px #999999;	
+}
+.border_grain03 {
+ border:solid 1px #999999;	
+}
+/*常规背景*/
+/*常规字号*/
+.text_font12{font-size:12px; line-height: 18px;}
+.text_font14{font-size:14px;line-height: 20px;}
+.text_font16{font-size:16px; line-height: 24px;}
+.text_font18{font-size:18px; line-height: 28px;}
+.text_font24{font-size:24px; line-height: 36px;}
+/*按钮字号*/
+.btn_font1{font-size:12px; line-height: 16px;}
+.btn_font2{font-size:14px;line-height: 18px;}
+.btn_font3{font-size:16px; line-height: 22px;}
+.btn_font4{font-size:20px; line-height: 28px;}
+/*按钮文字颜色*/
+.btntxt_color1{color:#fcc}
+.btntxt_color1:hover{color:#ffF}
+.btntxt_color2{color:#600}
+.btntxt_color2:hover{color:#a30}
+
+/*---------------------movie.css------------------*/
+/* CSS Document */
+/*动画movie1*/
+.css_movie1 {
+	background-size: 60px 60px;
+    background-color: hsla(20,80%,60%,1);
+    background-image: -webkit-repeating-radial-gradient( rgba(124, 51, 255, 0.74) 0px, hsla(120,100%,60%,0) 60%),                         
+						-webkit-repeating-radial-gradient( hsla(230,100%,40%,1) 12%, hsla(220,80%,60%,1) 24px);
+    background-image:        -moz-repeating-radial-gradient( hsla(220,100%,60%,.6) 0px, hsla(120,100%,60%,0) 60%),
+                           -moz-repeating-radial-gradient( hsla(230,100%,40%,1) 12%, hsla(220,80%,60%,1) 24px);
+    background-image:         -ms-repeating-radial-gradient( hsla(220,100%,60%,.6) 0px, hsla(120,100%,60%,0) 60%),
+                            -ms-repeating-radial-gradient( hsla(230,100%,40%,1) 12%, hsla(220,80%,60%,1) 24px);
+    background-image:          -o-repeating-radial-gradient( hsla(220,100%,60%,.6) 0px, hsla(120,100%,60%,0) 60%),
+                             -o-repeating-radial-gradient( hsla(230,100%,40%,1) 12%, hsla(220,80%,60%,1) 24px);
+    background-image:             repeating-radial-gradient( hsla(220,100%,60%,.6) 0px, hsla(120,100%,60%,0) 60%),
+                                repeating-radial-gradient( hsla(230,100%,40%,1) 12%, hsla(220,80%,60%,1) 24px);
+}
+.css_movie1:hover {
+	 background-size: 60px 60px;
+      -webkit-animation: movie1_jj 1.4s cubic-bezier(.1,.4,.9,.6) infinite;
+       -moz-animation: movie1_jj 1.4s cubic-bezier(.1,.4,.9,.6) infinite;
+        -ms-animation: movie1_jj 1.4s cubic-bezier(.1,.4,.9,.6) infinite;
+         -o-animation: movie1_jj 1.4s cubic-bezier(.1,.4,.9,.6) infinite;
+            animation: movie1_jj 1.4s cubic-bezier(.1,.4,.9,.6) infinite;
+}
+
+@-webkit-keyframes movie1_jj {
+    from { background-size:  60px  60px,  24px  24px; }
+    50%  { background-size: 120px 120px, 100px 100px; }
+    to   { background-size:  24px  24px, 140px 140px; }
+}
+@-moz-keyframes movie1_jj {
+    from { background-size:  60px  60px,  24px  24px; }
+    50%  { background-size: 120px 120px, 100px 100px; }
+    to   { background-size:  24px  24px, 140px 140px; }
+}
+@-webkit-keyframes movie1_jj {
+    from { background-size:  60px  60px,  24px  24px; }
+    50%  { background-size: 120px 120px, 100px 100px; }
+    to   { background-size:  24px  24px, 140px 140px; }
+}
+@-webkit-keyframes movie1_jj {
+    from { background-size:  60px  60px,  24px  24px; }
+    50%  { background-size: 120px 120px, 100px 100px; }
+    to   { background-size:  24px  24px, 140px 140px; }
+}
+@-webkit-keyframes movie1_jj {
+    from { background-size:  60px  60px,  24px  24px; }
+    50%  { background-size: 120px 120px, 100px 100px; }
+    to   { background-size:  24px  24px, 140px 140px; }
+}
+/*动画movie1结束*/
+
+/*动画movie2*/
+.css_movie2 {
+    background-size: 66px 66px;
+    background-color: hsl(200,100%,50%);
+
+    background-image:     -webkit-repeating-radial-gradient( hsla(200,100%,80%,.8) 0px, hsla(200,100%,80%,.5) 4px, hsla(200,100%,80%,0) 50px),
+                        -webkit-repeating-radial-gradient( hsla(260,100%, 0%, 0) 0px, hsla(260,100%,50%,.1) 2px, hsla(260,100%, 0%,0) 10px);
+    background-image:        -moz-repeating-radial-gradient( hsla(200,100%,80%,.8) 0px, hsla(200,100%,80%,.5) 4px, hsla(200,100%,80%,0) 50px),
+                           -moz-repeating-radial-gradient( hsla(260,100%, 0%, 0) 0px, hsla(260,100%,50%,.1) 2px, hsla(260,100%, 0%,0) 10px);
+    background-image:         -ms-repeating-radial-gradient( hsla(200,100%,80%,.8) 0px, hsla(200,100%,80%,.5) 4px, hsla(200,100%,80%,0) 50px),
+                            -ms-repeating-radial-gradient( hsla(260,100%, 0%, 0) 0px, hsla(260,100%,50%,.1) 2px, hsla(260,100%, 0%,0) 10px);
+    background-image:          -o-repeating-radial-gradient( hsla(200,100%,80%,.8) 0px, hsla(200,100%,80%,.5) 4px, hsla(200,100%,80%,0) 50px),
+                             -o-repeating-radial-gradient( hsla(260,100%, 0%, 0) 0px, hsla(260,100%,50%,.1) 2px, hsla(260,100%, 0%,0) 10px);
+    background-image:             repeating-radial-gradient( hsla(200,100%,80%,.8) 0px, hsla(200,100%,80%,.5) 4px, hsla(200,100%,80%,0) 50px),
+                                repeating-radial-gradient( hsla(260,100%, 0%, 0) 0px, hsla(260,100%,50%,.1) 2px, hsla(260,100%, 0%,0) 10px);
+}
+.css_movie2:hover {
+    -webkit-animation:     movie2_jj   6s cubic-bezier(.4,0,.2,1) infinite,
+                        movie2-size     .75s cubic-bezier(.4,0,.2,1) infinite alternate;
+       -moz-animation:     movie2_jj   6s cubic-bezier(.4,0,.2,1) infinite,
+                        movie2-size     .75s cubic-bezier(.4,0,.2,1) infinite alternate;
+        -ms-animation:     movie2_jj   6s cubic-bezier(.4,0,.2,1) infinite,
+                        movie2-size     .75s cubic-bezier(.4,0,.2,1) infinite alternate;
+         -o-animation:     movie2_jj   6s cubic-bezier(.4,0,.2,1) infinite,
+                        movie2-size     .75s cubic-bezier(.4,0,.2,1) infinite alternate;
+            animation:     movie2_jj   6s cubic-bezier(.4,0,.2,1) infinite,
+                        movie2-size     .75s cubic-bezier(.4,0,.2,1) infinite alternate;
+}
+
+@-webkit-keyframes movie2_jj {
+      0% { background-position: left  top,      left  top; }
+     25% { background-position: right top,         left  bottom; }
+     50% { background-position: right bottom,     right bottom; }
+     75% { background-position: left  bottom,    right top; }
+    100% { background-position: left  top,        left  top; }
+}
+@-moz-keyframes movie2_jj {
+      0% { background-position: left  top,      left  top; }
+     25% { background-position: right top,         left  bottom; }
+     50% { background-position: right bottom,     right bottom; }
+     75% { background-position: left  bottom,    right top; }
+    100% { background-position: left  top,        left  top; }
+}
+@-ms-keyframes movie2_jj {
+      0% { background-position: left  top,      left  top; }
+     25% { background-position: right top,         left  bottom; }
+     50% { background-position: right bottom,     right bottom; }
+     75% { background-position: left  bottom,    right top; }
+    100% { background-position: left  top,        left  top; }
+}
+@-o-keyframes movie2_jj {
+      0% { background-position: left  top,      left  top; }
+     25% { background-position: right top,         left  bottom; }
+     50% { background-position: right bottom,     right bottom; }
+     75% { background-position: left  bottom,    right top; }
+    100% { background-position: left  top,        left  top; }
+}
+@keyframes movie2_jj {
+      0% { background-position: left  top,      left  top; }
+     25% { background-position: right top,         left  bottom; }
+     50% { background-position: right bottom,     right bottom; }
+     75% { background-position: left  bottom,    right top; }
+    100% { background-position: left  top,        left  top; }
+}
+
+@-webkit-keyframes movie2-size { from { background-size: 200px 150px, 200px 150px; } to { background-size:  66px  44px, 66px 66px; } }
+   @-moz-keyframes movie2-size { from { background-size: 200px 150px, 200px 150px; } to { background-size:  66px  44px, 66px 66px; } }
+    @-ms-keyframes movie2-size { from { background-size: 200px 150px, 200px 150px; } to { background-size:  66px  44px, 66px 66px; } }
+     @-o-keyframes movie2-size { from { background-size: 200px 150px, 200px 150px; } to { background-size:  66px  66px, 66px 66px; } }
+        @keyframes movie2-size { from { background-size: 200px 150px, 200px 150px; } to { background-size:  66px  44px, 66px 66px; } }
+
+/*动画movie2*结束*/
+
+/*---------------------css3.css------------------*/
+/* CSS Document */
+/* 圆角样式  */
+.border_radius_3{
+	border-radius:3px;
+	-moz-border-radius:3px; /* Old Firefox */
+}
+.border_radius_5{
+	border-radius:5px;
+	-moz-border-radius:5px; /* Old Firefox */
+}
+.border_radius_8{
+	border-radius:8px;
+	-moz-border-radius:8px; /* Old Firefox */
+}
+.border_radius_yuan{
+	border-radius:50%;
+	-moz-border-radius:50%; /* Old Firefox */
+}
+.border_radius_fang{
+	border-radius:10%;
+	-moz-border-radius:10%; /* Old Firefox */
+}
+/* 圆角样式结束  */
+/* 影子样式  */
+.border_shadow_3{
+box-shadow: 3px 3px 5px #888888;
+}
+.border_shadow_5{
+box-shadow: 5px 5px 8px #888888;
+}
+.border_shadow_10{
+box-shadow: 10px 10px 15px rgba(0,0,0,0.5);
+}
+.border_insetshadow_3{
+box-shadow: 2px 2px 5px 1px #666 inset;
+}
+.border_insetshadow_1{
+box-shadow: 1px 1px 3px  #666 inset;
+box-shadow:inset 0 1px 0 rgba(255,255,255,0.2),0 1px 2px rgba(0,0,0,0.15)
+
+}
+.border_insetshadow_1_qian{
+box-shadow: 1px 1px 0px #e0e0e0 inset;
+}
+/* 影子样式结束  */
+/* 发光样式  */
+.border_light_3{
+box-shadow: 0px 0px 5px #fff;
+}
+.border_light_5{
+box-shadow: 0px 0px 8px #fff;
+}
+.border_light_10{
+box-shadow: 0px 0px 15px rgba(255,255,255,0.9);
+}
+
+.border_insetlight_1{
+box-shadow: 0px 0px 3px  #fff inset;
+}
+.border_insetlight_3{
+box-shadow: 0px 0px 5px  #fff inset;
+}
+.border_insetlight_5{
+box-shadow: 0px 0px 8px  #fff inset;
+}
+/* 发光样式结束  */
+/*定义颜色*/
+/*button类颜色*/
+.color_y{
+background-image: linear-gradient(bottom, rgb(230,131,9) 15%, rgb(250,246,175) 81%, rgb(250,194,130) 55%, rgb(255,208,150) 56%);
+background-image: -o-linear-gradient(bottom, rgb(230,131,9) 15%, rgb(250,246,175) 81%, rgb(250,194,130) 55%, rgb(255,208,150) 56%);
+background-image: -moz-linear-gradient(bottom, rgb(230,131,9) 15%, rgb(250,246,175) 81%, rgb(250,194,130) 55%, rgb(255,208,150) 56%);
+background-image: -webkit-linear-gradient(bottom, rgb(230,131,9) 15%, rgb(250,246,175) 81%, rgb(250,194,130) 55%, rgb(255,208,150) 56%);
+background-image: -ms-linear-gradient(bottom, rgb(230,131,9) 15%, rgb(250,246,175) 81%, rgb(250,194,130) 55%, rgb(255,208,150) 56%);
+background-image: -webkit-gradient(
+	linear,
+	left bottom,
+	left top,
+	color-stop(0.15, rgb(230,131,9)),
+	color-stop(0.81, rgb(250,246,175)),
+	color-stop(0.55, rgb(250,194,130)),
+	color-stop(0.56, rgb(255,208,150))
+);
+background:url(../images/vj_colory.png) repeat-x center center\9;
+}
+.color_y:hover{
+background-image: linear-gradient(bottom, rgb(230,105,9) 15%, rgb(255,251,194) 81%, rgb(252,183,104) 50%, rgb(250,195,127) 51%);
+background-image: -o-linear-gradient(bottom, rgb(230,105,9) 15%, rgb(255,251,194) 81%, rgb(252,183,104) 50%, rgb(250,195,127) 51%);
+background-image: -moz-linear-gradient(bottom, rgb(230,105,9) 15%, rgb(255,251,194) 81%, rgb(252,183,104) 50%, rgb(250,195,127) 51%);
+background-image: -webkit-linear-gradient(bottom, rgb(230,105,9) 15%, rgb(255,251,194) 81%, rgb(252,183,104) 50%, rgb(250,195,127) 51%);
+background-image: -ms-linear-gradient(bottom, rgb(230,105,9) 15%, rgb(255,251,194) 81%, rgb(252,183,104) 50%, rgb(250,195,127) 51%);
+
+background-image: -webkit-gradient(
+	linear,
+	left bottom,
+	left top,
+	color-stop(0.15, rgb(230,105,9)),
+	color-stop(0.81, rgb(255,251,194)),
+	color-stop(0.5, rgb(252,183,104)),
+	color-stop(0.51, rgb(250,195,127))
+);
+background:url(../images/vj_coloryhover.png) repeat-x center center\9; 
+}
+/*button类颜色结束*/
+/*区域颜色*/
+.colorp_y{
+background-image: linear-gradient(bottom, rgb(250,194,130) 15%, rgb(255,208,150) 81%);
+background-image: -o-linear-gradient(bottom, rgb(250,194,130) 15%, rgb(255,208,150) 81%);
+background-image: -moz-linear-gradient(bottom, rgb(250,194,130) 15%, rgb(255,208,150) 81%);
+background-image: -webkit-linear-gradient(bottom, rgb(250,194,130) 15%, rgb(255,208,150) 81%);
+background-image: -ms-linear-gradient(bottom, rgb(250,194,130) 15%, rgb(255,208,150) 81%);
+background-image: -webkit-gradient(
+	linear,
+	left bottom,
+	left top,
+	color-stop(0.15, rgb(250,246,175)),
+	color-stop(0.85, rgb(250,194,130))
+	); 
+}
+.colorp_grain1{
+background-image: linear-gradient(bottom, rgb(250,250,250) 95%, rgb(240,240,240) 21%,rgb(220,220,220),5%);
+background-image: -o-linear-gradient(bottom, rgb(250,250,250) 95%, rgb(240,240,240) 21%,rgb(220,220,220),5%);
+background-image: -moz-linear-gradient(bottom, rgb(250,250,250) 95%, rgb(240,240,240) 21%,rgb(220,220,220),5%);
+background-image: -webkit-linear-gradient(bottom, rgb(250,250,250) 95%, rgb(240,240,240) 21%,rgb(220,220,220),5%);
+background-image: -ms-linear-gradient(bottom, rgb(250,250,250) 95%, rgb(240,240,240) 21%,rgb(220,220,220),5%);
+background-image: -webkit-gradient(
+	linear,
+	left bottom,
+	left top,
+	color-stop(0.95, rgb(250,250,250)),
+	color-stop(0.51, rgb(240,240,240)),
+	color-stop(0.05, rgb(220,220,220))
+	);
+
+}
+.colorp_grain2{
+background-image: none;
+ background-image: -webkit-gradient(linear,  #ffffff 0%,#e7f0fc 50%,#c0ddf0 51%,#d9e7f8 100%);
+  background-image: -webkit-linear-gradient(top, #ffffff 0%,#d7e0fc 50%,#c0ddf0 51%,#d9e7f8 100%);
+  background-image: -moz-linear-gradient(top,  #ffffff 0%,#d7e0fc 50%,#c0ddf0 51%,#d9e7f8 100%);
+  background-image: -o-linear-gradient(top,  #ffffff 0%,#d7e0fc 50%,#c0ddf0 51%,#d9e7f8 100%);
+  background-image: linear-gradient(top,  #ffffff 0%,#d7d0fc 50%,#c0ddf0 51%,#d9e7f8 100%);
+background-color: #d9e7f8;
+}
+.colorp_grain3{
+background: #f7f7f7;
+  background: -moz-linear-gradient(#f7f7f7 0%, #f0f0f0 100%);
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #f7f7f7), color-stop(100%, #f0f0f0));
+  background: -webkit-linear-gradient(#f7f7f7 0%, #f0f0f0 100%);
+  background: linear-gradient(#f7f7f7 0%, #f0f0f0 100%);
+}
+.colorp_grain3 text,.colorp_grain3 a{color:#eee}
+.colorp_grain3 a:hover{color:#fff}
+.colorp_grain4 {
+background-image: linear-gradient(bottom, rgb(230,230,230) 95%,rgb(220,220,220),5%);
+background-image: -o-linear-gradient(bottom, rgb(230,230,230) 95%,rgb(220,220,220),5%);
+background-image: -moz-linear-gradient(bottom, rgb(230,230,230) 95%,rgb(220,220,220),5%);
+background-image: -webkit-linear-gradient(bottom, rgb(230,230,230) 95%,rgb(220,220,220),5%);
+background-image: -ms-linear-gradient(bottom, rgb(230,230,230) 95%,rgb(220,220,220),5%);
+background-image: -webkit-gradient(
+	linear,
+	left bottom,
+	left top,
+	color-stop(0.95, rgb(230,230,230)),
+	color-stop(0.05, rgb(200,200,200))
+	);
+}
+.colorp_grain5 {/*渐变透明区*/
+background-image: linear-gradient(left, rgba(250,255,255,0) 1,rgba(250,255,255,0.8) 90%,rgba(250,255,255,0.8) 10%,rgba(250,255,255,0) 0%);
+background-image: -o-linear-gradient(left, rgba(250,255,255,0) 1,rgba(250,255,255,0.8) 90%,rgba(250,255,255,0.8) 10%,rgba(250,255,255,0) 0%);
+background-image: -moz-linear-gradient(left, rgba(250,255,255,0) 1,rgba(250,255,255,0.8) 90%,rgba(250,255,255,0.8) 10%,rgba(250,255,255,0) 0%);
+background-image: -webkit-linear-gradient(left, rgba(250,255,255,0) 1,rgba(250,255,255,0.8) 90%,rgba(250,255,255,0.8) 10%,rgba(250,255,255,0) 0%);
+background-image: -ms-linear-gradient(left, rgba(250,255,255,0) 1,rgba(250,255,255,0.8) 90%,rgba(250,255,255,0.8) 10%,rgba(250,255,255,0) 0%);
+background-image: -webkit-gradient(
+	linear,
+	left bottom,
+	right bottom,
+	color-stop(1, rgba(250,250,250,0)),
+	color-stop(0, rgba(250,250,250,0))
+	);
+}
+/*区域类颜色结束*/

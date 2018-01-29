@@ -1,0 +1,153 @@
+﻿body{font-size:12px;}
+
+#page2_jPanel1 {
+    top: 211px;
+    height: 393px;
+    width: 590px;
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    background-image: url('../../../Images/jloginbox03.png');
+}
+
+#page2_jHtmlForm1_form{
+  position:absolute;
+  left: 69px;
+  top: 121px;
+  width: 473px;
+  height: 252px;
+}
+
+#page2_jLabel5{
+  left: 102px;
+  top: 89px;
+  font-size: 18px;
+  font-family: "微软雅黑";
+  font-weight: bold;
+  color: #505050;
+  line-height: 20px;
+}
+
+#page2_jLabel6{
+  left: 174px;
+  top: 94px;
+  font-size: 14px;
+  color: #505050;
+  line-height: 16px;
+}
+
+#page2_jButton1{
+  left: 156px;
+  top: 192px;
+  width:79px;
+  height:20px;
+}
+
+#page2_jButton2{
+  left: 248px;
+  top: 193px;
+  width:79px;
+  height:20px;
+}
+
+#page2_jPanel2{
+  left: 32px;
+  top: 4px;
+  height: 48px;
+  width: 394px;
+  background: #33393f;
+}
+
+#page2_jPanel3{
+  left: 33px;
+  top: 62px;
+  height: 48px;
+  width: 394px;
+  background: #33393f;
+}
+
+#page2_jLabel2{
+  left: 31px;
+  top: 16px;
+  font-size: 14px;
+  color: #ffffff;
+  line-height: 16px;
+}
+
+#page2_jEdit1{
+  left: 125px;
+  top: 10px;
+  width:242px;
+  height:20px;
+}
+
+#page2_jLabel7{
+  left: 29px;
+  top: 17px;
+  font-size: 14px;
+  color: #ffffff;
+  line-height: 16px;
+}
+
+#page2_jEdit2{
+  left: 125px;
+  top: 11px;
+  width:242px;
+  height:20px;
+}
+
+#page2_jPanel4{
+  left: 33px;
+  top: 118px;
+  height: 48px;
+  width: 394px;
+  background: #33393f;
+}
+
+#page2_jCheckBox1{
+  left: 126px;
+  top: 13px;
+}
+
+#page2_jLabel1{
+  left: 26px;
+  top: 16px;
+  font-size: 14px;
+  color: #ffffff;
+  line-height: 16px;
+}
+
+#page2_jPanel5{
+  top: -187px;
+  height: 62px;
+  width: 589px;
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#page2_jImages1{
+  left: 4px;
+  top: 4px;
+  height: 45px;
+  width: 45px;
+}
+
+#page2_jLabel3{
+  left: 51px;
+  top: 20px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #3f3f3f;
+  line-height: 22px;
+}
+
+#page2_jLabel4{
+  left: 345px;
+  top: 22px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #3f3f3f;
+  line-height: 22px;
+}
+

@@ -24,7 +24,7 @@ namespace DAL
         /// <param name="pagesize">每页显示数量</param>
         /// <param name="pageindex">页码</param>
         /// <returns></returns>
-        public DataTable GetCostRecords(int id, string state,int orderid, string OrderNo, string unitname, int pagesize, int pageindex)
+        public DataTable GetCostRecords(int id, string state,int orderid, string OrderNo, string unitname, int pagesize, int pageindex,int userOrg=0)
         {
             DataTable dt = new DataTable();
             string sql = string.Format(@"select top {0} * from (
@@ -37,12 +37,15 @@ case ISNULL(a.state,0) when 0 then '已缴清' when '1' then '未缴清' when -1
 end as CostState from cost a
 left join [Order] b on a.orderid=b.ID
 left join OrderPeople c on b.PersonID=c.ID
-left join USERS d on a.updateuser=d.ID ", pagesize);
+left join USERS d on a.updateuser=d.ID where 1=1 ", pagesize);
+            OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
+            string all = orgInfoDAL.getChilds(userOrg._ToStr(),"");
+            sql += " AND c.ORGID in (" + all + ")";
             if (!string.IsNullOrEmpty(OrderNo._ToStrTrim()))
             {
-                SqlParameter Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim());
+                SqlParameter Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
-                sql += " AND c.OrderNo LIKE '%'+@OrderNo+'%'";
+                sql += " AND upper(c.OrderNo) LIKE '%'+@OrderNo+'%'";
             }
             if (id > 0)
             {
@@ -64,9 +67,9 @@ left join USERS d on a.updateuser=d.ID ", pagesize);
             }
             if (!string.IsNullOrEmpty(unitname._ToStrTrim()))
             {
-                SqlParameter Para = new SqlParameter("unitname", unitname._ToStrTrim());
+                SqlParameter Para = new SqlParameter("unitname", unitname._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
-                sql += " AND c.UnitName LIKE '%'+@unitname+'%'";
+                sql += " AND upper(c.UnitName) LIKE '%'+@unitname+'%'";
             }
             dt = dbhelper.ExecuteSql(sql + string.Format(") t where rownumber > {0} ", (pageindex - 1) * pagesize));
             return dt;

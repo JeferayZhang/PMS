@@ -26,12 +26,12 @@ namespace BLL
         /// <param name="pagesize">每页显示数量</param>
         /// <param name="pageindex">页码</param>
         /// <returns></returns>
-        public PageModel GetCostRecords(int id, string state, int orderid, string OrderNo, string unitname, int pagesize, int pageindex)
+        public PageModel GetCostRecords(int id, string state, int orderid, string OrderNo, string unitname, int pagesize, int pageindex,int UserOrgID=0)
         {
             PageModel pg = new PageModel();
             try
             {
-                DataTable dt = dal.GetCostRecords(id, state,orderid, OrderNo, unitname, pagesize, pageindex);
+                DataTable dt = dal.GetCostRecords(id, state,orderid, OrderNo, unitname, pagesize, pageindex,UserOrgID);
                 if (dt.Rows.Count > 0 && dt != null)
                 {
                     pg.code = 0;

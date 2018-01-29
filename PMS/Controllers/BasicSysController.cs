@@ -304,17 +304,7 @@ namespace PMS.Controllers
                     user.State = dr["State"]._ToInt32();
                     user._OrgName = dr["OrgName"]._ToStrTrim();
                     user.OrgNo = dr["OrgNo"]._ToStrTrim();
-                    OrgInfoBLL orgInfoBLL = new OrgInfoBLL();
-                    retValue retValue = orgInfoBLL.GetOrgByPK(user.OrgID);
-                    if (retValue.result)
-                    {
-                        DataTable dt1 = retValue.data as DataTable;
-                        user.Level = dt1.Rows[0]["Level"]._ToInt32();
-                    }
-                    else
-                    {
-                        user.Level = 0;
-                    }
+                    user.Level = dr["Level"]._ToInt32();
                     Session["UserModel"] = user;
                 }
             }
@@ -334,8 +324,9 @@ namespace PMS.Controllers
         {
             retValue ret = new retValue();
             Session["UserModel"] = null;
+            ret.result = true;
+            ret.data = "NEEDLOGIN";
             var js = JsonConvert.SerializeObject(ret);
-
             return Json(js, JsonRequestBehavior.AllowGet);
         }
         #endregion

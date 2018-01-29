@@ -26,7 +26,8 @@
                     });
                     return false;
                 });
-                form.on('submit(add)', function (data) {
+                form.on('submit(exit)', function (data) {
+                    alert("123");
                     layer.open({
                         type: 2,
                         title: '修改个人信息',
@@ -56,6 +57,14 @@
                 show.innerHTML = t;
             }, 1000);
         };
+        function exit()
+        {
+            var ddd = { str:''}
+            ajaxHelper.post("/BasicSys/UserLoginOut/", ddd, function (da) {
+                top.location = "../Account/Login";
+                return false;
+            });
+        }
     </script>
 </head>
 
@@ -77,22 +86,13 @@
                             <a href="javascript:;" tag="@user._ID">
                                当前用户:@user.Name  ,  机构代码:@user.OrgNo  ,  机构名称:@user._OrgName
                             </a>
-                            @*<dl class="layui-nav-child">
+                            <dl class="layui-nav-child">
                                 <dd>
-                                    <form class="layui-form">
-                                        <div class=" layui-form-item">
-                                            <button class="layui-btn" lay-filter="add" lay-submit="" data-type="add">基本资料</button>
-                                        </div>
-                                    </form>
-                                    <form class="layui-form">
-                                        <div class=" layui-form-item">
-                                            <button class="layui-btn" lay-filter="exit" lay-submit="" data-type="exit">退出登录</button>
-                                        </div>
-                                    </form>
+                                    <a  href="javascript:exit();"  lay-filter="exit">退出登录</a>
                                 </dd>
-                            </dl>*@
+                            </dl>
                         }
-}                    
+                    }                    
                 </li>
             </ul>
         </div>

@@ -172,7 +172,36 @@ where 1=1 ");
             }
             int num = dbhelper.Count(sql);
             return num;
-        } 
+        }
+
+        /// <summary>
+        /// 根据订购流水号获取信息
+        /// </summary>
+        /// <param name="id">订购流水号</param>
+        /// <returns></returns>
+        public DataTable getByPK(int id)
+        {
+            string sql = string.Format(@"
+select a.ID ,b.Name docname ,a.BKDH,c.UnitName,c.Name ToUser,a.OrderDate,a.OrderMonths,
+a.OrderNum,CONVERT(varchar(100), a.Indate, 23) Indate,a.PosterID,d.Name as GetUser,e.NAME as InUser ,a.PersonID,a.NGUID,Cost.Money,Cost.MoneyPayed,Cost.ID as CostID,
+b.Price, case isnull(a.state,0) when 0 then '正常' when -1 then '退订' when 1 then '过期' end as OrderState,
+case ISNULL(Cost.state,0) when 0 then '已缴清' when '1' then '未缴清' when -1 then '退订未处理' when '-2' then '退订已处理' end as CostState
+from [Order]  a 
+inner join dbo.OrderPeople c on a.PersonID=c.ID
+left join Cost on Cost.OrderID=a.ID
+left join dbo.Doc b on a.BKDH=b.BKDH
+left join dbo.USERS d on a.PosterID=d.ID
+left join dbo.USERS e on a.userid=e.ID  
+where 1=1 ");
+            if (id > 0)
+            {
+                SqlParameter Para = new SqlParameter("ID", id._ToInt32());
+                dbhelper.SqlParameterList.Add(Para);
+                sql += " AND a.ID =@ID";
+            }
+            DataTable dt = dbhelper.ExecuteSql(sql);
+            return dt;
+        }
         #endregion
 
         #region 更新订购记录

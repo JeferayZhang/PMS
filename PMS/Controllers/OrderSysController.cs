@@ -81,12 +81,11 @@ namespace PMS.Controllers
                 ret.msg = "NEEDLOGIN";
                 return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
             }
-            PMS.Models.UserModel userModel = Session["UserModel"] as PMS.Models.UserModel;
             int addeditcode = Request["addeditcode"]._ToInt32();
             if (addeditcode > 0)
             {
                 BLL.OrderInfoBLL _BLL = new BLL.OrderInfoBLL();
-                PageModel pg = _BLL.GetOrderInfo(addeditcode, "", "", "", "", "", userModel.OrgID._ToStr(), "","","");
+                PageModel pg = _BLL.GetOrderInfoByPK(addeditcode);
                 ViewData.Model = pg;
             }
             else
@@ -217,7 +216,6 @@ namespace PMS.Controllers
             }
             PMS.Models.UserModel userModel = Session["UserModel"] as PMS.Models.UserModel;
             int userid = userModel._ID;
-            string content = string.Empty;
             DataTable dt = str.ToTable();
             string ids = "";
             foreach (DataRow item in dt.Rows)
@@ -228,7 +226,6 @@ namespace PMS.Controllers
                 }
             }
             ret = _BLL.TD(ids.Remove(ids.Length - 1), userid);
-            content = ret.toJson();
             var js = JsonConvert.SerializeObject(ret);
             return Json(js, JsonRequestBehavior.AllowGet);
         }

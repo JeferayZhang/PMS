@@ -109,7 +109,17 @@
                                 laytpl(getTpl3).render(jsonObj.data, function (a3) {
                                     $(view3).html(a3);
                                     var value = $("#OrderPeople").attr("tag");
-                                    $("#OrderPeople option[value='" + value + "']").attr("selected", "selected");
+                                    if (value != "") {
+                                        $("#OrderPeople option[value='" + value + "']").attr("selected", "selected");
+                                        var pay = document.getElementById("Pay");
+                                        if (pay != undefined) {
+                                            document.getElementById("NewspaperName").setAttribute("disabled", "disabled");
+                                            document.getElementById("Month").setAttribute("readonly", "readonly");
+                                            document.getElementById("OrderNumber").setAttribute("readonly", "readonly");
+                                            document.getElementById("Discount").setAttribute("readonly", "readonly");
+                                        }
+                                        form.render();
+                                    }
                                 });
                             }
                         }
@@ -127,8 +137,17 @@
                             laytpl(getTpl3).render(jsonObj.data, function (a3) {
                                 $(view3).html(a3);
                                 var value = $("#Poster").attr("tag");
-                                $("#Poster option[value='" + value + "']").attr("selected", "selected");
-                                form.render();
+                                if (value != "") {
+                                    $("#Poster option[value='" + value + "']").attr("selected", "selected");
+                                    var pay = document.getElementById("Pay");
+                                    if (pay != undefined) {
+                                        document.getElementById("NewspaperName").setAttribute("disabled", "disabled");
+                                        document.getElementById("Month").setAttribute("readonly", "readonly");
+                                        document.getElementById("OrderNumber").setAttribute("readonly", "readonly");
+                                        document.getElementById("Discount").setAttribute("readonly", "readonly");
+                                    }
+                                    form.render();
+                                }
                             });
                         }
                     });
@@ -146,9 +165,19 @@
                                     $(view2).html(a2);
                                     //设置选中值
                                     var value = $("#NewspaperName").attr("tag");
-                                    $("#NewspaperName option[value='" + value + "']").attr("selected", "selected");
-                                    //绑定价格
-                                    document.getElementById("Price").value = $("#NewspaperName").find("option:selected").attr("tag");
+                                    if (value != "") {
+                                        $("#NewspaperName option[value='" + value + "']").attr("selected", "selected");
+                                        //绑定价格
+                                        document.getElementById("Price").value = $("#NewspaperName").find("option:selected").attr("tag");
+                                        var pay = document.getElementById("Pay");
+                                        if (pay != undefined) {
+                                            document.getElementById("NewspaperName").setAttribute("disabled", "disabled");
+                                            document.getElementById("Month").setAttribute("readonly", "readonly");
+                                            document.getElementById("OrderNumber").setAttribute("readonly", "readonly");
+                                            document.getElementById("Discount").setAttribute("readonly", "readonly");
+                                        }
+                                        form.render();
+                                    }
                                 });
                             }
                         }
@@ -246,11 +275,11 @@
                 {
                     <input type="text" id="Discount" name="Discount" value="@(dr == null ? 1 :
                     dr["Money"]._ToDecimal()/(dr["OrderNum"]._ToInt32()*dr["OrderMonths"]._ToInt32()*dr["Price"]._ToDecimal()))"
-                           placeholder="" autocomplete="off" onchange="nowprice()" class="layui-input" maxlength="50">
+                           placeholder="" readonly autocomplete="off" onchange="nowprice()" class="layui-input" maxlength="50">
                 }
                 else
                 {
-                    <input type="text" id="Discount" name="Discount" value="1" placeholder="折扣在0至1之间" autocomplete="off" onchange="nowprice()" class="layui-input" maxlength="3">
+                    <input type="text" id="Discount" name="Discount" readonly value="1" placeholder="折扣在0至1之间" autocomplete="off" onchange="nowprice()" class="layui-input" maxlength="3">
                 }
             }
             else
@@ -274,8 +303,8 @@
             PMS.Models.UserModel user = Session["UserModel"] as PMS.Models.UserModel;
             if (user.Role == 4)
             {
-                <label class="layui-form-label" hidden>缴费</label>
-                <div class="layui-input-inline" hidden>
+                <label class="layui-form-label">缴费</label>
+                <div class="layui-input-inline">
                     <input type="text" id="Pay" name="Pay" value="" placeholder="费用总是正数" autocomplete="off" class="layui-input" maxlength="50">
                 </div>
             }

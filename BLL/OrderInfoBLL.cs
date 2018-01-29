@@ -56,6 +56,39 @@ namespace BLL
             return pg;
         }
 
+        /// <summary>
+        /// 根据订购流水号获取信息
+        /// </summary>
+        /// <param name="id">订购流水号</param>
+        /// <returns></returns>
+        public PageModel GetOrderInfoByPK(int ID)
+        {
+            PageModel pg = new PageModel();
+            try
+            {
+                DataTable dt = dal.getByPK(ID);
+                if (dt.Rows.Count > 0 && dt != null)
+                {
+                    pg.code = 0;
+                    pg.msg = "";
+                    pg.count = 1;
+                    pg.data = dt;
+                }
+                else
+                {
+                    pg.code = 1;
+                    pg.msg = "未查询到数据";
+                    pg.count = 0;
+                    pg.data = dt;
+                }
+            }
+            catch (Exception ex)
+            {
+                pg.code = 1;
+                pg.msg = ex.Message;
+            }
+            return pg;
+        }
         public retValue UpdateByPK(int ID, int months, int ordernum, string bkdh, int PersonID, int ModifyUser, int PosterID, string guid = "")
         {
             retValue ret = new retValue();

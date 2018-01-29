@@ -112,14 +112,12 @@ LEFT JOIN USERS B ON B.ID=USERS.Operator WHERE 1=1 ";
             DataTable dt = new DataTable();
             string sql = @"SELECT USERS.ID, USERS.USERNO, USERS.NAME
 FROM USERS WHERE 1=1 ";
-            string all = "";
             //这里加载当前登录人可以操作的用户
             if (!string.IsNullOrEmpty(orgid._ToStrTrim()))
             {
                 OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
-                string ids = orgInfoDAL.getChilds(orgid);
-                all = ids.Substring(0, ids.Length - 1);
-                sql += " AND USERS.ORGID in (" + all + ") ";
+                string ids = orgInfoDAL.getChilds(orgid,"");
+                sql += " AND USERS.ORGID in (" + ids + ") ";
             }
             sql += " AND USERS.ROLE="+ role + @" AND STATE=0";
             
@@ -397,7 +395,8 @@ FROM USERS WHERE 1=1 ";
                 dbhelper.SqlParameterList.Add(Para);
                 Para = new SqlParameter("PASSWORD", password._ToStrTrim());
                 dbhelper.SqlParameterList.Add(Para);
-                DataTable dt = dbhelper.ExecuteSql(@" SELECT * FROM USERS WHERE USERNO =@USERNO AND PASSWORD=@PASSWORD ");
+                DataTable dt = dbhelper.ExecuteSql(@" SELECT USERS.*,Org.OrgCode OrgNo,Org.Name OrgName,Org.Level FROM USERS left join Org on USERS.OrgID=Org.OrgID
+WHERE USERS.USERNO =@USERNO AND USERS.PASSWORD=@PASSWORD ");
                 if (dt==null||dt.Rows.Count == 0)
                 {
                     ret.result = false;

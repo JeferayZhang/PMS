@@ -82,11 +82,12 @@
                         area: ['700px', '380px'],
                         anim: 2,
                         moveOut: true,
-                        content: ['/OrderSys/Order_AddEdit?addeditcode=' + addeditcode, 'no'],//iframe的url，no代表不显示滚动条
+                        content: ['/OrderSys/Order_AddEdit?addeditcode=' + data[0].id, 'no'],//iframe的url，no代表不显示滚动条
                         end: function () {
                             $("#search").click();
                         }
                     });
+                    return false;
                 });
             });
         })

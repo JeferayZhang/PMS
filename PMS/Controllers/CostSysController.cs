@@ -32,12 +32,8 @@ namespace PMS.Controllers
                 return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
             }
             BLL.CostBLL _BLL = new CostBLL();
-
-            JObject o = null;
-
-            string content = string.Empty;
-
-            PageModel pg = _BLL.GetCostRecords(0, State, OrderID._ToInt32(), OrderNo, UnitName, limit, page);
+            PMS.Models.UserModel userModel = Session["UserModel"] as PMS.Models.UserModel;
+            PageModel pg = _BLL.GetCostRecords(0, State, OrderID._ToInt32(), OrderNo, UnitName, limit, page,userModel.OrgID);
            
             var js = JsonConvert.SerializeObject(pg);
             return Content(js);

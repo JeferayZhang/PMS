@@ -318,8 +318,8 @@ FROM USERS WHERE 1=1 ";
         /// <param name="Email">邮箱</param>
         /// <param name="OPERATOR">操作者</param>
         /// <returns>成功返回空值,否则返回提示</returns>
-        public string Insert(string userNo, string userName, string sex, string userRole, string userOrg,
-            string IDCard, string Password, string PhoneNumber, string Address, string Email, string OPERATOR)
+        public string Insert(string userNo, string userName, string sex, string userRole, string chooseOrg,
+            string IDCard, string Password, string PhoneNumber, string Address, string Email, string OPERATOR,int userlevel)
         {
             string res = "";
 
@@ -328,6 +328,13 @@ FROM USERS WHERE 1=1 ";
                 res = checkUser(userNo);
                 if (!string.IsNullOrEmpty(res))
                 {
+                    return res;
+                }
+                OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
+                int level = orgInfoDAL.GetOrgByPK(chooseOrg._ToInt32()).Rows[0]["Level"]._ToInt32();
+                if (level < userlevel)
+                {
+                    res = "你不能添加当前机构下的用户";
                     return res;
                 }
                 string sql = @"INSERT INTO USERS(USERNO, NAME,  SEX,ROLE,ORGID, PASSWORD,  IDCARD, PHONENUMBER,
@@ -345,7 +352,7 @@ FROM USERS WHERE 1=1 ";
                 Para = new SqlParameter("ROLE", userRole._ToInt32());
                 dbhelper.SqlParameterList.Add(Para);
 
-                Para = new SqlParameter("ORGID", userOrg._ToStrTrim());
+                Para = new SqlParameter("ORGID", chooseOrg._ToStrTrim());
                 dbhelper.SqlParameterList.Add(Para);
 
                 Para = new SqlParameter("PASSWORD", Password._ToStrTrim());
@@ -404,8 +411,16 @@ WHERE USERS.USERNO =@USERNO AND USERS.PASSWORD=@PASSWORD ");
                 }
                 else
                 {
-                    ret.result = true;
-                    ret.data = dt;
+                    if (dt.Rows[0]["State"]._ToInt32()!=0)
+                    {
+                        ret.result = false;
+                        ret.reason = "账号不是有效状态,不能登录";
+                    }
+                    else
+                    {
+                        ret.result = true;
+                        ret.data = dt;
+                    }
                 }
             }
             catch (Exception ex)

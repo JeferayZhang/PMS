@@ -140,10 +140,10 @@ namespace BLL
             return ret;
         }
 
-        public retValue DeleteByPK(string IDs)
+        public retValue DeleteByPK(string IDs,int userlevel)
         {
             retValue ret = new retValue();
-            string res = dal.delete(IDs);
+            string res = dal.DeleteByPK(IDs, userlevel);
             if (string.IsNullOrEmpty(res))
             {
                 ret.result = true; ret.data = "删除成功";

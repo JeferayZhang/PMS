@@ -256,7 +256,7 @@ namespace PMS.Controllers
                 //新增
                 if (string.IsNullOrEmpty(ID))
                 {
-                    ret = _UserBLL.Insert(USERNO, NAME, Sex, Role, OrgID, IDCard, Password, PhoneNumber, Address, Email, user._ID._ToStr());
+                    ret = _UserBLL.Insert(USERNO, NAME, Sex, Role, OrgID, IDCard, Password, PhoneNumber, Address, Email, user._ID._ToStr(),user.Level);
                 }
                 //更新
                 else
@@ -596,6 +596,7 @@ namespace PMS.Controllers
                 string NAME = o["Name"]._ToStrTrim();
                 string OrgCode = o["OrgCode"]._ToStrTrim();
                 string Address = o["Address"]._ToStrTrim();
+                UserModel user = Session["UserModel"] as UserModel;
                 //新增
                 if (string.IsNullOrEmpty(ID))
                 {
@@ -626,12 +627,35 @@ namespace PMS.Controllers
                     {
                         level = ((DataTable)ret.data).Rows[0]["Level"]._ToInt32() + 1;
                     }
-                    ret = _BLL.insert(NAME, Address, OrgCode, OrgID._ToInt32(), level);
+                    if (user.Level > level)
+                    {
+                        ret.result = false;
+                        ret.reason = "您不能添加当前级别的机构";
+                    }
+                    else
+                    {
+                        ret = _BLL.insert(NAME, Address, OrgCode, OrgID._ToInt32(), level);
+                    }
                 }
                 //更新
                 else
                 {
-                    ret = _BLL.update(ID._ToInt32(), NAME, OrgCode, Address);
+                    int level = 0;
+                    ret = _BLL.GetOrgByPK(ID._ToInt32());
+                    if (ret.result)
+                    {
+                        level = ((DataTable)ret.data).Rows[0]["Level"]._ToInt32();
+                        
+                        if (user.Level > level)
+                        {
+                            ret.result = false;
+                            ret.reason = "您不能更新当前级别的机构";
+                        }
+                        else
+                        {
+                            ret = _BLL.update(ID._ToInt32(), NAME, OrgCode, Address);
+                        }
+                    }                   
                 }
             }
             var js = JsonConvert.SerializeObject(ret);
@@ -653,10 +677,10 @@ namespace PMS.Controllers
             }
 
             BLL.OrgInfoBLL _BLL = new OrgInfoBLL();
-
+            UserModel user = Session["UserModel"] as UserModel;
             if (!string.IsNullOrEmpty(str))
             {
-                ret = _BLL.DeleteByPK(str);
+                ret = _BLL.DeleteByPK(str, user.Level);
             }
             var js = JsonConvert.SerializeObject(ret);
 

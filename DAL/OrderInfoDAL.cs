@@ -427,7 +427,7 @@ values(@BKDH,@personid,@userid,@ordernum,@orderdate,@posterid,@ordermonths) ";
                 dbhelper.SqlParameterList.Add(Para);
                 if (dbhelper.ExecuteSql(sql).Rows.Count > 0)
                 {
-                    return "订购流水号:" + orderid + "费用非结清!不能删除!";
+                    return "订购流水号:" + orderid + "费用未结清!不能删除!";
                 }
             }
             return "";

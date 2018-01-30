@@ -233,6 +233,55 @@ group by t.OrgID";
                 res = ex.Message;
             }
             return res;
-        }        
+        }
+
+        public string check(int id,int userlevel) 
+        {
+            int level = 0;
+            level = GetOrgByPK(id).Rows[0]["Level"]._ToInt32();
+            if (level<userlevel)
+            {
+                return "您不能删除当前级别的机构";
+            }
+            else
+            {
+                return "";
+            }
+        }
+        public string DeleteByPK(string ids, int userlevel)
+        {
+            string res = "";
+            SqlConnection conn = new SqlConnection(dbh.SqlConnectionString);
+            conn.Open();
+            using (SqlTransaction tran = conn.BeginTransaction())
+            {
+                try
+                {
+                    SqlParameter Para = null;
+                    string[] pk = ids.Split(',');
+                    foreach (string item in pk)
+                    {
+                        res = check(item._ToInt32(), userlevel);
+                        if (!string.IsNullOrEmpty(res))
+                        {
+                            tran.Rollback();
+                            return res;
+                        }
+                        string sql = @" DELETE FROM  org  WHERE orgID = @ID ";
+                        Para = new SqlParameter("ID", item._ToInt32());
+                        dbh.SqlParameterList.Add(Para);
+                        int num = dbh.ExecuteNonQuery(tran, sql);
+                    }
+                    tran.Commit();
+                }
+                catch (Exception ex)
+                {
+                    tran.Rollback();
+                    res = ex.Message;
+                }
+            }
+            conn.Close();
+            return res;
+        }
     }
 }

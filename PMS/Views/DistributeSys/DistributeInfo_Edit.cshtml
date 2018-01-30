@@ -3,9 +3,12 @@
 @{
     //表示执行的操作是市-县级分发,或者是县-段道分发
     string ids = "";
+    string action = "city";
     if (Model != null)
     {
-        ids = Model._ToStr();
+        string[] str = Model._ToStr().Split('|');
+        ids = str[0]._ToStr();
+        action = str[1]._ToStr();
     }
 }
 @section scripts{
@@ -47,6 +50,7 @@
 }
 
 <form class="layui-form" style="margin-top:100px">
+    <input type="hidden" name="action" value="@action" />
     <input type="hidden" id="ids" name="ids" value="@ids" />
     <div class=" layui-form-item">
         <label class="layui-form-label">年卷期</label>

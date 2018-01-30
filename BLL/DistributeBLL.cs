@@ -74,17 +74,17 @@ namespace BLL
         /// <param name="dt2">分发日期</param>
         /// <param name="userid">分发员</param>
         /// <returns></returns>
-        public PageModel getlog1(string dt1, string dt2, string userid, int limit = 0, int index = 0)
+        public PageModel getlog1(string dt1, string dt2, int userorg, string userid, int limit = 0, int index = 0)
         {
             PageModel pg = new PageModel();
             try
             {
-                DataTable dt = _dal.getlog1(dt1, dt2, userid, limit, index);
+                DataTable dt = _dal.getlog1(dt1, dt2, userorg, userid, limit, index);
                 if (dt.Rows.Count > 0 && dt != null)
                 {
                     pg.code = 0;
                     pg.msg = "";
-                    pg.count = _dal.getlog1(dt1, dt2, userid).Rows.Count;
+                    pg.count = _dal.getlog1(dt1, dt2, userorg, userid).Rows.Count;
                     pg.data = dt;
                 }
                 else
@@ -110,17 +110,17 @@ namespace BLL
         /// <param name="dt2">分发日期</param>
         /// <param name="userid">分发员</param>
         /// <returns></returns>
-        public PageModel getlog2(string dt1, string dt2, string userid, int limit = 0, int index = 0)
+        public PageModel getlog2(string dt1, string dt2, int userorg, string userid, int limit = 0, int index = 0)
         {
             PageModel pg = new PageModel();
             try
             {
-                DataTable dt = _dal.getlog2(dt1, dt2, userid, limit, index);
+                DataTable dt = _dal.getlog2(dt1, dt2, userorg, userid, limit, index);
                 if (dt.Rows.Count > 0 && dt != null)
                 {
                     pg.code = 0;
                     pg.msg = "";
-                    pg.count = _dal.getlog2(dt1, dt2, userid).Rows.Count;
+                    pg.count = _dal.getlog2(dt1, dt2, userorg, userid).Rows.Count;
                     pg.data = dt;
                 }
                 else
@@ -139,10 +139,10 @@ namespace BLL
             return pg;
         }
 
-        public retValue insertLog(string orderids, string nianjuanqi,int userid)
+        public retValue insertLog(string orderids, string nianjuanqi,int userid,int type=0)
         {
             retValue ret = new retValue();
-            string res = _dal.insertLog(orderids, nianjuanqi, userid);
+            string res = _dal.insertLog(orderids, nianjuanqi, userid, type);
             if (string.IsNullOrEmpty(res))
             {
                 ret.result = true;

@@ -71,12 +71,12 @@
                     });
                 }
                 form.on('select(Province)', function (data) {
-                    $("#CompanyCity").empty();
-                    document.getElementById('CompanyCity').innerHTML = "";
-                    document.getElementById('CompanyUnderCity').innerHTML = "";
-                    document.getElementById('CompanyUnderArea').innerHTML = "";
-                    $("#CompanyUnderCity").empty();
-                    $("#CompanyUnderArea").empty();
+                    var CompanyCity = $("#CompanyCity");
+                    CompanyCity.empty();
+                    var CompanyUnderCity = $("#CompanyUnderCity");
+                    CompanyUnderCity.empty();
+                    var CompanyUnderArea = $("#CompanyUnderArea");
+                    CompanyUnderArea.empty();
                     $("#t_UserInfo").html("");
                     var parentid = $("#Province option:selected").val();
                     if (parentid == "") {
@@ -88,8 +88,10 @@
                     return false;
                 });
                 form.on('select(CompanyCity)', function (data) {
-                    $("#CompanyUnderCity").html("");
-                    $("#CompanyUnderArea").html("");
+                    var CompanyUnderCity = $("#CompanyUnderCity");
+                    CompanyUnderCity.empty();
+                    var CompanyUnderArea = $("#CompanyUnderArea");
+                    CompanyUnderArea.empty();
                     $("#t_UserInfo").html("");
                     var parentid = $("#CompanyCity option:selected").val();
                     if (parentid == "") {
@@ -99,7 +101,8 @@
                     return false;
                 });
                 form.on('select(CompanyUnderCity)', function (data) {
-                    $("#CompanyUnderArea").html("");
+                    var CompanyUnderArea = $("#CompanyUnderArea");
+                    CompanyUnderArea.empty();
                     $("#t_UserInfo").html("");
                     var parentid = $("#CompanyUnderCity option:selected").val();
                     if (parentid == "") {
@@ -227,7 +230,7 @@
                             }
                             else {
                                 layer.open({
-                                    title: '提示', content: jsonObj.result, time: 2000
+                                    title: '提示', content: jsonObj.reason, time: 2000
                                 });
                             }
                         });

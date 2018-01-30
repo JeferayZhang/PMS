@@ -141,12 +141,12 @@ namespace BLL
         /// <param name="Email">邮箱</param>
         /// <param name="OPERATOR">操作者</param>
         /// <returns>成功返回空值,否则返回提示</returns>
-        public retValue Insert(string userNo, string userName, string sex, string userRole, string userOrg,
-            string IDCard, string Password, string PhoneNumber, string Address, string Email, string OPERATOR)
+        public retValue Insert(string userNo, string userName, string sex, string userRole, string chooseOrg,
+            string IDCard, string Password, string PhoneNumber, string Address, string Email, string OPERATOR,int userlevel)
         {
             retValue ret = new retValue();
-            string res = dal.Insert(userNo, userName, sex, userRole, userOrg,
-             IDCard, Password, PhoneNumber, Address, Email, OPERATOR);
+            string res = dal.Insert(userNo, userName, sex, userRole, chooseOrg,
+             IDCard, Password, PhoneNumber, Address, Email, OPERATOR, userlevel);
             if (string.IsNullOrEmpty(res))
             {
                 ret.result = true; ret.data = "保存成功";

@@ -30,7 +30,7 @@ namespace PMS.Controllers
         }
 
         /// <summary>
-        /// 查询要分发的记录
+        /// 查询要分发的记录,应该只能查询出订购状态是正常的记录
         /// </summary>
         /// <param name="str"></param>
         /// <returns></returns>
@@ -125,15 +125,15 @@ namespace PMS.Controllers
             }
 
             BLL.DistributeBLL _BLL = new DistributeBLL();
-
+            UserModel userModel = Session["userModel"] as UserModel;
             JObject o = null;
             if (tttttt == "area")
             {
-                ret = _BLL.getlog2(test1, test2, User, limit, page - 1);
+                ret = _BLL.getlog2(test1, test2,userModel.OrgID, User, limit, page - 1);
             }
             else
             {
-                ret = _BLL.getlog1(test1, test2, User, limit, page - 1);
+                ret = _BLL.getlog1(test1, test2, userModel.OrgID, User, limit, page - 1);
             }
             var js = JsonConvert.SerializeObject(ret);
             return Content(js);
@@ -174,10 +174,15 @@ namespace PMS.Controllers
             {
                 return Redirect("/Account/Login");
             }
-            ViewData.Model = Request["ids"]._ToStr();
+            ViewData.Model = Request["ids"]._ToStr() + "|" + Request["action"]._ToStr();
             return View();
         }
-
+        
+        /// <summary>
+        /// 分发之后,要将那些到了时间的订购记录,状态更改为过期
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
         [HttpPost]
         public JsonResult DistributeLog_FF(string str)
         {
@@ -196,8 +201,15 @@ namespace PMS.Controllers
                 o = JObject.Parse(str);
                 UserModel userModel = Session["userModel"] as UserModel;
                 string nianjuanqi = o["nianjuanqi"]._ToStrTrim();
+                string action = o["action"]._ToStrTrim();
+                //日志类型,0表示市,1表示县
+                int type = 0;
+                if (action=="area")
+                {
+                    type = 1;
+                }
                 string ids = o["ids"]._ToStrTrim();
-                ret = _BLL.insertLog(ids, nianjuanqi,userModel._ID);
+                ret = _BLL.insertLog(ids, nianjuanqi, userModel._ID, type);
             }
             var js = JsonConvert.SerializeObject(ret);
             return Json(js, JsonRequestBehavior.AllowGet);

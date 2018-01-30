@@ -159,7 +159,7 @@ GROUP BY a.BKDH,a.DocName,a.OrgName ,a.PersonID ";
         /// <param name="orderids">订购流水号</param>
         /// <param name="nianjuanqi">报纸年卷期</param>
         /// <returns></returns>
-        public string insertLog(string orderids,string nianjuanqi, int UserID)
+        public string insertLog(string orderids,string nianjuanqi, int UserID,int type=0)
         {
             string res = "";
             SqlConnection conn = new SqlConnection(dbhelper.SqlConnectionString);
@@ -172,12 +172,14 @@ GROUP BY a.BKDH,a.DocName,a.OrgName ,a.PersonID ";
                     string[] pk = orderids.Split(',');
                     foreach (string item in pk)
                     {
-                        string sql = @"INSERT INTO LOG(ORDERID,DATE,NIANJUANQI,UserID) VALUES(@ORDERID,getdate(),@NIANJUANQI,@UserID)";
+                        string sql = @"INSERT INTO LOG(ORDERID,DATE,NIANJUANQI,UserID,Type) VALUES(@ORDERID,getdate(),@NIANJUANQI,@UserID,@Type)";
                         Para = new SqlParameter("ORDERID", item._ToInt32());
                         dbhelper.SqlParameterList.Add(Para);
                         Para = new SqlParameter("NIANJUANQI", nianjuanqi._ToStrTrim().ToUpper());
                         dbhelper.SqlParameterList.Add(Para);
                         Para = new SqlParameter("UserID", UserID);
+                        dbhelper.SqlParameterList.Add(Para);
+                        Para = new SqlParameter("Type", type);
                         dbhelper.SqlParameterList.Add(Para);
                         int num = dbhelper.ExecuteNonQuery(tran, sql);
                     }
@@ -200,7 +202,7 @@ GROUP BY a.BKDH,a.DocName,a.OrgName ,a.PersonID ";
         /// <param name="dt2">分发日期</param>
         /// <param name="userid">分发员</param>
         /// <returns></returns>
-        public DataTable getlog1(string dt1, string dt2, string userid, int limit = 0, int index = 0)
+        public DataTable getlog1(string dt1, string dt2, int userorg, string userid, int limit = 0, int index = 0)
         {
             DataTable dt = new DataTable();
             //OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
@@ -256,7 +258,7 @@ GROUP BY a.BKDH,a.DocName,a.OrgName,a.ParentID,a.Date,a.NAME,NianJuanQi";
         /// <param name="dt2">分发日期</param>
         /// <param name="userid">分发员</param>
         /// <returns></returns>
-        public DataTable getlog2(string dt1, string dt2, string userid, int limit = 0, int index = 0)
+        public DataTable getlog2(string dt1, string dt2,int userorg, string userid, int limit = 0, int index = 0)
         {
             DataTable dt = new DataTable();
             SqlParameter Para = null;
@@ -278,6 +280,16 @@ GROUP BY a.BKDH,a.DocName,a.OrgName,a.ParentID,a.Date,a.NAME,NianJuanQi";
                 Para = new SqlParameter("userid", userid._ToDateTime());
                 dbhelper.SqlParameterList.Add(Para);
                 logsql += " AND  log.userid=@userid ";
+            }
+            OrgInfoDAL _org = new OrgInfoDAL();
+            string all = _org.getChilds(userorg._ToStr(), "");
+            if (!string.IsNullOrEmpty(userid._ToStrTrim())) 
+            {
+                logsql += " OrderPeople.orgid in (" + all + ")";
+            }
+            else
+            {
+                return dt;
             }
             string sql = @"select  ROW_NUMBER() over (order by a.BKDH) as rownumber,a.BKDH,a.DocName,a.OrgName ,SUM(a.OrderNum) OrderNum,ids=STUFF((SELECT ','+ltrim([order].ID)  FROM [order]    
   WHERE PersonID=a.PersonID and BKDH=a.BKDH FOR XML PATH('')), 1, 1, ''),CONVERT(varchar(100),a.Date, 23) as Date,a.NAME,NianJuanQi from (

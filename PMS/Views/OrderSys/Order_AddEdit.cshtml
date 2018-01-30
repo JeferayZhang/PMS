@@ -3,17 +3,22 @@
 @model object
 @{
     DataRow dr = null;
+    string from = "";
     if (Model != null)
     {
-        PageModel pageModel = Model as PageModel;
+        List<PageModel> pageModel = Model as List<PageModel>;
 
-        if (pageModel.code==0)
+        if (pageModel[0].code==0)
         {
-            DataTable dt = pageModel.data as DataTable;
+            DataTable dt = pageModel[0].data as DataTable;
             if (dt != null && dt.Rows.Count > 0)
             {
                 dr = dt.Rows[0];
             }
+        }
+        if (pageModel[1].code == 0)
+        {
+            from = pageModel[1].data._ToStr();
         }
     }
 
@@ -93,6 +98,14 @@
                     parent.layer.close(index);  // 关闭layer
                 });
                 $(function () {
+                    var pay = document.getElementById("Pay");
+                    if (pay != undefined) {
+                        document.getElementById("NewspaperName").setAttribute("disabled", "disabled");
+                        document.getElementById("Month").setAttribute("readonly", "readonly");
+                        document.getElementById("OrderNumber").setAttribute("readonly", "readonly");
+                        document.getElementById("Discount").setAttribute("readonly", "readonly");
+                        document.getElementById("test1").setAttribute("readonly", "readonly");
+                    }
                     GetAllOrderPeopleInfos();
                     GetPosters();
                     selectchanged("", "NewspaperName");
@@ -111,13 +124,7 @@
                                     var value = $("#OrderPeople").attr("tag");
                                     if (value != "") {
                                         $("#OrderPeople option[value='" + value + "']").attr("selected", "selected");
-                                        var pay = document.getElementById("Pay");
-                                        if (pay != undefined) {
-                                            document.getElementById("NewspaperName").setAttribute("disabled", "disabled");
-                                            document.getElementById("Month").setAttribute("readonly", "readonly");
-                                            document.getElementById("OrderNumber").setAttribute("readonly", "readonly");
-                                            document.getElementById("Discount").setAttribute("readonly", "readonly");
-                                        }
+                                        
                                         form.render();
                                     }
                                 });
@@ -139,13 +146,7 @@
                                 var value = $("#Poster").attr("tag");
                                 if (value != "") {
                                     $("#Poster option[value='" + value + "']").attr("selected", "selected");
-                                    var pay = document.getElementById("Pay");
-                                    if (pay != undefined) {
-                                        document.getElementById("NewspaperName").setAttribute("disabled", "disabled");
-                                        document.getElementById("Month").setAttribute("readonly", "readonly");
-                                        document.getElementById("OrderNumber").setAttribute("readonly", "readonly");
-                                        document.getElementById("Discount").setAttribute("readonly", "readonly");
-                                    }
+                                    
                                     form.render();
                                 }
                             });
@@ -169,13 +170,7 @@
                                         $("#NewspaperName option[value='" + value + "']").attr("selected", "selected");
                                         //绑定价格
                                         document.getElementById("Price").value = $("#NewspaperName").find("option:selected").attr("tag");
-                                        var pay = document.getElementById("Pay");
-                                        if (pay != undefined) {
-                                            document.getElementById("NewspaperName").setAttribute("disabled", "disabled");
-                                            document.getElementById("Month").setAttribute("readonly", "readonly");
-                                            document.getElementById("OrderNumber").setAttribute("readonly", "readonly");
-                                            document.getElementById("Discount").setAttribute("readonly", "readonly");
-                                        }
+                                        
                                         form.render();
                                     }
                                 });
@@ -190,7 +185,6 @@
                     nowprice();
                     return false;
                 });
-                
                 form.render();
             });
 
@@ -235,6 +229,7 @@
     <input type="hidden" name="ID" value="@(dr == null ? "" : dr["ID"]._ToStrTrim())" />
     <input type="hidden" name="MGuid" value="@(dr == null ? "" : dr["NGUID"]._ToStrTrim())" />
     <input type="hidden" name="CostID" value="@(dr == null ? "" : dr["CostID"]._ToStrTrim())" />
+    <input type="hidden" name="from" id="from" value="@from" />
     <div class=" layui-form-item">
         <label class="layui-form-label">订户</label>
         <div class="layui-input-inline">
@@ -257,16 +252,21 @@
         </div>
     </div>
     <div class=" layui-form-item">  
+        <label class="layui-form-label">起订日期</label>
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" value="@(dr == null ? "" : dr["OrderDate"]._ToDateTime().ToString("yyyy-MM-dd"))" name="test1" id="test1" placeholder="年-月-日">
+        </div>
         <label class="layui-form-label">订阅月数</label>
         <div class="layui-input-inline">
             <input type="text" id="Month" onkeyup="this.value=this.value.replace(/[^\d]/g,'') " value="@(dr == null ? "" : dr["OrderMonths"]._ToStrTrim())" name="Month" placeholder="" onchange="javascript:nowprice()" autocomplete="off" class="layui-input" maxlength="50">
         </div>   
-        <label class="layui-form-label">订购份数</label>
-        <div class="layui-input-inline">
-            <input type="text" id="OrderNumber"onkeyup="this.value=this.value.replace(/[^\d]/g,'')" name="OrderNumber" value="@(dr == null ? "" : dr["OrderNum"]._ToStrTrim())" onchange="javascript:nowprice()"placeholder="" autocomplete="off" class="layui-input" maxlength="50">
-        </div>
+        
     </div>
     <div class=" layui-form-item">
+        <label class="layui-form-label">订购份数</label>
+        <div class="layui-input-inline">
+            <input type="text" id="OrderNumber" onkeyup="this.value=this.value.replace(/[^\d]/g,'')" name="OrderNumber" value="@(dr == null ? "" : dr["OrderNum"]._ToStrTrim())" onchange="javascript:nowprice()" placeholder="" autocomplete="off" class="layui-input" maxlength="50">
+        </div>
         <label class="layui-form-label">折扣</label>
         <div class="layui-input-inline">
             @if (dr != null)
@@ -274,7 +274,7 @@
                 if ((dr["OrderNum"]._ToInt32() * dr["OrderMonths"]._ToInt32() * dr["Price"]._ToDecimal()) > 0)
                 {
                     <input type="text" id="Discount" name="Discount" value="@(dr == null ? 1 :
-                    dr["Money"]._ToDecimal()/(dr["OrderNum"]._ToInt32()*dr["OrderMonths"]._ToInt32()*dr["Price"]._ToDecimal()))"
+                    Math.Round(dr["Money"]._ToDecimal()/(dr["OrderNum"]._ToInt32()*dr["OrderMonths"]._ToInt32()*dr["Price"]._ToDecimal()),2))"
                            placeholder="" readonly autocomplete="off" onchange="nowprice()" class="layui-input" maxlength="50">
                 }
                 else
@@ -287,31 +287,38 @@
                 <input type="text" id="Discount" name="Discount" value="1" placeholder="折扣在0至1之间" autocomplete="off" onchange="nowprice()" class="layui-input" maxlength="3">
             }
         </div>
+    </div>
+    <div class=" layui-form-item">
         <label class="layui-form-label">总价</label>
         <div class="layui-input-inline">
             <input type="text" id="FullPrice" name="FullPrice" value="@(dr == null ? "" : dr["Money"]._ToStrTrim())" readonly placeholder="" autocomplete="off" class="layui-input" maxlength="50">
         </div>
-    </div>
-    <div class=" layui-form-item">
         <label class="layui-form-label">已缴金额</label>
         <div class="layui-input-inline">
             <input type="text" id="MoneyPayed" readonly name="MoneyPayed" value="@(dr == null ? "" : dr["MoneyPayed"]._ToStrTrim())" placeholder="" autocomplete="off" class="layui-input" maxlength="50">
         </div>
+    </div>
+    <div class=" layui-form-item">
         @* 只有财务人员才能缴费 *@
         @if (Session["UserModel"] != null)
         {
             PMS.Models.UserModel user = Session["UserModel"] as PMS.Models.UserModel;
-            if (user.Role == 4)
+            if (from == "cost")
             {
-                <label class="layui-form-label">缴费</label>
-                <div class="layui-input-inline">
-                    <input type="text" id="Pay" name="Pay" value="" placeholder="费用总是正数" autocomplete="off" class="layui-input" maxlength="50">
-                </div>
+                if (user.Role == 4)
+                {
+                    <label class="layui-form-label">缴费金额</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="Pay" name="Pay" value="" placeholder="费用总是正数" autocomplete="off" class="layui-input" maxlength="50">
+                    </div>
+                    <button class="layui-btn" type="button" lay-filter="save1" lay-submit="" data-type="save">缴费</button>
+                }
+            }
+            else
+            {
+                <button class="layui-btn" type="button" lay-filter="save1" lay-submit="" data-type="save">保存</button>
             }
         }
-    </div>
-    <div class=" layui-form-item">
-        <button class="layui-btn" type="button" lay-filter="save1" lay-submit="" data-type="save">保存</button>
         <button class="layui-btn" type="button"  lay-filter="close" lay-submit="" data-type="close">关闭</button>
     </div>
 </form>

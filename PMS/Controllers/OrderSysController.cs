@@ -82,11 +82,18 @@ namespace PMS.Controllers
                 return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
             }
             int addeditcode = Request["addeditcode"]._ToInt32();
+            string from = Request["from"]._ToStr();
             if (addeditcode > 0)
             {
                 BLL.OrderInfoBLL _BLL = new BLL.OrderInfoBLL();
+                List<PageModel> lis = new List<PageModel>();
                 PageModel pg = _BLL.GetOrderInfoByPK(addeditcode);
-                ViewData.Model = pg;
+                lis.Add(pg);
+                pg = new PageModel();
+                pg.code = 0;
+                pg.data = from;
+                lis.Add(pg);
+                ViewData.Model = lis;
             }
             else
             {
@@ -202,7 +209,7 @@ namespace PMS.Controllers
         }
         #endregion
 
-        #region 退订
+        #region 退订操作
         [HttpPost]
         public JsonResult Order_TD(string str)
         {
@@ -214,18 +221,21 @@ namespace PMS.Controllers
                 ret.data = "NEEDLOGIN";
                 return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
             }
+            JObject o = null;
             PMS.Models.UserModel userModel = Session["UserModel"] as PMS.Models.UserModel;
             int userid = userModel._ID;
-            DataTable dt = str.ToTable();
-            string ids = "";
-            foreach (DataRow item in dt.Rows)
+            if (!string.IsNullOrEmpty(str))
             {
-                if (!string.IsNullOrEmpty(item["ID"]._ToStrTrim()))
+                o = JObject.Parse(str);
+                string ids = o["ID"]._ToStrTrim();
+                int Month = o["Month"]._ToInt32();
+                int Group_Type = o["Group_Type"]._ToInt32();
+                if (Group_Type==1)
                 {
-                    ids += item["ID"]._ToStrTrim() + ",";
+                    Month = 0;
                 }
+                ret = _BLL.TD(ids.Remove(ids.Length - 1), userid, Month);
             }
-            ret = _BLL.TD(ids.Remove(ids.Length - 1), userid);
             var js = JsonConvert.SerializeObject(ret);
             return Json(js, JsonRequestBehavior.AllowGet);
         }
@@ -425,13 +435,29 @@ namespace PMS.Controllers
         }
         #endregion
 
-        #region 续订
+        #region 退订界面
         /// <summary>
         /// 续订
         /// </summary>
         /// <returns></returns>
         public ActionResult Order_Continue()
         {
+            PageModel ret = new PageModel();
+            if (!authorize.checkFilterContext())
+            {
+                ret.code = 2;
+                ret.msg = "NEEDLOGIN";
+                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
+            }
+            string addeditcode = Request["addeditcode"]._ToStr();
+            if (!string.IsNullOrEmpty(addeditcode))
+            {
+                ViewData.Model = addeditcode;
+            }
+            else
+            {
+                ViewData.Model = null;
+            }
             return View();
         }
         #endregion 

@@ -262,31 +262,27 @@
                         });
                         return false;
                     }
-                    layer.confirm('确认要退订吗？', {
-                        btn: ['是', '否'] //可以无限个按钮
-                        , btn1: function (index, layero) {
-                            var senddata = { str: JSON.stringify(data) };
-                            ajaxHelper.post("/OrderSys/Order_TD/", senddata, function (da) {
-                                var jsonObj = JSON.parse(da);
-                                if (jsonObj.data == "NEEDLOGIN") {
-                                    top.location = "../Account/Login";
-                                    return false;
-                                }
-                                if (jsonObj.result) {
-                                    layer.open({
-                                        title: '提示', content: jsonObj.data, time: 2000
-                                    });
-                                    $("#search").click();
-                                }
-                                else {
-                                    layer.open({
-                                        title: '提示', content: jsonObj.reason, time: 2000
-                                    });
-                                }
-                            });
+                    var ids = "";
+                    var senddata = { str: JSON.stringify(data) };
+                    console.log(data);
+                    console.log(senddata);
+                    for (var i = 0; i < data.length; i++) {
+                        ids += data[i].ID + ",";
+                    }
+                    console.log(ids);
+                    layer.open({
+                        type: 2,
+                        title: '退订',
+                        closeBtn: 1,
+                        shade: [0],
+                        area: ['400px', '380px'],
+                        anim: 2,
+                        moveOut: true,
+                        content: ['/OrderSys/Order_Continue?addeditcode=' + ids, 'no'],//iframe的url，no代表不显示滚动条
+                        end: function () {
+                            $("#search").click();
                         }
                     });
-                    return false;
                 });
                 //执行实例
                 var uploadInst = upload.render({

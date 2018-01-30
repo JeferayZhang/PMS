@@ -14,11 +14,13 @@
                     url: '/CostSys/CostInfos/',
                     cols: [[
                         { type: 'checkbox' },
-                        { field: 'id',  title: '费用流水号', sort: true },
+                        { field: 'id', title: '费用流水号', sort: true },
+                        { field: 'orderid', title: '订购流水号', sort: true },
                         { field: 'OrderNo', align: 'center', title: '单位编码', sort: true },
                         { field: 'UnitName', align: 'center', title: '单位名称', sort: true },
                         { field: 'indate', align: 'center', title: '起订日期' },
                         { field: 'ordermonths', align: 'center', title: '订购月数' },
+                        { field: 'ordernum', align: 'center', title: '订购份数' },
                         { field: 'money', align: 'center', title: '应缴费用' },
                         { field: 'moneypayed', align: 'center', title: '已缴费用' },
                         { field: 'updatetime', align: 'center', title: '更新时间', sort: true },
@@ -82,7 +84,7 @@
                         area: ['700px', '380px'],
                         anim: 2,
                         moveOut: true,
-                        content: ['/OrderSys/Order_AddEdit?addeditcode=' + data[0].id, 'no'],//iframe的url，no代表不显示滚动条
+                        content: ['/OrderSys/Order_AddEdit?from=cost&addeditcode=' + data[0].orderid, 'no'],//iframe的url，no代表不显示滚动条
                         end: function () {
                             $("#search").click();
                         }

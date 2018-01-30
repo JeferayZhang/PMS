@@ -30,7 +30,7 @@ namespace DAL
             string sql = string.Format(@"select top {0} * from (
 select a.id,a.orderid,c.UnitName,c.OrderNo,a.money,
 a.moneypayed,CONVERT(varchar(100), a.updatetime, 23)updatetime,d.NAME updateuser ,
-b.indate,b.ordermonths,
+b.indate,b.ordermonths,b.ordernum,
 ROW_NUMBER() over (order by a.ID) as rownumber ,
 case isnull(b.state,0) when 0 then '正常' when -1 then '退订' when 1 then '过期' end as OrderState,
 case ISNULL(a.state,0) when 0 then '已缴清' when '1' then '未缴清' when -1 then '退订未处理' when '-2' then '退订已处理' 
@@ -85,18 +85,21 @@ left join USERS d on a.updateuser=d.ID where 1=1 ", pagesize);
         /// <param name="dt1"></param>
         /// <param name="dt2"></param>
         /// <returns></returns>
-        public int GetCount(int id, int orderid,string OrderNo, string unitname)
+        public int GetCount(int id, string state, int orderid,string OrderNo, string unitname, int userOrg = 0)
         {
             string sql = string.Format(@"
-select count(1) as num from cost a
+select count(1) from cost a
 left join [Order] b on a.orderid=b.ID
 left join OrderPeople c on b.PersonID=c.ID
-left join USERS d on a.updateuser=d.ID  ");
+left join USERS d on a.updateuser=d.ID where 1=1 ");
+            OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
+            string all = orgInfoDAL.getChilds(userOrg._ToStr(), "");
+            sql += " AND c.ORGID in (" + all + ")";
             if (!string.IsNullOrEmpty(OrderNo._ToStrTrim()))
             {
-                SqlParameter Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim());
+                SqlParameter Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
-                sql += " AND c.OrderNo LIKE '%'+@OrderNo+'%'";
+                sql += " AND upper(c.OrderNo) LIKE '%'+@OrderNo+'%'";
             }
             if (id > 0)
             {
@@ -110,11 +113,17 @@ left join USERS d on a.updateuser=d.ID  ");
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND b.ID =@orderid";
             }
+            if (!string.IsNullOrEmpty(state._ToStrTrim()))
+            {
+                SqlParameter Para = new SqlParameter("state", state._ToInt32());
+                dbhelper.SqlParameterList.Add(Para);
+                sql += " AND  a.state=@state";
+            }
             if (!string.IsNullOrEmpty(unitname._ToStrTrim()))
             {
-                SqlParameter Para = new SqlParameter("unitname", unitname._ToStrTrim());
+                SqlParameter Para = new SqlParameter("unitname", unitname._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
-                sql += " AND c.UnitName LIKE '%'+@unitname+'%'";
+                sql += " AND upper(c.UnitName) LIKE '%'+@unitname+'%'";
             }
 
             int num = dbhelper.Count(sql);

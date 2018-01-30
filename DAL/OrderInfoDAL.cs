@@ -182,7 +182,7 @@ where 1=1 ");
         public DataTable getByPK(int id)
         {
             string sql = string.Format(@"
-select a.ID ,b.Name docname ,a.BKDH,c.UnitName,c.Name ToUser,a.OrderDate,a.OrderMonths,
+select a.ID ,b.Name docname ,a.BKDH,c.UnitName,c.Name ToUser,CONVERT(varchar(100), a.OrderDate, 23) OrderDate,a.OrderMonths,
 a.OrderNum,CONVERT(varchar(100), a.Indate, 23) Indate,a.PosterID,d.Name as GetUser,e.NAME as InUser ,a.PersonID,a.NGUID,Cost.Money,Cost.MoneyPayed,Cost.ID as CostID,
 b.Price, case isnull(a.state,0) when 0 then '正常' when -1 then '退订' when 1 then '过期' end as OrderState,
 case ISNULL(Cost.state,0) when 0 then '已缴清' when '1' then '未缴清' when -1 then '退订未处理' when '-2' then '退订已处理' end as CostState
@@ -259,7 +259,7 @@ bkdh = @bkdh,PersonID = @PersonID,ModifyDate = GETDATE(),ModifyUser = @ModifyUse
         #endregion
 
         #region 退订,会将缴费记录同时更新
-        public string TD(string ids, int ModifyUser)
+        public string TD(string ids, int ModifyUser,int months=0)
         {
             string res = "";
             SqlConnection conn = new SqlConnection(dbhelper.SqlConnectionString);
@@ -272,19 +272,58 @@ bkdh = @bkdh,PersonID = @PersonID,ModifyDate = GETDATE(),ModifyUser = @ModifyUse
                     string[] pk = ids.Split(',');
                     foreach (string item in pk)
                     {
-                        string sql = @"update [order] set state=-1,nguid=newid() ,
-ModifyDate = GETDATE(),ModifyUser = @ModifyUser where id=@id and isnull(state,0)!=-1";
-                        Para = new SqlParameter("id", item);
-                        dbhelper.SqlParameterList.Add(Para);
-                        Para = new SqlParameter("ModifyUser", ModifyUser);
-                        dbhelper.SqlParameterList.Add(Para);
-                        int num = dbhelper.ExecuteNonQuery(tran, sql);
-                        if (num > 0)
+                        //如果全退
+                        if (months == 0)
                         {
-                            sql = " update cost set moneypayed=moneypayed*-1,state=-1 where  orderid=@id ";
+                            string sql = @"update [order] set state=-1,nguid=newid() ,
+ModifyDate = GETDATE(),ModifyUser = @ModifyUser where id=@id and isnull(state,0)!=-1";
                             Para = new SqlParameter("id", item);
                             dbhelper.SqlParameterList.Add(Para);
-                            num = dbhelper.ExecuteNonQuery(tran, sql);
+                            Para = new SqlParameter("ModifyUser", ModifyUser);
+                            dbhelper.SqlParameterList.Add(Para);
+                            int num = dbhelper.ExecuteNonQuery(tran, sql);
+                            if (num > 0)
+                            {
+                                sql = " update cost set moneypayed=moneypayed*-1,state=-1 where  orderid=@id ";
+                                Para = new SqlParameter("id", item);
+                                dbhelper.SqlParameterList.Add(Para);
+                                num = dbhelper.ExecuteNonQuery(tran, sql);
+                            }
+                        }
+                        else
+                        {
+                            res = checkTD(item._ToInt32(), months);
+                            if (string.IsNullOrEmpty(res))
+                            {
+                                string sql = @"update [order] set OrderMonths=OrderMonths-@OrderMonths,nguid=newid() ,
+ModifyDate = GETDATE(),ModifyUser = @ModifyUser where id=@id and isnull(state,0)!=-1";
+                                Para = new SqlParameter("id", item);
+                                dbhelper.SqlParameterList.Add(Para);
+                                Para = new SqlParameter("OrderMonths", months);
+                                dbhelper.SqlParameterList.Add(Para);
+                                Para = new SqlParameter("ModifyUser", ModifyUser);
+                                dbhelper.SqlParameterList.Add(Para);
+                                int num = dbhelper.ExecuteNonQuery(tran, sql);
+                                if (num > 0)
+                                {
+                                    sql = @" update cost set Money=Money-((select [order].OrderNum*Doc.Price from [order] 
+left join Doc on Doc.BKDH =[order].BKDH
+where[order].ID = @ID)*" + months + @")  where  orderid=@id ";
+                                    Para = new SqlParameter("id", item);
+                                    dbhelper.SqlParameterList.Add(Para);
+                                    num = dbhelper.ExecuteNonQuery(tran, sql);
+
+                                    sql = " update cost set moneypayed=Money-moneypayed, state=-1  where moneypayed>Money and orderid=@id ";
+                                    Para = new SqlParameter("id", item);
+                                    dbhelper.SqlParameterList.Add(Para);
+                                    num = dbhelper.ExecuteNonQuery(tran, sql);
+                                }
+                            }
+                            else
+                            {
+                                tran.Rollback();
+                                return res;
+                            }
                         }
                     }
                     tran.Commit();
@@ -314,6 +353,22 @@ ModifyDate = GETDATE(),ModifyUser = @ModifyUser where id=@id and isnull(state,0)
                 }
             }
             return "";
+        }
+
+        /// <summary>
+        /// 检查是否可以退订,如果退订月份大于剩余月份,则不能退订
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        private string checkTD(int id,int months)
+        {
+            string res = "";
+            string sql = @"select * from[order] t where dateadd(MONTH,t.OrderMonths,t.OrderDate)<dateadd(MONTH,"+ months + @",GETDATE()) and id=" + id;
+            if (dbhelper.ExecuteSql(sql).Rows.Count>0)
+            {
+                res = "订购流水号"+ id + "剩余订购月数不满"+ months + "个月,无法退订";
+            }
+            return res;
         }
 
         #region 新增订购

@@ -36,7 +36,7 @@ namespace BLL
                 {
                     pg.code = 0;
                     pg.msg = "";
-                    pg.count = dal.GetCount(id, orderid, OrderNo, unitname);
+                    pg.count = dal.GetCount(id, state, orderid, OrderNo, unitname, UserOrgID);
                     pg.data = dt;
                 }
                 else

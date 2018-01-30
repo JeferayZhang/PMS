@@ -1,20 +1,82 @@
-﻿<form class="layui-form layui-form-pane" style="margin-left: 20px;margin-top:20px;" action="" method="get" id="mainform">
+﻿@using Common
+@model object
+@{
+    string ids = null;
+    if (Model != null)
+    {
+        ids = Model._ToStr();
+    }
+
+}
+@section scripts{
+    <script>
+        $(function () {
+            var ajaxHelper = new AjaxHelper();
+
+            layui.use([ 'jquery', 'layer', 'form', 'element'], function () {
+                var $ = layui.jquery, layer = layui.layer, form = layui.form, element = layui.element;
+                form.on('submit(save1)', function (data) {
+                    layer.confirm('确认要退订吗？', {
+                        btn: ['是', '否'] //可以无限个按钮
+                        , btn1: function (index, layero) {
+                            var ddd = { str: JSON.stringify(data.field) };
+                            ajaxHelper.post("/OrderSys/Order_TD/", ddd, function (da) {
+                                var jsonObj = JSON.parse(da);
+                                if (jsonObj.data == "NEEDLOGIN") {
+                                    top.location = "../Account/Login";
+                                    return false;
+                                }
+                                if (jsonObj.result) {
+                                    layer.open({
+                                        title: '提示', content: jsonObj.data, time: 2000,
+                                        end: function () {
+                                            var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                                            parent.layer.close(index);  // 关闭layer
+                                        }
+                                    });
+                                }
+                                else {
+                                    layer.open({
+                                        title: '提示', content: jsonObj.reason, time: 2000
+                                    });
+                                }
+                            });
+                        }
+                    });
+                });
+                form.on('radio(Group_Type)', function (data) {
+                    if (data.value=="1") {
+                        $("#Month").attr("readonly", "readonly");
+                    }
+                    else {
+                        $("#Month").removeAttr("readonly");
+                    }
+                });  
+                form.on('submit(close)', function () {
+                    var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+                    parent.layer.close(index);  // 关闭layer
+                });
+                form.render();
+            });
+        });
+    </script>
+}
+
+<form class="layui-form layui-form-pane" style="margin-left: 20px;margin-top:20px;" action="" id="mainform">
+    <input type="hidden" name="ID" value="@ids" />
     <div class=" layui-form-item">
-        <label class="layui-form-label">订购份数</label>
+        <label class="layui-form-label">退订方式</label>
         <div class="layui-input-inline">
-            <input type="text" id="" name="OrderNumber" placeholder="" autocomplete="off" class="layui-input" maxlength="50" value="">
+            <input type="radio" lay-filter="Group_Type"  name="Group_Type" value="1" title="全部退订" checked>
+            <input type="radio" lay-filter="Group_Type"  name="Group_Type" value="2" title="部分退订">
         </div>
-        <label class="layui-form-label">订阅月数</label>
+        <label class="layui-form-label">退订月数</label>
         <div class="layui-input-inline">
-            <input type="text" id="" name="Month" placeholder="" autocomplete="off" class="layui-input" maxlength="50" value="">
+            <input type="text" id="Month" readonly onkeyup="this.value=this.value.replace(/[^\d]/g,'') " value="" name="Month" placeholder=""  autocomplete="off" class="layui-input" maxlength="50">
         </div>
     </div>
     <div class=" layui-form-item">
-        <button class="layui-btn layui-btn-warm">
-            <i class="layui-icon">&#xe618;</i> 确定
-        </button>
-        <button class="layui-btn layui-btn-danger" onclick="javascript: mvccloseall();">
-            <i class="layui-icon">&#x1006;</i> 取消
-        </button>
+        <button class="layui-btn" type="button" lay-filter="save1" lay-submit="" data-type="save">退订</button>
+        <button class="layui-btn" type="button" lay-filter="close" lay-submit="" data-type="close">关闭</button>
     </div>
 </form>

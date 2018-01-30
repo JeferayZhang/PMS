@@ -106,10 +106,10 @@ namespace BLL
         }
 
         
-        public retValue TD(string ID,int ModifyUser)
+        public retValue TD(string ID,int ModifyUser,int months=0)
         {
             retValue ret = new retValue();
-            string res = dal.TD(ID,  ModifyUser);
+            string res = dal.TD(ID,  ModifyUser, months);
             if (string.IsNullOrEmpty(res))
             {
                 ret.result = true; ret.data = "退订成功";

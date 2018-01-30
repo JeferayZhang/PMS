@@ -276,6 +276,8 @@
     <Content Include="Plugin\layui\font\iconfont.eot" />
     <Content Include="Plugin\layui\font\iconfont.ttf" />
     <Content Include="Plugin\layui\font\iconfont.woff" />
+    <Content Include="数据库文件.sql" />
+    <None Include="Properties\PublishProfiles\PMS.pubxml" />
     <None Include="Scripts\jquery-1.8.2.intellisense.js" />
     <Content Include="JS\Common\AjaxHelper.js" />
     <Content Include="JS\Common\Tab.js" />
@@ -421,15 +423,7 @@
     <Content Include="Images\orderedList8.png" />
     <Content Include="Images\orderedList9.png" />
     <Content Include="Views\_ViewStart.cshtml" />
-    <Content Include="Views\Account\_ChangePasswordPartial.cshtml" />
-    <Content Include="Views\Account\_ExternalLoginsListPartial.cshtml" />
-    <Content Include="Views\Account\_RemoveExternalLoginsPartial.cshtml" />
-    <Content Include="Views\Account\_SetPasswordPartial.cshtml" />
     <Content Include="Views\Account\Login.cshtml" />
-    <Content Include="Views\Account\Manage.cshtml" />
-    <Content Include="Views\Account\Register.cshtml" />
-    <Content Include="Views\Account\ExternalLoginFailure.cshtml" />
-    <Content Include="Views\Account\ExternalLoginConfirmation.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
@@ -450,15 +444,12 @@
     <Content Include="Views\OrderSys\OrderPeopleInfo_AddEdit.cshtml" />
     <Content Include="Views\OrderSys\Order_AddEdit.cshtml" />
     <Content Include="Views\OrderSys\Order_Continue.cshtml" />
-    <Content Include="Views\BasicSys\DocTypeInfo.cshtml" />
-    <Content Include="Views\BasicSys\DocTypeInfo_AddEdit.cshtml" />
     <Content Include="Views\BasicSys\OrgInfo.cshtml" />
     <Content Include="Views\BasicSys\OrgInfo_AddEdit.cshtml" />
     <Content Include="Views\BasicSys\DocInfo.cshtml" />
     <Content Include="Views\BasicSys\DocInfo_AddEdit.cshtml" />
     <Content Include="批量导入订购模板.xlsx" />
     <Content Include="Views\CostSys\CostInfo.cshtml" />
-    <Content Include="Views\CostSys\Cost_Pay.cshtml" />
     <Content Include="Views\DistributeSys\DistributeInfo_Edit.cshtml" />
   </ItemGroup>
   <ItemGroup>

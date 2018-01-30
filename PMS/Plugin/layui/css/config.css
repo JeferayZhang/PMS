@@ -128,13 +128,13 @@
 
 #page2_jImages1{
   left: 4px;
-  top: 4px;
+  top: 0px;
   height: 45px;
   width: 45px;
 }
 
 #page2_jLabel3{
-  left: 51px;
+  left: 40px;
   top: 20px;
   font-size: 20px;
   font-weight: bold;

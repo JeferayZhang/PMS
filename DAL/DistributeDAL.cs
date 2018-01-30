@@ -34,7 +34,7 @@ namespace DAL
             SqlParameter Para = null;
             if (!string.IsNullOrEmpty(BKDH))
             {
-                wheresql += " AND t.BKDH=@BKDH";
+                wheresql += " AND upper(t.BKDH)=@BKDH";
                 Para = new SqlParameter("BKDH", BKDH.ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
             }
@@ -45,7 +45,6 @@ namespace DAL
             }
             else
             {
-                //分发行为,要查出已经被市公司分发过了,但是没有被县公司分发的记录
                 logsql += " and log.type=0 ";
                 wheresql += @" and not exists(
 select 1 from log where log.orderid=t.id and 
@@ -105,7 +104,7 @@ GROUP BY a.BKDH,a.DocName,a.OrgName,a.ParentID";
             
             if (!string.IsNullOrEmpty(BKDH))
             {
-                wheresql += " AND t.BKDH=@BKDH";
+                wheresql += " AND upper(t.BKDH)=@BKDH";
                 Para = new SqlParameter("BKDH", BKDH.ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
             }

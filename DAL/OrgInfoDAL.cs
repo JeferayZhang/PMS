@@ -146,7 +146,7 @@ group by t.OrgID";
             if (!string.IsNullOrEmpty(chooseorg))
             {
                 //这里是为了重置机构,免得重复
-                childs = userorg + ",";
+                childs = chooseorg + ",";
                 str2 = getChilds(chooseorg);
                 str2 = str2.Substring(0, str2.Length - 1);
                 //取交集

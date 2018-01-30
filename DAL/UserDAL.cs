@@ -56,7 +56,7 @@ LEFT JOIN USERS B ON B.ID=USERS.Operator WHERE 1=1 ";
             {
                 SqlParameter Para = new SqlParameter("USERNO", userNo._ToStrTrim());
                 dbhelper.SqlParameterList.Add(Para);
-                sql += " AND USERNO LIKE @USERNO+'%'";
+                sql += " AND USERS.USERNO LIKE @USERNO+'%'";
             }
             if (!string.IsNullOrEmpty(userName._ToStrTrim()))
             {

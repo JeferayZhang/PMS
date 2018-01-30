@@ -78,10 +78,12 @@ namespace PMS.Controllers
                 {
                     OrgID = Roads;
                 }
+                //如果是市县级分发
                 if (action=="city")
                 {
                     ret = _BLL.GetTable(NewspaperName, OrgID, userModel.OrgID._ToStr(), Group_Type, dt1);
                 }
+                    //如果是县段道级分发
                 else
                 {
                     ret = _BLL.GetTable2(NewspaperName, OrgID, userModel.OrgID._ToStr(), Group_Type, dt1);

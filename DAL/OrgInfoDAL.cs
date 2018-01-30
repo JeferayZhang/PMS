@@ -39,7 +39,7 @@ namespace DAL
             SqlParameter Para = null;
             Para = new SqlParameter("id", id._ToStrTrim());
             dbh.SqlParameterList.Add(Para);
-            dt = dbh.ExecuteSql(@"  select * ,b.Name ParentName from org 
+            dt = dbh.ExecuteSql(@"  select org.* ,b.Name ParentName from org 
   left join Org b on Org.ParentID=b.OrgID  where org.orgID=@id");
             return dt;
         }
@@ -59,7 +59,7 @@ namespace DAL
             Para = new SqlParameter("ParentID", ParentID._ToStrTrim());
             dbh.SqlParameterList.Add(Para);
             //dt = dbh.ExecuteSql(" select * from org where ParentID=@ParentID and orgid in (" + all + ")");
-            dt = dbh.ExecuteSql(@" select * ,b.Name ParentName from org 
+            dt = dbh.ExecuteSql(@" select org.* ,b.Name ParentName from org 
   left join Org b on Org.ParentID=b.OrgID  where org.ParentID=@ParentID");
             return dt;
         }

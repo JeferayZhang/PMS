@@ -621,7 +621,7 @@ namespace PMS.Controllers
                         OrgID = CompanyUnderArea;
                     }
                     int level = 0;
-                    ret = _BLL.GetOrgByParentID(OrgID._ToInt32());
+                    ret = _BLL.GetOrgByPK(OrgID._ToInt32());
                     if (ret.result)
                     {
                         level = ((DataTable)ret.data).Rows[0]["Level"]._ToInt32() + 1;

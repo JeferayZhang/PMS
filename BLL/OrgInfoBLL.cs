@@ -68,7 +68,14 @@ namespace BLL
                 }
                 else
                 {
-                    dt = dal.GetOrgByPK(id);
+                    if (id>0)
+                    {
+                        dt = dal.GetOrgByPK(id);
+                    }
+                    else
+                    {
+                        dt = dal.GetOrgByPK(UserOrgID);
+                    }
                 }
             }
             //如果不等于,那么表示选择了省份,需要加载用户所属市,县,网点

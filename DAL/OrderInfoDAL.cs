@@ -327,6 +327,7 @@ ModifyDate = GETDATE(),ModifyUser = @ModifyUser where id=@id and isnull(state,0)
         /// <param name="orderDate">订购起始日期</param>
         /// <param name="inuser">录入员</param>
         /// <param name="posterid">投递员,相当于收订人</param>
+        /// <param name="FullPrice">总价格</param>
         /// <returns></returns>
         public string Insert(string BKDH, int orderpeopleid, int ordernum, int ordermonths, string orderDate,string inuser, int posterid, SqlTransaction tran, decimal FullPrice = 0)
         {

@@ -259,7 +259,7 @@ bkdh = @bkdh,PersonID = @PersonID,ModifyDate = GETDATE(),ModifyUser = @ModifyUse
         #endregion
 
         #region 退订,会将缴费记录同时更新
-        public string TD(string ids, int ModifyUser,int months=0)
+        public string TD(string ids, int ModifyUser, int type = 1, int months = 0, int OrderNum = 0)
         {
             string res = "";
             SqlConnection conn = new SqlConnection(dbhelper.SqlConnectionString);
@@ -273,7 +273,7 @@ bkdh = @bkdh,PersonID = @PersonID,ModifyDate = GETDATE(),ModifyUser = @ModifyUse
                     foreach (string item in pk)
                     {
                         //如果全退
-                        if (months == 0)
+                        if (type == 1)
                         {
                             string sql = @"update [order] set state=-1,nguid=newid() ,
 ModifyDate = GETDATE(),ModifyUser = @ModifyUser where id=@id and isnull(state,0)!=-1";
@@ -292,27 +292,32 @@ ModifyDate = GETDATE(),ModifyUser = @ModifyUser where id=@id and isnull(state,0)
                         }
                         else
                         {
-                            res = checkTD(item._ToInt32(), months);
+                            res = checkTD(item._ToInt32(), months, OrderNum);
                             if (string.IsNullOrEmpty(res))
                             {
-                                string sql = @"update [order] set OrderMonths=OrderMonths-@OrderMonths,nguid=newid() ,
+                                string sql = @"update [order] set OrderMonths=OrderMonths-@OrderMonths,
+OrderNum=OrderNum-@OrderNum,nguid=newid() ,
 ModifyDate = GETDATE(),ModifyUser = @ModifyUser where id=@id and isnull(state,0)!=-1";
                                 Para = new SqlParameter("id", item);
                                 dbhelper.SqlParameterList.Add(Para);
                                 Para = new SqlParameter("OrderMonths", months);
+                                dbhelper.SqlParameterList.Add(Para);
+                                Para = new SqlParameter("OrderNum", OrderNum);
                                 dbhelper.SqlParameterList.Add(Para);
                                 Para = new SqlParameter("ModifyUser", ModifyUser);
                                 dbhelper.SqlParameterList.Add(Para);
                                 int num = dbhelper.ExecuteNonQuery(tran, sql);
                                 if (num > 0)
                                 {
-                                    sql = @" update cost set Money=Money-((select [order].OrderNum*Doc.Price from [order] 
+                                    //根据现有的订购数和订购月数计算应收金额
+                                    sql = @" update cost set Money=(select Doc.Price* [order].OrderMonths*[order].OrderNum
+from [order] 
 left join Doc on Doc.BKDH =[order].BKDH
-where[order].ID = @ID)*" + months + @")  where  orderid=@id ";
-                                    Para = new SqlParameter("id", item);
+where[order].ID = @ID)  where  orderid=@ID ";
+                                    Para = new SqlParameter("ID", item);
                                     dbhelper.SqlParameterList.Add(Para);
                                     num = dbhelper.ExecuteNonQuery(tran, sql);
-
+                                    //如果已经支付的金额大于应付金额,那么需要退钱,负数表示退钱
                                     sql = " update cost set moneypayed=Money-moneypayed, state=-1  where moneypayed>Money and orderid=@id ";
                                     Para = new SqlParameter("id", item);
                                     dbhelper.SqlParameterList.Add(Para);
@@ -360,13 +365,20 @@ where[order].ID = @ID)*" + months + @")  where  orderid=@id ";
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        private string checkTD(int id,int months)
+        private string checkTD(int id,int months,int ordernum)
         {
             string res = "";
             string sql = @"select * from[order] t where dateadd(MONTH,t.OrderMonths,t.OrderDate)<dateadd(MONTH,"+ months + @",GETDATE()) and id=" + id;
             if (dbhelper.ExecuteSql(sql).Rows.Count>0)
             {
                 res = "订购流水号"+ id + "剩余订购月数不满"+ months + "个月,无法退订";
+                return res;
+            }
+            sql = @"select * from[order] t where ordernum<" + ordernum + @" and id=" + id;
+            if (dbhelper.ExecuteSql(sql).Rows.Count > 0)
+            {
+                res = "订购流水号" + id + "实际订购份数小于" + ordernum + ",无法退订";
+                return res;
             }
             return res;
         }

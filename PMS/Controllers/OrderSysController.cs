@@ -229,12 +229,15 @@ namespace PMS.Controllers
                 o = JObject.Parse(str);
                 string ids = o["ID"]._ToStrTrim();
                 int Month = o["Month"]._ToInt32();
+                int OrderNum = o["OrderNum"]._ToInt32();
                 int Group_Type = o["Group_Type"]._ToInt32();
-                if (Group_Type==1)
+                //1全退,2部分退
+                if (Group_Type == 1)
                 {
                     Month = 0;
+                    OrderNum = 0;
                 }
-                ret = _BLL.TD(ids.Remove(ids.Length - 1), userid, Month);
+                ret = _BLL.TD(ids.Remove(ids.Length - 1), userid, Group_Type, Month, OrderNum);
             }
             var js = JsonConvert.SerializeObject(ret);
             return Json(js, JsonRequestBehavior.AllowGet);

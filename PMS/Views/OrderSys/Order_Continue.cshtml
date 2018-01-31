@@ -45,11 +45,13 @@
                     });
                 });
                 form.on('radio(Group_Type)', function (data) {
-                    if (data.value=="1") {
+                    if (data.value == "1") {
                         $("#Month").attr("readonly", "readonly");
+                        $("#OrderNum").attr("readonly", "readonly");
                     }
                     else {
                         $("#Month").removeAttr("readonly");
+                        $("#OrderNum").removeAttr("readonly");
                     }
                 });  
                 form.on('submit(close)', function () {
@@ -73,6 +75,10 @@
         <label class="layui-form-label">退订月数</label>
         <div class="layui-input-inline">
             <input type="text" id="Month" readonly onkeyup="this.value=this.value.replace(/[^\d]/g,'') " value="" name="Month" placeholder=""  autocomplete="off" class="layui-input" maxlength="50">
+        </div>
+        <label class="layui-form-label">退订份数</label>
+        <div class="layui-input-inline">
+            <input type="text" id="OrderNum" readonly onkeyup="this.value=this.value.replace(/[^\d]/g,'') " value="" name="OrderNum" placeholder="" autocomplete="off" class="layui-input" maxlength="50">
         </div>
     </div>
     <div class=" layui-form-item">

@@ -20,6 +20,32 @@
                 var $ = layui.jquery,layer = layui.layer, form = layui.form;
                 form.on('submit(save1)', function (data) {
                     var ddd = { str: JSON.stringify(data.field) };
+                    ajaxHelper.post("/DistributeSys/Check_FF/", ddd, function (da) {
+                        var jsonObj = JSON.parse(da);
+                        if (jsonObj.data == "NEEDLOGIN") {
+                            top.location = "../Account/Login";
+                            return false;
+                        }
+                        if (jsonObj.result) {
+                            ff(ddd);
+                        }
+                        else {
+                            layer.confirm('存在已经分发过的订购,是否继续？',
+                            {
+                                btn: ['是', '否'] //可以无限个按钮
+                               , btn1: function (index, layero)
+                               {
+                                     ff(ddd);
+                                }
+                            });
+                        }
+                    });
+                    
+                    return false;
+                });
+                //执行分发操作
+                function ff(ddd)
+                {
                     ajaxHelper.post("/DistributeSys/DistributeLog_FF/", ddd, function (da) {
                         var jsonObj = JSON.parse(da);
                         if (jsonObj.data == "NEEDLOGIN") {
@@ -41,8 +67,7 @@
                             });
                         }
                     });
-                    return false;
-                });
+                }
                 form.render();
             });
         });

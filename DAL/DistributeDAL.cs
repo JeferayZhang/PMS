@@ -15,6 +15,8 @@ namespace DAL
     public class DistributeDAL
     {
         SqlHelp dbhelper = new SqlHelp();
+
+        
         /// <summary>
         /// 统计-市-县级分发
         /// </summary>
@@ -57,11 +59,8 @@ select a.ID,a.BKDH,a.PersonID,a.UnitName,a.OrderNum, Org.ParentID,Org.Name from 
 select t.ID ,t.BKDH,t.PersonID,OrderPeople.UnitName,Org.ParentID,org.Name,t.OrderNum from [Order] t  
 left join OrderPeople on t.PersonID=OrderPeople.ID 
 left join Org on org.OrgID=OrderPeople.OrgID 
-where   dateadd(MONTH,t.OrderMonths,t.OrderDate)>CONVERT(varchar(100), @INDATE1, 23)
-and not exists(
-select 1 from log where log.orderid=t.id and 
-CONVERT(varchar(100), log.date, 23)=CONVERT(varchar(100), @INDATE1, 23) " + logsql + @"
-) " + wheresql + @" 
+where   dateadd(MONTH,t.OrderMonths,t.OrderDate)>CONVERT(varchar(100), @INDATE1, 23) and CONVERT(varchar(100),t.OrderDate, 23)<=
+CONVERT(varchar(100),getdate(), 23) " + wheresql + @" 
 ) a
 left join Org on a.ParentID=Org.OrgID) a 
 left join Org on a.ParentID=Org.OrgID 
@@ -84,6 +83,12 @@ GROUP BY a.BKDH,a.DocName,a.OrgName,a.ParentID";
             return dt;
         }
 
+        public int count(string ids,int type,string nianjuanqi) 
+        {
+            string sql = string.Format(@"select count(1) from log where log.orderid in ({0}) and type={1} and nianjuanqi='{2}'", ids, type, nianjuanqi);
+            int cou = dbhelper.Count(sql);
+            return cou;
+        } 
         /// <summary>
         /// 统计-县-段道级分发
         /// </summary>
@@ -131,7 +136,7 @@ where   dateadd(MONTH,t.OrderMonths,t.OrderDate)>CONVERT(varchar(100), @INDATE1,
 and exists(
 select 1 from log where log.orderid=t.id and 
 CONVERT(varchar(100), log.date, 23)=CONVERT(varchar(100), @INDATE1, 23) "+ logsql + @"
-)" + wheresql + @" 
+) 
 ) a
 GROUP BY a.BKDH,a.DocName,a.OrgName ,a.PersonID ";
             if (Group_Type == "1")
@@ -227,20 +232,17 @@ GROUP BY a.BKDH,a.DocName,a.OrgName ,a.PersonID ";
                 dbhelper.SqlParameterList.Add(Para);
                 logsql += " AND  log.userid=@userid ";
             }
-            string sql = @"select  ROW_NUMBER() over (order by a.BKDH) as rownumber,a.BKDH,a.DocName,a.OrgName,SUM(a.OrderNum) OrderNum,a.ParentID,ids=STUFF((SELECT ','+ltrim([order].ID)  FROM [order]    
-  WHERE BKDH=a.BKDH FOR XML PATH('')), 1, 1, ''),CONVERT(varchar(100),a.Date, 23) as Date,NianJuanQi,a.NAME from (
-select a.ID,a.BKDH,Doc.Name DocName,a.PersonID,a.UnitName,a.OrderNum, Org.ParentID,Org.Name OrgName,a.Date,NianJuanQi,a.NAME from (
-select a.ID,a.BKDH,a.PersonID,a.UnitName,a.OrderNum, Org.ParentID,Org.Name OrgName,a.Date,NianJuanQi,a.NAME from (
-select t.ID ,t.BKDH,t.PersonID,OrderPeople.UnitName,Org.ParentID,org.Name OrgName,t.OrderNum,log.Date ,NianJuanQi,users.NAME from [Order] t  
-left join OrderPeople on t.PersonID=OrderPeople.ID 
-left join Org on org.OrgID=OrderPeople.OrgID 
-left join log on log.orderid=t.id 
-left join users on users.id=log.userid where 1=1 " + logsql + @"
-) a
-left join Org on a.ParentID=Org.OrgID) a 
-left join Org on a.ParentID=Org.OrgID 
-left join Doc on Doc.BKDH=a.BKDH) a 
-GROUP BY a.BKDH,a.DocName,a.OrgName,a.ParentID,a.Date,a.NAME,NianJuanQi";
+            OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
+            string all = orgInfoDAL.getChilds(userorg._ToStr(), "");
+            logsql += " AND e.ORGID in (" + all + ")";
+            string sql = @"select  ROW_NUMBER() over (order by log.ID) as rownumber, log.ID,log.nianjuanqi,CONVERT(VARCHAR, log.Date,120) Date,c.name as ffname, f.Name as OrgName,
+e.UnitName UnitName,d.Name, 
+case Log.type when 0 then '市级分发' else '县级分发' end as type,b.BKDH,b.OrderNum from log  
+left join [Order] b on Log.OrderID=b.ID
+left join USERS c on c.ID=Log.UserID
+left join Doc d on d.BKDH=b.BKDH
+left join OrderPeople e on b.PersonID=e.ID
+left join Org f on f.OrgID=e.OrgID where    1=1 " + logsql;
             string top = "";
             if (limit > 0)
             {
@@ -283,23 +285,15 @@ GROUP BY a.BKDH,a.DocName,a.OrgName,a.ParentID,a.Date,a.NAME,NianJuanQi";
             }
             OrgInfoDAL _org = new OrgInfoDAL();
             string all = _org.getChilds(userorg._ToStr(), "");
-            if (!string.IsNullOrEmpty(userid._ToStrTrim())) 
-            {
-                logsql += " OrderPeople.orgid in (" + all + ")";
-            }
-            else
-            {
-                return dt;
-            }
-            string sql = @"select  ROW_NUMBER() over (order by a.BKDH) as rownumber,a.BKDH,a.DocName,a.OrgName ,SUM(a.OrderNum) OrderNum,ids=STUFF((SELECT ','+ltrim([order].ID)  FROM [order]    
-  WHERE PersonID=a.PersonID and BKDH=a.BKDH FOR XML PATH('')), 1, 1, ''),CONVERT(varchar(100),a.Date, 23) as Date,a.NAME,NianJuanQi from (
-select t.ID ,t.BKDH,Doc.Name DocName,Org.Name OrgName ,t.OrderNum,t.PersonID,log.Date,users.NAME,NianJuanQi from [Order] t  
-left join OrderPeople on t.PersonID=OrderPeople.ID 
-left join Org on org.OrgID=OrderPeople.OrgID 
-left join Doc on Doc.BKDH=t.BKDH
-left join Log on log.OrderID=t.ID
-left join users on users.id=log.userid where log.type=1 " + logsql + @"
-) a GROUP BY a.BKDH,a.DocName,a.OrgName ,a.PersonID,a.Date,a.NAME,NianJuanQi ;";
+            logsql += " AND e.ORGID in (" + all + ")";
+            string sql = @"select  ROW_NUMBER() over (order by log.ID) as rownumber, log.ID,log.nianjuanqi,log.Date,c.name as ffname, f.Name as OrgName,
+e.UnitName UnitName,d.Name, 
+case Log.type when 0 then '市级分发' else '县级分发' end as type,b.BKDH,b.OrderNum from log  
+left join [Order] b on Log.OrderID=b.ID
+left join USERS c on c.ID=Log.UserID
+left join Doc d on d.BKDH=b.BKDH
+left join OrderPeople e on b.PersonID=e.ID
+left join Org f on f.OrgID=e.OrgID where 1=1 " + logsql;
             string top = "";
             if (limit > 0)
             {

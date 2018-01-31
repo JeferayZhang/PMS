@@ -46,12 +46,15 @@
                     elem: '#maintb',
                     url: '/DistributeSys/GetHistory/',
                     cols: [[
-                        { field: 'DocName', align: 'center', title: '报刊名称', sort: true },
+                        { field: 'rownumber', align: 'center', title: '序号', sort: true },
+                        { field: 'Name', align: 'center', title: '报刊名称', sort: true },
                         { field: 'OrgName', align: 'center', title: '机构名称', sort: true },
-                        { field: 'OrderNum', align: 'center', title: '订购数' },
-                        { field: 'Date', align: 'center', title: '分发日期' },
-                        { field: 'NAME', align: 'center', title: '分发员' },
-                        { field: 'NianJuanQi', align: 'center', title: '年卷期' }
+                        { field: 'UnitName', align: 'center', title: '订户名称', sort: true },
+                        { field: 'OrderNum', align: 'center', title: '订购数', sort: true },
+                        { field: 'Date', align: 'center', title: '分发日期', sort: true },
+                        { field: 'ffname', align: 'center', title: '分发员' },
+                        { field: 'type', align: 'center', title: '分发类型' },
+                        { field: 'nianjuanqi', align: 'center', title: '年卷期', sort: true }
                     ]],
                     page: true,
                     id: 'testReload'

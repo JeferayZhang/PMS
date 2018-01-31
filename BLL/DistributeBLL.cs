@@ -138,7 +138,11 @@ namespace BLL
             }
             return pg;
         }
-
+        public int count(string ids, int type, string nianjuanqi)
+        {
+            int cou = _dal.count(ids, type,nianjuanqi);
+            return cou;
+        } 
         public retValue insertLog(string orderids, string nianjuanqi,int userid,int type=0)
         {
             retValue ret = new retValue();

@@ -193,7 +193,6 @@ namespace PMS.Controllers
                 ret.data = "NEEDLOGIN";
                 return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
             }
-
             BLL.DistributeBLL _BLL = new DistributeBLL();
             JObject o = null;
             if (!string.IsNullOrEmpty(str))
@@ -210,6 +209,50 @@ namespace PMS.Controllers
                 }
                 string ids = o["ids"]._ToStrTrim();
                 ret = _BLL.insertLog(ids, nianjuanqi, userModel._ID, type);
+            }
+            var js = JsonConvert.SerializeObject(ret);
+            return Json(js, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
+        /// 分发之前的验证
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public JsonResult Check_FF(string str)
+        {
+            retValue ret = new retValue();
+            if (!authorize.checkFilterContext())
+            {
+                ret.result = true;
+                ret.data = "NEEDLOGIN";
+                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
+            }
+            BLL.DistributeBLL _BLL = new DistributeBLL();
+            JObject o = null;
+            if (!string.IsNullOrEmpty(str))
+            {
+                o = JObject.Parse(str);
+                string nianjuanqi = o["nianjuanqi"]._ToStrTrim();
+                string action = o["action"]._ToStrTrim();
+                //日志类型,0表示市,1表示县
+                int type = 0;
+                if (action == "area")
+                {
+                    type = 1;
+                }
+                string ids = o["ids"]._ToStrTrim();
+                if (_BLL.count(ids, type, nianjuanqi) > 0)
+                {
+                    ret.result = false;
+                    ret.reason = "1000";
+                }
+                else
+                {
+                    ret.result = true;
+                    ret.data = "";
+                }
             }
             var js = JsonConvert.SerializeObject(ret);
             return Json(js, JsonRequestBehavior.AllowGet);

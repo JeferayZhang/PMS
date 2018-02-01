@@ -27,21 +27,24 @@ namespace BLL
         /// <param name="userRegData_Begin">用户注册时间范围,起始值</param>
         /// <param name="userRegData_End">用户注册时间范围,截止值</param>
         /// <returns>data为DataTable</returns>
-        public retValue GetUser(string userNo, string userName, string sex, string userRole, string userOrg, string IDCard, string userState,
-            string userRegData_Begin, string userRegData_End,string orgid)
+        public PageModel GetUser(string userNo, string userName, string sex, string userRole, string userOrg, string IDCard, string userState,
+            string userRegData_Begin, string userRegData_End,string orgid,int limit ,int page)
         {
-            retValue ret = new retValue();
+            PageModel ret = new PageModel();
             DataTable dt = dal.GetUser(userNo, userName, sex, userRole, userOrg, IDCard, userState,
-                userRegData_Begin, userRegData_End, orgid);
+                userRegData_Begin, userRegData_End, orgid, limit, page);
             if (dt!=null && dt.Rows.Count>0)
             {
-                ret.result = true;
+                ret.code = 0;
                 ret.data = dt;
+                ret.count= dal.GetUserCount(userNo, userName, sex, userRole, userOrg, IDCard, userState,
+                userRegData_Begin, userRegData_End, orgid);
             }
             else
             {
-                ret.result = false;
-                ret.reason = "未能查询到数据";
+                ret.code = 0;
+                ret.msg = "未能查询到数据";
+                ret.count = 0;
             }
             return ret;
         }

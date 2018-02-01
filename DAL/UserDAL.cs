@@ -28,10 +28,15 @@ namespace DAL
         /// <param name="userRegData_End">用户注册时间范围,截止值</param>
         /// <returns></returns>
         public DataTable GetUser(string userNo, string userName, string sex, string userRole, string orgid,
-            string IDCard, string userState, string userRegData_Begin, string userRegData_End,string userOrg)
+            string IDCard, string userState, string userRegData_Begin, string userRegData_End,string userOrg,int limit,int page)
         {
             DataTable dt = new DataTable();
-            string sql = @"SELECT USERS.ID, USERS.USERNO, USERS.NAME, ISNULL(ROLE.ROLENAME, '未知角色') ROLE,
+            string top = "";
+            if (limit>0)
+            {
+                top = " top "+ limit;
+            }
+            string sql = @"select  "+top +@" * from ( SELECT ROW_NUMBER() over (order by  USERS.ID) as rownumber , USERS.ID, USERS.USERNO, USERS.NAME, ISNULL(ROLE.ROLENAME, '未知角色') ROLE,
        USERS.PASSWORD,
        CASE USERS.SEX
           WHEN 0 THEN
@@ -103,8 +108,70 @@ LEFT JOIN USERS B ON B.ID=USERS.Operator WHERE 1=1 ";
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND  CONVERT(varchar(100),USERS.INDATE, 23)  <= CONVERT(varchar(100),@INDATE2, 23) ";
             }
-            dt = dbhelper.ExecuteSql(sql + " ORDER BY USERNO");
+            dt = dbhelper.ExecuteSql(sql + ") b where  b.rownumber>"+ limit * (page - 1));
             return dt;
+        }
+
+        public int  GetUserCount(string userNo, string userName, string sex, string userRole, string orgid,
+            string IDCard, string userState, string userRegData_Begin, string userRegData_End, string userOrg)
+        {
+            string sql = @"SELECT count(1)
+FROM USERS
+LEFT JOIN ORG ON ORG.ORGID = USERS.ORGID
+LEFT JOIN ROLE ON ROLE.ROLEID = USERS.ROLE 
+LEFT JOIN USERS B ON B.ID=USERS.Operator WHERE 1=1 ";
+            if (!string.IsNullOrEmpty(userNo._ToStrTrim()))
+            {
+                SqlParameter Para = new SqlParameter("USERNO", userNo._ToStrTrim());
+                dbhelper.SqlParameterList.Add(Para);
+                sql += " AND USERS.USERNO LIKE @USERNO+'%'";
+            }
+            if (!string.IsNullOrEmpty(userName._ToStrTrim()))
+            {
+                SqlParameter Para = new SqlParameter("NAME", userName._ToStrTrim());
+                dbhelper.SqlParameterList.Add(Para);
+                sql += " AND USERS.NAME LIKE '%'+@NAME+'%'";
+            }
+            if (!string.IsNullOrEmpty(sex._ToStrTrim()))
+            {
+                SqlParameter Para = new SqlParameter("SEX", sex._ToInt32());
+                dbhelper.SqlParameterList.Add(Para);
+                sql += " AND USERS.SEX =@SEX";
+            }
+            if (!string.IsNullOrEmpty(userRole._ToStrTrim()))
+            {
+                SqlParameter Para = new SqlParameter("ROLE", userRole._ToInt32());
+                dbhelper.SqlParameterList.Add(Para);
+                sql += " AND USERS.ROLE =@ROLE";
+            }
+            OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
+            string all = orgInfoDAL.getChilds(userOrg, orgid);
+            sql += " AND USERS.ORGID in (" + all + ")";
+            if (!string.IsNullOrEmpty(IDCard._ToStrTrim()))
+            {
+                SqlParameter Para = new SqlParameter("IDCARD", IDCard._ToStrTrim());
+                dbhelper.SqlParameterList.Add(Para);
+                sql += " AND USERS.IDCARD =@IDCARD";
+            }
+            if (!string.IsNullOrEmpty(userState._ToStrTrim()))
+            {
+                SqlParameter Para = new SqlParameter("STATE", userState._ToInt32());
+                dbhelper.SqlParameterList.Add(Para);
+                sql += " AND USERS.STATE =@STATE";
+            }
+            if (!string.IsNullOrEmpty(userRegData_Begin._ToStrTrim()))
+            {
+                SqlParameter Para = new SqlParameter("INDATE1", userRegData_Begin._ToDateTime());
+                dbhelper.SqlParameterList.Add(Para);
+                sql += " AND CONVERT(varchar(100),USERS.INDATE, 23)  >= CONVERT(varchar(100),@INDATE1, 23)";
+            }
+            if (!string.IsNullOrEmpty(userRegData_End._ToStrTrim()))
+            {
+                SqlParameter Para = new SqlParameter("INDATE2", userRegData_End._ToDateTime());
+                dbhelper.SqlParameterList.Add(Para);
+                sql += " AND  CONVERT(varchar(100),USERS.INDATE, 23)  <= CONVERT(varchar(100),@INDATE2, 23) ";
+            }
+            return dbhelper.Count(sql);
         }
 
         public DataTable GetPosters(string orgid,int role=3)

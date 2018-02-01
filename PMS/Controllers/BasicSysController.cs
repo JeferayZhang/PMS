@@ -26,65 +26,47 @@ namespace PMS.Controllers
         }
 
         #region 查询
-        [HttpPost]
-        public JsonResult UserInfos(string str)
+        [HttpGet]
+        public ActionResult UserInfos(int page, int limit, string test1, string test2,
+            string Province, string CompanyCity, string CompanyUnderCity,
+            string CompanyUnderArea, string UserNo, string NAME, string Role, string IDCard, string State)
         {
-            retValue ret = new retValue();
+            PageModel _page = new PageModel();
             if (!authorize.checkFilterContext())
             {
-                ret.result = true;
-                ret.data = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
+                _page.code = 0;
+                _page.count = 0;
+                _page.data = "";
+                return Content(JsonConvert.SerializeObject(_page));
             }
 
             BLL.UserBLL _UserBLL = new UserBLL();
 
             UserModel user = Session["UserModel"] as UserModel;
             JObject o = null;
-
-            string content = string.Empty;
-
-            if (!string.IsNullOrEmpty(str))
+            string OrgID = "";
+            if (Province._ToInt32() > 0)
             {
-                o = JObject.Parse(str);
-
-                string test1 = o["test1"]._ToStrTrim();
-                string test2 = o["test2"]._ToStrTrim();
-                string UserNo = o["UserNo"]._ToStrTrim();
-                string NAME = o["Name"]._ToStrTrim();
-                string Sex = o["Sex"]._ToStrTrim();
-                string Role = o["Role"]._ToStrTrim();
-                string IDCard = o["IDCard"]._ToStrTrim();
-                string Province = o["Province"]._ToStrTrim();
-                string CompanyCity = o["CompanyCity"]._ToStrTrim();
-                string CompanyUnderCity = o["CompanyUnderCity"]._ToStrTrim();
-                string CompanyUnderArea = o["CompanyUnderArea"]._ToStrTrim();
-                string State = o["State"]._ToStrTrim();
-                string OrgID = "";
-                if (Province._ToInt32() > 0)
-                {
-                    OrgID = Province;
-                }
-                if (CompanyCity._ToInt32() > 0)
-                {
-                    OrgID = CompanyCity;
-                }
-                if (CompanyUnderCity._ToInt32() > 0)
-                {
-                    OrgID = CompanyUnderCity;
-                }
-                if (CompanyUnderArea._ToInt32() > 0)
-                {
-                    OrgID = CompanyUnderArea;
-                }
-                ret = _UserBLL.GetUser(UserNo, NAME, Sex, Role,
-                    OrgID, IDCard, State, test1, test2, user.OrgID._ToStr());
+                OrgID = Province;
             }
-            content = ret.toJson();
+            if (CompanyCity._ToInt32() > 0)
+            {
+                OrgID = CompanyCity;
+            }
+            if (CompanyUnderCity._ToInt32() > 0)
+            {
+                OrgID = CompanyUnderCity;
+            }
+            if (CompanyUnderArea._ToInt32() > 0)
+            {
+                OrgID = CompanyUnderArea;
+            }
+            _page = _UserBLL.GetUser(UserNo, NAME, "", Role,
+                OrgID, IDCard, State, test1, test2, user.OrgID._ToStr(), limit,page);
 
-            var js = JsonConvert.SerializeObject(ret);
+            var js = JsonConvert.SerializeObject(_page);
 
-            return Json(js, JsonRequestBehavior.AllowGet);
+            return Content(js);
         } 
         #endregion
 

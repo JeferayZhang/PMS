@@ -1,6 +1,5 @@
 ﻿@{
     ViewBag.Title = "用户信息维护";
-    Layout = "~/Views/Shared/Normal.cshtml";
 }
 @section scripts{
     <script>
@@ -8,8 +7,8 @@
             var ajaxHelper = new AjaxHelper();
 
 
-            layui.use(['laydate', 'layer', 'element', 'form', 'laytpl'], function () {
-                var laydate = layui.laydate, layer = layui.layer, element = layui.element, form = layui.form, $ = layui.jquery, laytpl = layui.laytpl;
+            layui.use(['laydate', 'layer', 'element','table', 'form', 'laytpl'], function () {
+                var laydate = layui.laydate, layer = layui.layer, element = layui.element, table = layui.table, form = layui.form, $ = layui.jquery, laytpl = layui.laytpl;
 
                 var start = {
                     min: laydate.now
@@ -35,37 +34,80 @@
                 laydate.render({
                     elem: '#test2'
                 });
-
-                //查询
-                form.on('submit(search)', function (data) {
-                    var ddd = { str: JSON.stringify(data.field) };
-                    ajaxHelper.post("/BasicSys/UserInfos/", ddd, function (da) {
-                        var jsonObj = JSON.parse(da);
-                        if (jsonObj.data == "NEEDLOGIN") {
-                            top.location = "../Account/Login";
-                            return false;
-                        }
-                        var getTpl = $("#tuserinfo").html()
-, view = $("#t_UserInfo");
-                        if (jsonObj.result) {
-                            if (jsonObj.data.length > 0) {
-                                laytpl(getTpl).render(jsonObj.data, function (a) {
-                                    $(view).html(a);
-                                });
-                            }
-                        }
-                        else {
-                            $("#t_UserInfo").html("");
-                        }
-                        form.render();
-                    });
-                    return false;
+                table.render({
+                    height: 'full-450',
+                    elem: '#maintb',
+                    url: '/BasicSys/UserInfos/',
+                    cols: [[
+                        { type: 'checkbox' },
+                        {field: 'ID', title: '流水号', sort: true },
+                        { field: 'USERNO', title: '用户编号', sort: true },
+                        { field: 'NAME', align: 'center', title: '用户名称', sort: true },
+                        { field: 'SEX', align: 'center', title: '性别', sort: true },
+                        { field: 'ROLE', align: 'center', title: '角色' },
+                        { field: 'ORGNAME', align: 'center', title: '所属机构' },
+                        { field: 'IDCARD', align: 'center', title: '证件号码' },
+                        { field: 'PHONENUMBER', align: 'center', title: '联系方式' },
+                        { field: 'ADDRESS', align: 'center', title: '住址' },
+                        { field: 'EMAIL', align: 'center', title: 'Email', sort: true },
+                        { field: 'STATE', align: 'center', title: '状态' },
+                        { field: 'INDATE', align: 'center', title: '录入时间' },
+                        { field: 'OPERATOR', align: 'center', title: '录入员' }
+                    ]],
+                    page: true,
+                    id: 'testReload'
                 });
+                var $ = layui.$, active = {
+                    reload: function () {
+                        var test1 = $('#test1').val();
+                        var test2 = $('#test2').val();
+                        var Province = $('#Province option:selected').val();
+                        var CompanyCity = $('#CompanyCity option:selected').val();
+                        var CompanyUnderCity = $('#CompanyUnderCity option:selected').val();
+                        var CompanyUnderArea = $('#CompanyUnderArea option:selected').val();
+                        var Role = $('#Role option:selected').val();
+                        var State = $('#State option:selected').val();
+                        var UserNo = $('#UserNo').val();
+                        var NAME = $('#Name').val();
+                        var IDCard = $('#IDCard').val();
+                        //执行重载
+                        table.reload('testReload', {
+                            page: {
+                                curr: 1, //重新从第 1 页开始
+                                layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'],
+                                groups: 5,
+                                last: true,
+                                first: true
+                            }
+                            , where: {
+                                test1: test1,
+                                test2: test2,
+                                Province: Province,
+                                CompanyCity: CompanyCity,
+                                CompanyUnderCity: CompanyUnderCity,
+                                CompanyUnderArea: CompanyUnderArea,
+                                Role: Role,
+                                State: State,
+                                UserNo: UserNo,
+                                NAME: NAME,
+                                IDCard: IDCard
+                            }
+                        });
+                    },
+                    getCheckData: function () { //获取选中数据
+                        var checkStatus = table.checkStatus('testReload')
+                            , data = checkStatus.data;
+                        layer.alert(JSON.stringify(data));
+                    }
+                };
 
+                $('.layui-form .layui-btn').on('click', function () {
+                    var type = $(this).data('type');
+                    active[type] ? active[type].call(this) : '';
+                });
                 $(function () {
                     var ddd = { str: '' };
                     selectchanged('', "Province");
-                    $("#search").click();
                 });
                 //下拉框绑定
                 function selectchanged(parentid, elem) {
@@ -124,15 +166,6 @@
                     selectchanged(parentid, "CompanyUnderArea");
                     return false;
                 });
-
-                //全选
-                form.on('checkbox(allChoose)', function (data) {
-                    var child = $(data.elem).parents('table').find('tbody input[type="checkbox"]');
-                    child.each(function (index, item) {
-                        item.checked = data.elem.checked;
-                    });
-                    form.render('checkbox');
-                });
                 form.render();
                 //新增数据
                 $("#add").click(function () {
@@ -152,13 +185,15 @@
                 });
                 //编辑
                 $("#edit").click(function () {
-                    var addeditcode = $("[name=table_ck]:checked:eq(0)").val();
-                    if ($("#t_UserInfo").find("[name=table_ck]:checked").length == 0) {
+                    var checkStatus = table.checkStatus('testReload')
+                        , data = checkStatus.data;
+                    if (data.length != 1) {
                         layer.open({
-                            title: '提示', content: '请勾选需要进行操作的数据!', time: 2000
+                            title: '提示', content: '请勾选一条数据进行操作!', time: 2000
                         });
                         return;
                     }
+                    var addeditcode = data[0].ID;
                     layer.open({
                         type: 2,
                         title: '修改用户',
@@ -175,19 +210,22 @@
                 });
                 //批量删除
                 $("#delete").click(function () {
-                    if ($("#t_UserInfo").find("[name=table_ck]:checked").length == 0) {
+                    var checkStatus = table.checkStatus('testReload')
+                        , data = checkStatus.data;
+                    if (data.length == 0 || data.length == undefined) {
                         layer.open({
-                            title: '提示', content: '请勾选需要进行操作的数据!',time:2000
+                            title: '提示', content: '请勾选需要进行操作的数据!', time: 2000
                         });
-                        return false; 
+                        return false;
                     }
+
                     layer.confirm('确认要删除吗？', {
                         btn: ['是', '否'] //可以无限个按钮
                         , btn1: function (index, layero) {
                             var delkeys = "";
-                            $("#t_UserInfo").find("[name=table_ck]:checked").each(function () {
-                                delkeys += $(this).val() + ",";
-                            });
+                            for (var i = 0; i < data.length; i++) {
+                                delkeys += data[i].ID + ",";
+                            }
                             delkeys = delkeys.substring(0, delkeys.length - 1);
                             var senddata = { str: delkeys };
                             ajaxHelper.post("/BasicSys/UserInfo_Deletes/", senddata, function (da) {
@@ -214,19 +252,21 @@
                 });
                 //批量注销
                 $("#updatestate").click(function () {
-                    if ($("#t_UserInfo").find("[name=table_ck]:checked").length == 0) {
+                    var checkStatus = table.checkStatus('testReload')
+                        , data = checkStatus.data;
+                    if (data.length == 0 || data.length == undefined) {
                         layer.open({
                             title: '提示', content: '请勾选需要进行操作的数据!', time: 2000
                         });
-                        return;
+                        return false;
                     }
                     layer.confirm('确认要注销吗？', {
                         btn: ['是', '否'] //可以无限个按钮
                         , btn1: function (index, layero) {
                             var delkeys = "";
-                            $("#t_UserInfo").find("[name=table_ck]:checked").each(function () {
-                                delkeys += $(this).val() + ",";
-                            });
+                            for (var i = 0; i < data.length; i++) {
+                                delkeys += data[i].ID + ",";
+                            }
                             delkeys = delkeys.substring(0, delkeys.length - 1);
                             var senddata = { str: delkeys };
                             ajaxHelper.post("/BasicSys/UserInfo_Update/", senddata, function (da) {
@@ -266,26 +306,7 @@
     <option value="{{item.OrgID}}">{{item.Name}}</option>
     {{#  }); }}
 </script>
-<script id="tuserinfo" type="text/html">
-    {{#  layui.each(d, function(index, item){ }}
-    <tr>
-        <td><input type="checkbox" name="table_ck" value="{{item.ID}}" lay-filter="table_ck" lay-skin="primary" title=""></td>
-        <td>{{item.USERNO}}</td>
-        <td>{{item.NAME}}</td>
-        <td>{{item.SEX}}</td>
-        <td>{{item.ROLE}}</td>
-        <td>{{item.ORGNAME}}</td>
-        <td>{{item.IDCARD}}</td>
-        <td>{{item.PHONENUMBER}}</td>
-        <td>{{item.ADDRESS}}</td>
-        <td>{{item.EMAIL}}</td>
-        <td>{{item.STATE}}</td>
-        <td>{{item.INDATE}}</td>
-        <td>{{item.OPERATOR}}</td>
-    </tr>
-    {{#  }); }}
-</script>
-<div>
+<div  >
     <div class="layui-collapse" lay-accordion="">
         <div class="layui-colla-item">
             <h2 class="layui-colla-title">查询条件</h2>
@@ -359,7 +380,7 @@
                                 <option value="4">财务员</option>
                             </select>
                         </div>
-                        <button class="layui-btn" lay-filter="search" lay-submit="" id="search" data-type="save">查询</button>
+                        <button class="layui-btn" lay-filter="search"  type="button" id="search" data-type="reload">查询</button>
                     </div>
                 </form>
             </div>
@@ -383,27 +404,9 @@
             </div>
         </form>
     </div>
-    <div>
-        <form class="layui-form">
-            <table class="layui-table" id="maintb" style="width: 99%; margin-left: 5px;">
-                <thead>
-                    <tr>
-                        <th><input type="checkbox" lay-filter="allChoose" lay-skin="primary" /></th>
-                        <td>用户编号</td>
-                        <td>用户名称</td>
-                        <td>性别</td>
-                        <td>用户角色</td>
-                        <td>所属机构</td>
-                        <td>证件号码</td>
-                        <td>联系方式</td>
-                        <td>住址</td>
-                        <td>Email</td>
-                        <td>用户状态</td>
-                        <td>录入时间</td>
-                        <td>录入员</td>
-                    </tr>
-                </thead>
-                <tbody id="t_UserInfo"></tbody>
+    <div >
+        <form class="layui-form" >
+            <table class="layui-table"  id="maintb" style="width: 99%; margin-left: 5px;">
             </table>
         </form>
     </div>

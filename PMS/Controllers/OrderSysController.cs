@@ -35,12 +35,6 @@ namespace PMS.Controllers
             string CompanyUnderArea, string OrderNo, string UnitName, string BKDH, string OrderState, string CostState)
         {
             PageModel ret = new PageModel();
-            if (!authorize.checkFilterContext())
-            {
-                ret.code = 2;
-                ret.msg = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
             BLL.OrderInfoBLL _BLL = new OrderInfoBLL();
             PMS.Models.UserModel userModel = Session["UserModel"] as PMS.Models.UserModel;
             string OrgID = "";

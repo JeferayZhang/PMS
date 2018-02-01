@@ -10,6 +10,7 @@
             layui.use(['laydate', 'layer', 'element', 'form', 'table'], function () {
                 var laydate = layui.laydate, layer = layui.layer, element = layui.element, form = layui.form, $ = layui.jquery, table = layui.table;
                 table.render({
+                    height: 'full-200',
                     elem: '#maintb',
                     url: '/CostSys/CostInfos/',
                     cols: [[
@@ -136,5 +137,4 @@
     <div>
         <table class="layui-table" id="maintb"></table>
     </div>
-
 </form>

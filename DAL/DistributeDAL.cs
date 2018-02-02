@@ -26,7 +26,7 @@ namespace DAL
         /// <param name="Group_Type">排序方式:1根据报刊名称排序.2根据机构排序</param>
         /// <param name="dt1">分发日期</param>
         /// <returns></returns>
-        public DataTable GetTable(string BKDH, string chooseorg, string userorg, string Group_Type, string dt1)
+        public DataTable GetTable(string BKDH, string chooseorg, string userorg, string Group_Type, string dt1,int limit,int page)
         {
             DataTable dt = new DataTable();
             OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
@@ -39,7 +39,7 @@ namespace DAL
                 Para = new SqlParameter("BKDH", BKDH.ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
             }
-            string sql = @"select  a.DocName,a.OrgName,SUM(a.OrderNum) OrderNum,ids=STUFF((SELECT ','+ltrim(b.ID)  FROM (select a.ID,a.OrderNum,Org.OrgID, Org.Name OrgName from (
+            string sql = @"select ROW_NUMBER() over (order by a.DocName) as rownumber, a.DocName,a.OrgName,SUM(a.OrderNum) OrderNum,ids=STUFF((SELECT ','+ltrim(b.ID)  FROM (select a.ID,a.BKDH,a.OrderNum,Org.OrgID, Org.Name OrgName from (
 select a.ID,a.BKDH,a.PersonID,a.UnitName,a.OrderNum, Org.ParentID,Org.Name from (
 select t.ID ,t.BKDH,t.PersonID,OrderPeople.UnitName,Org.ParentID,org.Name,t.OrderNum from [Order] t  
 left join OrderPeople on t.PersonID=OrderPeople.ID 
@@ -51,8 +51,8 @@ and CONVERT(varchar(100),t.OrderDate, 23)<=CONVERT(varchar(100),getdate(), 23)
 left join Org on a.ParentID=Org.OrgID) a 
 left join Org on a.ParentID=Org.OrgID 
 left join Doc on Doc.BKDH=a.BKDH) b  
-  WHERE b.OrgID=a.OrgID FOR XML PATH('')), 1, 1, '') from (
-select a.ID,Doc.Name DocName,a.OrderNum,Org.OrgID,Org.Name OrgName from (
+  WHERE b.OrgID=a.OrgID and b.BKDH=a.BKDH  FOR XML PATH('')), 1, 1, '') from (
+select a.ID,Doc.Name DocName,a.BKDH,a.OrderNum,Org.OrgID,Org.Name OrgName from (
 select a.ID,a.BKDH,a.PersonID,a.UnitName,a.OrderNum, Org.ParentID,Org.Name from (
 select t.ID ,t.BKDH,t.PersonID,OrderPeople.UnitName,Org.ParentID,org.Name,t.OrderNum from [Order] t  
 left join OrderPeople on t.PersonID=OrderPeople.ID 
@@ -63,7 +63,7 @@ CONVERT(varchar(100),getdate(), 23) " + wheresql + @"
 left join Org on a.ParentID=Org.OrgID) a 
 left join Org on a.ParentID=Org.OrgID 
 left join Doc on Doc.BKDH=a.BKDH) a 
-GROUP BY a.DocName,a.OrgName,a.OrgID";
+GROUP BY a.DocName,a.OrgName,a.BKDH,a.OrgID ";
             if (Group_Type=="1")
             {
                 sql += " order by a.DocName";
@@ -77,7 +77,17 @@ GROUP BY a.DocName,a.OrgName,a.OrgID";
                 Para = new SqlParameter("INDATE1", dt1._ToDateTime());
                 dbhelper.SqlParameterList.Add(Para);
             }
-            dt = dbhelper.ExecuteSql(sql);
+            else
+            {
+                Para = new SqlParameter("INDATE1", System.DateTime.Now.ToShortDateString());
+                dbhelper.SqlParameterList.Add(Para);
+            }
+            string top = "";
+            if (limit>0)
+            {
+                top = " top "+limit;
+            }
+            dt = dbhelper.ExecuteSql("select "+top+" * from ("+sql+ ") tttt where tttt.rownumber>"+ limit * (page-1));
             return dt;
         }
 
@@ -97,7 +107,7 @@ GROUP BY a.DocName,a.OrgName,a.OrgID";
         /// <param name="dt1">分发日期</param>
         /// <param name="type">如果为0,则表示分发行为;如果为1,则表示查看日志</param>
         /// <returns></returns>
-        public DataTable GetTable2(string BKDH, string chooseorg, string userorg, string Group_Type, string dt1,int type = 0)
+        public DataTable GetTable2(string BKDH, string chooseorg, string userorg, string Group_Type, string dt1, int limit, int page, int type = 0)
         {
             DataTable dt = new DataTable();
             OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
@@ -112,19 +122,8 @@ GROUP BY a.DocName,a.OrgName,a.OrgID";
                 dbhelper.SqlParameterList.Add(Para);
             }
             string logsql = "";
-            if (type == 1)
-            {
-                logsql += " and log.type=1 ";
-            }
-            else
-            {
-                //分发行为,要查出已经被市公司分发过了,但是没有被县公司分发的记录
-                logsql += " and log.type=0 ";
-                wheresql += @" and not exists(
-select 1 from log where log.orderid=t.id and 
-CONVERT(varchar(100), log.date, 23)=CONVERT(varchar(100), @INDATE1, 23) and log.type=1 ) ";
-            }
-            string sql = @"select  a.BKDH,a.DocName,a.OrgName ,SUM(a.OrderNum) OrderNum,ids=STUFF((SELECT ','+ltrim([order].ID)  FROM [order]    
+            logsql += " and log.type=0 ";
+            string sql = @"select  ROW_NUMBER() over (order by a.DocName) as rownumber,a.BKDH,a.DocName,a.OrgName ,SUM(a.OrderNum) OrderNum,ids=STUFF((SELECT ','+ltrim([order].ID)  FROM [order]    
   WHERE PersonID=a.PersonID and BKDH=a.BKDH FOR XML PATH('')), 1, 1, '') from (
 select t.ID ,t.BKDH,Doc.Name DocName,Org.Name OrgName ,t.OrderNum,t.PersonID from [Order] t  
 left join OrderPeople on t.PersonID=OrderPeople.ID 
@@ -133,7 +132,7 @@ left join Doc on Doc.BKDH=t.BKDH
 where   dateadd(MONTH,t.OrderMonths,t.OrderDate)>CONVERT(varchar(100), @INDATE1, 23)
 and exists(
 select 1 from log where log.orderid=t.id and 
-CONVERT(varchar(100), log.date, 23)=CONVERT(varchar(100), @INDATE1, 23) "+ logsql + @"
+CONVERT(varchar(100), log.date, 23)=CONVERT(varchar(100), @INDATE1, 23) " + logsql + @"
 ) 
 ) a
 GROUP BY a.BKDH,a.DocName,a.OrgName ,a.PersonID ";
@@ -150,8 +149,17 @@ GROUP BY a.BKDH,a.DocName,a.OrgName ,a.PersonID ";
                 Para = new SqlParameter("INDATE1", dt1._ToDateTime());
                 dbhelper.SqlParameterList.Add(Para);
             }
-            
-            dt = dbhelper.ExecuteSql(sql);
+            else
+            {
+                Para = new SqlParameter("INDATE1", System.DateTime.Now.ToShortDateString());
+                dbhelper.SqlParameterList.Add(Para);
+            }
+            string top = "";
+            if (limit > 0)
+            {
+                top = " top " + limit;
+            }
+            dt = dbhelper.ExecuteSql("select " + top + " * from (" + sql + ") tttt where tttt.rownumber>" + limit * (page - 1));
             return dt;
         }
 

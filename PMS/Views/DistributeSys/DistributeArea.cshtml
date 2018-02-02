@@ -42,8 +42,8 @@
                 table.render({
                     height: 'full-350',
                     elem: '#maintb',
-                    id:'IDS',
-                    url: '/DistributeSys/GetDis/',
+                    id:"IDS",
+                    url: '/DistributeSys/GetDis2/',
                     cols: [[
                         { type: 'checkbox'},
                         { field: 'DocName', align: 'center', title: '报刊名称' },
@@ -57,6 +57,7 @@
                     reload: function () {
                         var test1 = $('#test1').val();
                         var Group_Type = $('#Group_Type').val();
+                        var action = $('#action').val();
                         var Province = $('#Province option:selected').val();
                         var CompanyCity = $('#CompanyCity option:selected').val();
                         var CompanyUnderCity = $('#CompanyUnderCity option:selected').val();
@@ -74,12 +75,12 @@
                             , where: {
                                 test1: test1,
                                 Group_Type: Group_Type,
-                                NewspaperName: NewspaperName,
                                 Province: Province,
                                 CompanyCity: CompanyCity,
                                 CompanyUnderCity: CompanyUnderCity,
                                 CompanyUnderArea: CompanyUnderArea,
-                                Roads: Roads
+                                Roads: Roads,
+                                NewspaperName: NewspaperName,
                             }
                         });
                     }
@@ -89,6 +90,7 @@
                     var type = $(this).data('type');
                     active[type] ? active[type].call(this) : '';
                 });
+
                 //下拉框绑定
                 $(function () {
                     bindqk();
@@ -169,11 +171,11 @@
                     });
                 }
                 //分发
-                form.on('submit(save1)', function () {
+                form.on('submit(save1)',function () {
                     var checkStatus = table.checkStatus('testReload')
                         , data = checkStatus.data;
                     var delkeys = "";
-                    
+
                     //因为表头算一行,所以至少两行才算是有数据
                     if (data.length == 0 || data.length == undefined) {
                         layer.open({
@@ -183,7 +185,7 @@
                     }
                     for (var i = 0; i < data.length; i++) {  //遍历Table的所有Row
                         delkeys += data[i].ids + ",";
-                        console.log(data[i].ids );
+                        console.log(data[i].ids);
                     }
                     var action = $('#action').val();
                     delkeys = delkeys.substring(0, delkeys.length - 1);
@@ -217,10 +219,10 @@
         <label class="layui-form-label">分发日期</label>
         <div class="layui-input-inline">
             <input type="text" class="layui-input" value="@System.DateTime.Now.ToString("yyyy-MM-dd")" name="test1" id="test1" placeholder="年-月-日">
-        </div>  
+        </div>
     </div>
     <div class=" layui-form-item" id="Visable_ByMagazine">
-        <input type="hidden" id="action" name="action" value="city" />
+        <input type="hidden" id="action" name="action" value="area" />
         <label class="layui-form-label">报刊名称</label>
         <div class="layui-input-inline">
             <select id="NewspaperName" lay-filter="NewspaperName" name="NewspaperName" tag=""></select>
@@ -237,14 +239,22 @@
         <div class="layui-input-inline">
             <select id="CompanyUnderCity" style="width:150px;" lay-filter="CompanyUnderCity" name="CompanyUnderCity"></select>
         </div>
+    </div>
+    <div class=" layui-form-item">
+        <label class="layui-form-label">网点</label>
+        <div class="layui-input-inline">
+            <select id="CompanyUnderArea" style="width:150px;" lay-filter="CompanyUnderArea" name="CompanyUnderArea"></select>
+        </div>
+        <label class="layui-form-label">段道</label>
+        <div class="layui-input-inline">
+            <select id="Roads" style="width:150px;" lay-filter="Roads" name="Roads"></select>
+        </div>
         <button class="layui-btn" type="button" lay-filter="search" lay-submit="" data-type="reload">统计</button>
-        <button class="layui-btn" type="button" lay-filter="save1" lay-submit="" data-type="save">分发</button>
+        <button class="layui-btn" id="save1" type="button" lay-filter="save1" lay-submit="" data-type="save">分发</button>
     </div>
 </form>
 <div>
     <form class="layui-form">
-        <table class="layui-table" id="maintb" style="width: 99%; margin-left: 5px;">
-            
-        </table>
+        <table class="layui-table" id="maintb" style="width: 99%; margin-left: 5px;"></table>
     </form>
 </div>

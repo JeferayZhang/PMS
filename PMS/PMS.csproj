@@ -451,6 +451,7 @@
     <Content Include="批量导入订购模板.xlsx" />
     <Content Include="Views\CostSys\CostInfo.cshtml" />
     <Content Include="Views\DistributeSys\DistributeInfo_Edit.cshtml" />
+    <Content Include="Views\DistributeSys\DistributeArea.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

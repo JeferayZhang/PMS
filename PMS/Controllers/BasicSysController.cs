@@ -507,19 +507,42 @@ namespace PMS.Controllers
         public JsonResult OrgInfos(string str)
         {
             retValue ret = new retValue();
-            if (!authorize.checkFilterContext())
-            {
-                ret.result = true;
-                ret.data = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
             BLL.OrgInfoBLL _BLL = new OrgInfoBLL();
             UserModel user = Session["UserModel"] as UserModel;
             ret = _BLL.GetOrgByParentID(str._ToInt32(), user.OrgID,user.Level);
             var js = JsonConvert.SerializeObject(ret);
 
             return Json(js, JsonRequestBehavior.AllowGet);
-        } 
+        }
+
+        [HttpGet]
+        public ActionResult OrgInfos2(int limit,int page,string Province, string CompanyCity, string CompanyUnderCity, string CompanyUnderArea)
+        {
+            PageModel ret = new PageModel();
+            BLL.OrgInfoBLL _BLL = new OrgInfoBLL();
+            UserModel user = Session["UserModel"] as UserModel;
+            string OrgID = "";
+            if (Province._ToInt32() > 0)
+            {
+                OrgID = Province;
+            }
+            if (CompanyCity._ToInt32() > 0)
+            {
+                OrgID = CompanyCity;
+            }
+            if (CompanyUnderCity._ToInt32() > 0)
+            {
+                OrgID = CompanyUnderCity;
+            }
+            if (CompanyUnderArea._ToInt32() > 0)
+            {
+                OrgID = CompanyUnderArea;
+            }
+            ret = _BLL.GetOrgByParentID(OrgID._ToInt32(), limit,page, user.OrgID, user.Level);
+            var js = JsonConvert.SerializeObject(ret);
+
+            return Content(js);
+        }
         #endregion
 
         #region 加载机构新增修改页面

@@ -5,8 +5,8 @@
     <script>
         $(function () {
             var ajaxHelper = new AjaxHelper();
-            layui.use(['laydate', 'layer', 'element', 'form', 'laytpl'], function () {
-                var laydate = layui.laydate, layer = layui.layer, element = layui.element, form = layui.form, $ = layui.jquery, laytpl = layui.laytpl;
+            layui.use(['laydate', 'layer', 'table','element', 'form', 'laytpl'], function () {
+                var laydate = layui.laydate, layer = layui.layer, table = layui.table, element = layui.element, form = layui.form, $ = layui.jquery, laytpl = layui.laytpl;
                
                 var start = {
                     min: laydate.now
@@ -32,6 +32,54 @@
                 laydate.render({
                     elem: '#test2'
                 });
+                table.render({
+                    height: 'full-300',
+                    elem: '#maintb',
+                    url: '/BasicSys/OrgInfos2/',
+                    id:"OrgID",
+                    cols: [[
+                        { type: 'checkbox' },
+                        { field: 'OrgCode', title: '机构编号', sort: true },
+                        { field: 'Name', title: '机构名称' },
+                        { field: 'ParentName', align: 'center', title: '上级机构' },
+                        { field: 'Address', align: 'center', title: '地址' }
+                    ]],
+                    page: true,
+                    id: 'testReload'
+                });
+                var $ = layui.$, active = {
+                    reload: function () {
+                        var Province = $('#Province option:selected').val();
+                        var CompanyCity = $('#CompanyCity option:selected').val();
+                        var CompanyUnderCity = $('#CompanyUnderCity option:selected').val();
+                        var CompanyUnderArea = $('#CompanyUnderArea option:selected').val();
+                        //执行重载
+                        table.reload('testReload', {
+                            page: {
+                                curr: 1, //重新从第 1 页开始
+                                groups: 5,
+                                last: true,
+                                first: true
+                            }
+                            , where: {
+                                Province: Province,
+                                CompanyCity: CompanyCity,
+                                CompanyUnderCity: CompanyUnderCity,
+                                CompanyUnderArea: CompanyUnderArea
+                            }
+                        });
+                    },
+                    getCheckData: function () { //获取选中数据
+                        var checkStatus = table.checkStatus('testReload')
+                            , data = checkStatus.data;
+                        layer.alert(JSON.stringify(data));
+                    }
+                };
+
+                $('.layui-form .layui-btn').on('click', function () {
+                    var type = $(this).data('type');
+                    active[type] ? active[type].call(this) : '';
+                });
                 $(function () {
                     var ddd = { str: '' };
                     selectchanged('', "Province");
@@ -46,17 +94,12 @@
                     var ddd = { str: parentid }
                     ajaxHelper.post("/BasicSys/OrgInfos/", ddd, function (da) {
                         var jsonObj = JSON.parse(da);
-                        var getTpl = $("#tuserinfo").html()
-                            , view = $("#t_UserInfo");
                         if (elem != "") {
                             var getTpl2 = $("#orginfo").html()
                                 , view2 = $("#" + elem + "");
                         }
                         if (jsonObj.result) {
                             if (jsonObj.data.length > 0) {
-                                laytpl(getTpl).render(jsonObj.data, function (a) {
-                                    $(view).html(a);
-                                });
                                 if (elem != "") {
                                     laytpl(getTpl2).render(jsonObj.data, function (a2) {
                                         $(view2).html(a2);
@@ -65,7 +108,6 @@
                             }
                         }
                         else {
-                            $("#t_UserInfo").html("");
                         }
                         form.render();
                     });
@@ -77,7 +119,6 @@
                     CompanyUnderCity.empty();
                     var CompanyUnderArea = $("#CompanyUnderArea");
                     CompanyUnderArea.empty();
-                    $("#t_UserInfo").html("");
                     var parentid = $("#Province option:selected").val();
                     if (parentid == "") {
                         return false;
@@ -92,7 +133,7 @@
                     CompanyUnderCity.empty();
                     var CompanyUnderArea = $("#CompanyUnderArea");
                     CompanyUnderArea.empty();
-                    $("#t_UserInfo").html("");
+                    
                     var parentid = $("#CompanyCity option:selected").val();
                     if (parentid == "") {
                         return false;
@@ -103,7 +144,7 @@
                 form.on('select(CompanyUnderCity)', function (data) {
                     var CompanyUnderArea = $("#CompanyUnderArea");
                     CompanyUnderArea.empty();
-                    $("#t_UserInfo").html("");
+                    
                     var parentid = $("#CompanyUnderCity option:selected").val();
                     if (parentid == "") {
                         return false;
@@ -112,7 +153,7 @@
                     return false;
                 });
                 form.on('select(CompanyUnderArea)', function (data) {
-                    $("#t_UserInfo").html("");
+                    
                     var parentid = $("#CompanyUnderArea option:selected").val();
                     if (parentid == "") {
                         return false;
@@ -179,13 +220,15 @@
                 //编辑
                 $("#edit").click(function () {
                     
-                    var addeditcode = $("[name=table_ck]:checked:eq(0)").val();
-                    if ($("#t_UserInfo").find("[name=table_ck]:checked").length == 0) {
+                    var checkStatus = table.checkStatus('testReload')
+                        , data = checkStatus.data;
+                    if (data.length == 0 || data.length == undefined) {
                         layer.open({
                             title: '提示', content: '请勾选需要进行操作的数据!', time: 2000
                         });
-                        return;
+                        return false;
                     }
+                    var addeditcode = data[0].OrgID;
                     layer.open({
                         type: 2,
                         title: '修改机构',
@@ -202,9 +245,11 @@
                 });
                 //批量删除
                 $("#delete").click(function () {
-                    if ($("#t_UserInfo").find("[name=table_ck]:checked").length == 0) {
+                    var checkStatus = table.checkStatus('testReload')
+                        , data = checkStatus.data;
+                    if (data.length == 0 || data.length == undefined) {
                         layer.open({
-                            title: '提示', content: '请勾选需要进行操作的数据!',time:2000
+                            title: '提示', content: '请勾选需要进行操作的数据!', time: 2000
                         });
                         return false;
                     }
@@ -215,9 +260,9 @@
                         }
                     }, function (index, layero) {
                         var delkeys = "";
-                        $("#t_UserInfo").find("[name=table_ck]:checked").each(function () {
-                            delkeys += $(this).val() + ",";
-                        });
+                        for (var i = 0; i < data.length; i++) {
+                            delkeys += data[i].OrgID + ",";
+                        }
                         delkeys = delkeys.substring(0, delkeys.length - 1);
                         var senddata = { str: delkeys };
                         ajaxHelper.post("/BasicSys/OrgInfo_Deletes/", senddata, function (da) {
@@ -248,17 +293,6 @@
         width: 120px;
     }
 </style>
-<script id="tuserinfo" type="text/html">
-    {{#  layui.each(d, function(index, item){ }}
-    <tr>
-        <td><input type="checkbox" name="table_ck" value="{{item.OrgID}}" lay-filter="table_ck" lay-skin="primary" title=""></td>
-        <td>{{item.OrgCode}}</td>
-        <td>{{item.Name}}</td>
-        <td>{{item.ParentName}}</td>
-        <td>{{item.Address}}</td>
-    </tr>
-    {{#  }); }}
-</script>
 <script id="orginfo" type="text/html">
     <option value="">请选择</option>
     {{#  layui.each(d, function(index, item){ }}
@@ -285,6 +319,7 @@
         <div class="layui-input-inline">
             <select id="CompanyUnderArea" style="width:150px;" lay-filter="CompanyUnderArea" name="CompanyUnderArea"></select>
         </div>
+        <button class="layui-btn" lay-filter="search" type="button" id="search" data-type="reload"><i class="layui-icon">&#xe615;</i>查询</button>
         <button class="layui-btn layui-btn-warm" type="button" id="add">
             <i class="layui-icon">&#xe654;</i> 新增
         </button>
@@ -298,15 +333,5 @@
 </form>
 <form class="layui-form">
     <table class="layui-table" id="maintb" style="width: 99%; margin-left: 5px;">
-        <thead>
-            <tr>
-                <th><input type="checkbox" lay-filter="allChoose" lay-skin="primary" /></th>
-                <td>编号</td>
-                <td>名称</td>
-                <td>上级机构</td>
-                <td>地址</td>
-            </tr>
-        </thead>
-        <tbody id="t_UserInfo"></tbody>
     </table>
 </form>

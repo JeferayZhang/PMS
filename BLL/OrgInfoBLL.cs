@@ -41,7 +41,79 @@ namespace BLL
         /// <param name="id">父级ID</param>
         /// <param name="UserOrgID">用户所属机构ID</param>
         /// <returns></returns>
-        public retValue GetOrgByParentID(int id, int UserOrgID = 0, int userlevel = 0)
+        public PageModel GetOrgByParentID(int id,int limit,int page, int UserOrgID = 0, int userlevel = 0)
+        {
+            PageModel ret = new PageModel();
+            DataTable dt = new DataTable();
+            //初次加载省分
+            if (id == 0)
+            {
+                if (userlevel != 0)
+                {
+                    //如果用户是市级别
+                    if (userlevel == 1)
+                    {
+                        dt = dal.getAllOrgByUser(UserOrgID, 1);
+                    }
+                    //如果用户是县级别
+                    if (userlevel == 2)
+                    {
+                        dt = dal.getAllOrgByUser(UserOrgID, 2);
+                    }
+                    //如果用户是网点级别
+                    if (userlevel == 3)
+                    {
+                        dt = dal.getAllOrgByUser(UserOrgID, 3);
+                    }
+                }
+                else
+                {
+                    if (id>0)
+                    {
+                        dt = dal.GetOrgByPK(id);
+                    }
+                    else
+                    {
+                        dt = dal.GetOrgByPK(UserOrgID);
+                    }
+                }
+            }
+            //如果不等于,那么表示选择了省份,需要加载用户所属市,县,网点
+            else
+            {
+                //当前选择的机构的级别
+                int level = dal.GetOrgByPK(id).Rows[0]["Level"]._ToInt32();
+                //如果当前选择的机构级别大于用户级别
+                if (level < userlevel)
+                {
+                    dt = dal.getAllOrgByUser(UserOrgID, userlevel - level - 1);
+                }
+                else
+                {
+                    dt = dal.GetOrgByParentID(id, UserOrgID._ToStr());
+                }
+            }
+            if (dt != null && dt.Rows.Count > 0)
+            {
+                ret.code = 0;
+                ret.count = dt.Rows.Count;
+                if (limit>0)
+                {
+                    ret.data = dt.AsEnumerable().Skip(limit * (page - 1)).Take(limit).CopyToDataTable();
+                }
+                else
+                {
+                    ret.data = dt;
+                }
+            }
+            else
+            {
+                ret.code = 1;
+                ret.msg = "未查询到数据";
+            }
+            return ret;
+        }
+        public retValue GetOrgByParentID(int id,int UserOrgID = 0, int userlevel = 0)
         {
             retValue ret = new retValue();
             DataTable dt = new DataTable();
@@ -68,7 +140,7 @@ namespace BLL
                 }
                 else
                 {
-                    if (id>0)
+                    if (id > 0)
                     {
                         dt = dal.GetOrgByPK(id);
                     }

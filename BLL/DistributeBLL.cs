@@ -23,19 +23,21 @@ namespace BLL
         /// <param name="dt1">分发日期</param>
         /// <param name="type">如果为0,则表示分发行为;如果为1,则表示查看日志</param>
         /// <returns></returns>
-        public retValue GetTable(string BKDH, string orgid, string userorg,string Group_Type,string dt1)
+        public PageModel GetTable(string BKDH, string orgid, string userorg,string Group_Type,string dt1,int limit,int page)
         {
-            retValue ret = new retValue();
-            DataTable dt = _dal.GetTable(BKDH, orgid,userorg,Group_Type, dt1);
+            PageModel ret = new PageModel();
+            DataTable dt = _dal.GetTable(BKDH, orgid,userorg,Group_Type, dt1,limit,page);
             if (dt != null && dt.Rows.Count > 0)
             {
-                ret.result = true;
+                ret.code = 0;
                 ret.data = dt;
+                ret.count= _dal.GetTable(BKDH, orgid, userorg, Group_Type, dt1,0,0).Rows.Count;
             }
             else
             {
-                ret.result = false;
-                ret.reason = "未能查询到数据";
+                ret.code = 1;
+                ret.msg = "未能查询到数据";
+                ret.data = null;
             }
             return ret;
         }
@@ -50,19 +52,21 @@ namespace BLL
         /// <param name="dt1">分发日期</param>
         /// <param name="type">如果为0,则表示分发行为;如果为1,则表示查看日志</param>
         /// <returns></returns>
-        public retValue GetTable2(string BKDH, string orgid, string userorg, string Group_Type, string dt1, int type = 0)
+        public PageModel GetTable2(string BKDH, string orgid, string userorg, string Group_Type, string dt1, int limit, int page, int type = 0)
         {
-            retValue ret = new retValue();
-            DataTable dt = _dal.GetTable2(BKDH, orgid, userorg,Group_Type, dt1, type);
+            PageModel ret = new PageModel();
+            DataTable dt = _dal.GetTable2(BKDH, orgid, userorg,Group_Type, dt1, type, limit, page);
             if (dt != null && dt.Rows.Count > 0)
             {
-                ret.result = true;
+                ret.code = 0;
                 ret.data = dt;
+                ret.count = _dal.GetTable2(BKDH, orgid, userorg, Group_Type, dt1, 0,0).Rows.Count;
             }
             else
             {
-                ret.result = false;
-                ret.reason = "未能查询到数据";
+                ret.code = 1;
+                ret.msg = "未能查询到数据";
+                ret.data = null;
             }
             return ret;
         }

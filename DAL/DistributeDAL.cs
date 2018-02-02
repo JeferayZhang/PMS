@@ -25,9 +25,8 @@ namespace DAL
         /// <param name="userorg">用户所属机构ID</param>
         /// <param name="Group_Type">排序方式:1根据报刊名称排序.2根据机构排序</param>
         /// <param name="dt1">分发日期</param>
-        /// <param name="type">如果为0,则表示分发行为;如果为1,则表示查看日志</param>
         /// <returns></returns>
-        public DataTable GetTable(string BKDH, string chooseorg, string userorg, string Group_Type, string dt1, int type = 0)
+        public DataTable GetTable(string BKDH, string chooseorg, string userorg, string Group_Type, string dt1)
         {
             DataTable dt = new DataTable();
             OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
@@ -40,21 +39,20 @@ namespace DAL
                 Para = new SqlParameter("BKDH", BKDH.ToUpper());
                 dbhelper.SqlParameterList.Add(Para);
             }
-            string logsql = "";
-            if (type == 1)
-            {
-                logsql += " and log.type=1 ";
-            }
-            else
-            {
-                logsql += " and log.type=0 ";
-                wheresql += @" and not exists(
-select 1 from log where log.orderid=t.id and 
-CONVERT(varchar(100), log.date, 23)=CONVERT(varchar(100), @INDATE1, 23) and log.type=1 ) ";
-            }
-            string sql = @"select  a.BKDH,a.DocName,a.OrgName,SUM(a.OrderNum) OrderNum,a.ParentID,ids=STUFF((SELECT ','+ltrim([order].ID)  FROM [order]    
-  WHERE BKDH=a.BKDH FOR XML PATH('')), 1, 1, '') from (
-select a.ID,a.BKDH,Doc.Name DocName,a.PersonID,a.UnitName,a.OrderNum, Org.ParentID,Org.Name OrgName from (
+            string sql = @"select  a.DocName,a.OrgName,SUM(a.OrderNum) OrderNum,ids=STUFF((SELECT ','+ltrim(b.ID)  FROM (select a.ID,a.OrderNum,Org.OrgID, Org.Name OrgName from (
+select a.ID,a.BKDH,a.PersonID,a.UnitName,a.OrderNum, Org.ParentID,Org.Name from (
+select t.ID ,t.BKDH,t.PersonID,OrderPeople.UnitName,Org.ParentID,org.Name,t.OrderNum from [Order] t  
+left join OrderPeople on t.PersonID=OrderPeople.ID 
+left join Org on org.OrgID=OrderPeople.OrgID 
+where   dateadd(MONTH,t.OrderMonths,t.OrderDate)>CONVERT(varchar(100), @INDATE1, 23) 
+and CONVERT(varchar(100),t.OrderDate, 23)<=CONVERT(varchar(100),getdate(), 23)  
+" + wheresql + @" 
+) a
+left join Org on a.ParentID=Org.OrgID) a 
+left join Org on a.ParentID=Org.OrgID 
+left join Doc on Doc.BKDH=a.BKDH) b  
+  WHERE b.OrgID=a.OrgID FOR XML PATH('')), 1, 1, '') from (
+select a.ID,Doc.Name DocName,a.OrderNum,Org.OrgID,Org.Name OrgName from (
 select a.ID,a.BKDH,a.PersonID,a.UnitName,a.OrderNum, Org.ParentID,Org.Name from (
 select t.ID ,t.BKDH,t.PersonID,OrderPeople.UnitName,Org.ParentID,org.Name,t.OrderNum from [Order] t  
 left join OrderPeople on t.PersonID=OrderPeople.ID 
@@ -65,7 +63,7 @@ CONVERT(varchar(100),getdate(), 23) " + wheresql + @"
 left join Org on a.ParentID=Org.OrgID) a 
 left join Org on a.ParentID=Org.OrgID 
 left join Doc on Doc.BKDH=a.BKDH) a 
-GROUP BY a.BKDH,a.DocName,a.OrgName,a.ParentID";
+GROUP BY a.DocName,a.OrgName,a.OrgID";
             if (Group_Type=="1")
             {
                 sql += " order by a.DocName";
@@ -174,7 +172,7 @@ GROUP BY a.BKDH,a.DocName,a.OrgName ,a.PersonID ";
                 try
                 {
                     SqlParameter Para = null;
-                    string[] pk = orderids.Split(',');
+                    string[] pk = orderids.Split(',').Distinct().ToArray();
                     foreach (string item in pk)
                     {
                         string sql = @"INSERT INTO LOG(ORDERID,DATE,NIANJUANQI,UserID,Type) VALUES(@ORDERID,getdate(),@NIANJUANQI,@UserID,@Type)";
@@ -242,7 +240,7 @@ left join [Order] b on Log.OrderID=b.ID
 left join USERS c on c.ID=Log.UserID
 left join Doc d on d.BKDH=b.BKDH
 left join OrderPeople e on b.PersonID=e.ID
-left join Org f on f.OrgID=e.OrgID where    1=1 " + logsql;
+left join Org f on f.OrgID=e.OrgID where  Log.TYPE=0 AND   1=1 " + logsql;
             string top = "";
             if (limit > 0)
             {
@@ -293,7 +291,7 @@ left join [Order] b on Log.OrderID=b.ID
 left join USERS c on c.ID=Log.UserID
 left join Doc d on d.BKDH=b.BKDH
 left join OrderPeople e on b.PersonID=e.ID
-left join Org f on f.OrgID=e.OrgID where 1=1 " + logsql;
+left join Org f on f.OrgID=e.OrgID where Log.TYPE=1 AND  1=1 " + logsql;
             string top = "";
             if (limit > 0)
             {

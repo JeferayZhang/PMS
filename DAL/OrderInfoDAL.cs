@@ -213,7 +213,7 @@ where 1=1 ");
         /// <param name="months"></param>
         /// <param name="guid"></param>
         /// <returns></returns>
-        public string update(int ID, int ordernum, int months, string guid, string bkdh, int PersonID, int ModifyUser, int PosterID)
+        public string update(int ID, int ordernum, int months, string guid, string bkdh, int PersonID, int ModifyUser, int PosterID, string OrderDate)
         {
             string res = check(ID, guid);
             if (!string.IsNullOrEmpty(res))
@@ -228,7 +228,8 @@ where 1=1 ");
                 try
                 {
                     SqlParameter Para = null;
-                    string sql = @"update [order] set ordernum=@ordernum,ordermonths=@ordermonths,nguid=newid() ,
+                    string sql = @"update [order] set ordernum=@ordernum,OrderDate=@OrderDate,
+ordermonths=@ordermonths,nguid=newid() ,
 bkdh = @bkdh,PersonID = @PersonID,ModifyDate = GETDATE(),ModifyUser = @ModifyUser,PosterID=@PosterID where id=@id";
                     Para = new SqlParameter("ordernum", ordernum);
                     dbhelper.SqlParameterList.Add(Para);
@@ -243,6 +244,8 @@ bkdh = @bkdh,PersonID = @PersonID,ModifyDate = GETDATE(),ModifyUser = @ModifyUse
                     Para = new SqlParameter("ModifyUser", ModifyUser);
                     dbhelper.SqlParameterList.Add(Para);
                     Para = new SqlParameter("PosterID", PosterID);
+                    dbhelper.SqlParameterList.Add(Para);
+                    Para = new SqlParameter("OrderDate", OrderDate._ToDateTime()._ToStr("yyyy-MM-dd"));
                     dbhelper.SqlParameterList.Add(Para);
                     int num = dbhelper.ExecuteNonQuery(tran, sql);
                     tran.Commit();

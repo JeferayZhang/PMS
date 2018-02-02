@@ -23,10 +23,10 @@ namespace BLL
         /// <param name="dt1">分发日期</param>
         /// <param name="type">如果为0,则表示分发行为;如果为1,则表示查看日志</param>
         /// <returns></returns>
-        public retValue GetTable(string BKDH, string orgid, string userorg,string Group_Type,string dt1,int type=0)
+        public retValue GetTable(string BKDH, string orgid, string userorg,string Group_Type,string dt1)
         {
             retValue ret = new retValue();
-            DataTable dt = _dal.GetTable(BKDH, orgid,userorg,Group_Type, dt1, type);
+            DataTable dt = _dal.GetTable(BKDH, orgid,userorg,Group_Type, dt1);
             if (dt != null && dt.Rows.Count > 0)
             {
                 ret.result = true;

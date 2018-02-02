@@ -89,10 +89,10 @@ namespace BLL
             }
             return pg;
         }
-        public retValue UpdateByPK(int ID, int months, int ordernum, string bkdh, int PersonID, int ModifyUser, int PosterID, string guid = "")
+        public retValue UpdateByPK(int ID, int months, int ordernum, string bkdh, int PersonID, int ModifyUser, int PosterID, string OrderDate,string guid = "")
         {
             retValue ret = new retValue();
-            string res = dal.update(ID, ordernum, months, guid, bkdh, PersonID, ModifyUser, PosterID);
+            string res = dal.update(ID, ordernum, months, guid, bkdh, PersonID, ModifyUser, PosterID, OrderDate);
             if (string.IsNullOrEmpty(res))
             {
                 ret.result = true; ret.data = "保存成功";

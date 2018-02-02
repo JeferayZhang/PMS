@@ -126,6 +126,7 @@ namespace PMS.Controllers
                 string BKDH = o["NewspaperName"]._ToStrTrim();
                 string FullPrice = o["FullPrice"]._ToStrTrim();
                 string MoneyPayed = o["Pay"]._ToStrTrim();
+                string test1 = o["test1"]._ToStrTrim();
                 if (string.IsNullOrEmpty(ID))
                 {
                     SqlHelp dbhelper = new SqlHelp();
@@ -136,7 +137,7 @@ namespace PMS.Controllers
                         try
                         {
                             ret = _BLL.Insert(tran, BKDH, PersonID._ToInt32(), OrderNum._ToInt32(), Month._ToInt32(),
-                                System.DateTime.Now.ToShortDateString(), userid._ToStr(), Poster._ToInt32(), FullPrice._ToDecimal());
+                                test1, userid._ToStr(), Poster._ToInt32(), FullPrice._ToDecimal());
                             tran.Commit();
                         }
                         catch (Exception ex)
@@ -151,7 +152,7 @@ namespace PMS.Controllers
                 else
                 {
                     ret = _BLL.UpdateByPK(ID._ToInt32(), Month._ToInt32(), OrderNum._ToInt32(), BKDH,
-                        PersonID._ToInt32(), userid, Poster._ToInt32(), NGUID);
+                        PersonID._ToInt32(), userid, Poster._ToInt32(),test1, NGUID);
                     if (ret.result)
                     {
                         CostBLL costBLL = new CostBLL();

@@ -185,6 +185,7 @@
                     nowprice();
                     return false;
                 });
+                
                 form.render();
             });
 
@@ -200,10 +201,14 @@
                 return false;
             }
             var dj = $('#Price').val();//单价
+            console.log(dj);
             var Month = $('#Month').val();//月数
+            console.log(Month);
             var OrderNumber = $('#OrderNumber').val();//订购份数
+            console.log(OrderNumber);
             var Discount = $('#Discount').val();//折扣
-            document.getElementById("FullPrice").value = dj * Month * OrderNumber * Discount;
+            console.log(Discount);
+            $("#FullPrice").val(dj * Month * OrderNumber * Discount);
         }
     </script>
 }
@@ -248,17 +253,18 @@
         </div>   
         <label class="layui-form-label">单价</label>
         <div class="layui-input-inline">
-            <input type="text" id="Price" name="Price" value="0" readonly placeholder=""onchange="javascript:nowprice();"autocomplete="off" class="layui-input" maxlength="50">
+            <input type="text" id="Price" name="Price" value="0" readonly placeholder="" onchange="javascript:nowprice();"autocomplete="off" class="layui-input" maxlength="50">
         </div>
     </div>
     <div class=" layui-form-item">  
         <label class="layui-form-label">起订日期</label>
         <div class="layui-input-inline">
-            <input type="text" class="layui-input" value="@(dr == null ? "" : dr["OrderDate"]._ToDateTime().ToString("yyyy-MM-dd"))" name="test1" id="test1" placeholder="年-月-日">
+            <input type="text" class="layui-input" lay-verify="required" value="@(dr == null ? "" : dr["OrderDate"]._ToDateTime().ToString("yyyy-MM-dd"))" name="test1" id="test1" placeholder="年-月-日">
         </div>
         <label class="layui-form-label">订阅月数</label>
         <div class="layui-input-inline">
-            <input type="text" id="Month" onkeyup="this.value=this.value.replace(/[^\d]/g,'') " value="@(dr == null ? "" : dr["OrderMonths"]._ToStrTrim())" name="Month" placeholder="" onchange="javascript:nowprice()" autocomplete="off" class="layui-input" maxlength="50">
+            <input type="text" id="Month" onkeyup="this.value=this.value.replace(/[^\d]/g,'') " value="@(dr == null ? "" : dr["OrderMonths"]._ToStrTrim())" 
+                   name="Month" placeholder="" onchange="nowprice();" autocomplete="off" class="layui-input" maxlength="50">
         </div>   
         
     </div>

@@ -129,7 +129,7 @@ select t.ID ,t.BKDH,Doc.Name DocName,Org.Name OrgName ,t.OrderNum,t.PersonID fro
 left join OrderPeople on t.PersonID=OrderPeople.ID 
 left join Org on org.OrgID=OrderPeople.OrgID 
 left join Doc on Doc.BKDH=t.BKDH
-where   dateadd(MONTH,t.OrderMonths,t.OrderDate)>CONVERT(varchar(100), @INDATE1, 23)
+where  1=1 "+wheresql+@" and  dateadd(MONTH,t.OrderMonths,t.OrderDate)>CONVERT(varchar(100), @INDATE1, 23)
 and exists(
 select 1 from log where log.orderid=t.id and 
 CONVERT(varchar(100), log.date, 23)=CONVERT(varchar(100), @INDATE1, 23) " + logsql + @"

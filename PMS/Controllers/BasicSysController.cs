@@ -122,7 +122,7 @@ namespace PMS.Controllers
 
                 foreach (string item in ids)
                 {
-                    ret = _UserBLL.UpdateByPK(item._ToInt32(), "", "", "", "", "", "", "1", "","");
+                    ret = _UserBLL.UpdateByPK(item._ToInt32(), "", "", "", "", "", "", "1", "","","");
                     if (ret.result)
                     {
                         count++;
@@ -243,7 +243,7 @@ namespace PMS.Controllers
                 //更新
                 else
                 {
-                    ret = _UserBLL.UpdateByPK(ID._ToInt32(), USERNO, NAME, Sex, Role, OrgID, IDCard, State, MGUID, Address);
+                    ret = _UserBLL.UpdateByPK(ID._ToInt32(), USERNO, NAME, Sex, Role, OrgID, IDCard, State, MGUID, Email, PhoneNumber, Password);
                 }
             }
             var js = JsonConvert.SerializeObject(ret);

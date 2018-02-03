@@ -219,7 +219,7 @@ FROM USERS WHERE 1=1 ";
         /// <param name="guid">唯一标识,每次修改数据会同时修改此列</param>
         /// <returns>成功返回空值,否则返回提示</returns>
         public  string UpdateByPK(int ID,string userNo, string userName, string sex, string userRole, string userOrg, 
-            string IDCard, string userState, string guid,string Address)
+            string IDCard, string userState, string guid,string Email,string PhoneNumber,string Password="")
         {
             string res = "";
             try
@@ -274,10 +274,22 @@ FROM USERS WHERE 1=1 ";
                         SqlParameter Para = new SqlParameter("USERNO", userNo._ToStrTrim());
                         dbhelper.SqlParameterList.Add(Para);
                     }
-                    if (!string.IsNullOrEmpty(Address._ToStrTrim()))
+                    if (!string.IsNullOrEmpty(Email._ToStrTrim()))
                     {
-                        sql += " Address =@Address ,";
-                        SqlParameter Para = new SqlParameter("Address", Address._ToStrTrim());
+                        sql += " Email =@Email ,";
+                        SqlParameter Para = new SqlParameter("Email", Email._ToStrTrim());
+                        dbhelper.SqlParameterList.Add(Para);
+                    }
+                    if (!string.IsNullOrEmpty(PhoneNumber._ToStrTrim()))
+                    {
+                        sql += " PhoneNumber =@PhoneNumber ,";
+                        SqlParameter Para = new SqlParameter("PhoneNumber", PhoneNumber._ToStrTrim());
+                        dbhelper.SqlParameterList.Add(Para);
+                    }
+                    if (!string.IsNullOrEmpty(Password._ToStrTrim()))
+                    {
+                        sql += " Password =@Password ,";
+                        SqlParameter Para = new SqlParameter("Password", Password._ToStrTrim());
                         dbhelper.SqlParameterList.Add(Para);
                     }
                     if (ID > 0)

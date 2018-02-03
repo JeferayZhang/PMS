@@ -89,10 +89,11 @@ namespace BLL
         /// <param name="userState">状态(0有效,1无效)</param>
         /// <param name="guid">唯一标识,每次修改数据会同时修改此列</param>
         /// <returns>成功返回空值,否则返回提示</returns>
-        public retValue UpdateByPK(int ID,string userNo, string userName, string sex, string userRole, string userOrg, string IDCard, string userState, string guid,string Address) 
+        public retValue UpdateByPK(int ID,string userNo, string userName, string sex, string userRole, string userOrg, string IDCard, 
+            string userState, string guid,string Email, string PhoneNumber,string Password="") 
         {
             retValue ret = new retValue();
-            string res = dal.UpdateByPK(ID,userNo, userName, sex, userRole, userOrg, IDCard, userState, guid, Address);
+            string res = dal.UpdateByPK(ID,userNo, userName, sex, userRole, userOrg, IDCard, userState, guid, Email, PhoneNumber, Password);
             if (string.IsNullOrEmpty(res))
             {
                 ret.result = true; ret.data = "保存成功";

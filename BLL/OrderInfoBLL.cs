@@ -191,12 +191,21 @@ namespace BLL
             string inuser, int posterid, string OrderNo,string unitname,
             string address,string name,string phone,string orgID,SqlTransaction tran,string oporgid) 
         {
-            int checkOrderPeople = _SubscriberDAL.GetCount(0, OrderNo, "", "", "", "", "", oporgid);
+            DataTable dt= _SubscriberDAL.getbyNo(OrderNo);
+            retValue ret = new retValue();
             int orderpeopleid = 0;
-            retValue ret=new retValue();
-            if (checkOrderPeople > 0)
+            //如果根据机构编号找到了机构,那么就判断权限
+            if (dt.Rows.Count>0)
             {
-                orderpeopleid = _SubscriberDAL.GetSubscriber(0, OrderNo, "", "", orgID, "", "", oporgid).Rows[0]["ID"]._ToInt32();
+                orderpeopleid = dt.Rows[0]["ID"]._ToInt32();
+                OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
+                string all = orgInfoDAL.getChilds(oporgid, orgID);
+                if (all=="0")
+                {
+                    ret.result = false;
+                    ret.reason = "您没有权限添加"+ OrderNo+"的订购,可能是因为该订户不属于您的机构";
+                    return ret;
+                }
             }
             else
             {

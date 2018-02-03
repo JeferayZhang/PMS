@@ -153,6 +153,10 @@ group by t.OrgID";
                 string[] str = str1.Split(',').Intersect(str2.Split(',')).ToArray();
                 str1 = string.Join(",", str);
             }
+            if (string.IsNullOrEmpty(str1))
+            {
+                str1 = "0";
+            }
             return str1;
         }
         public string insert(string Name,string address,string OrgCode,int parentID=0,int level=0) 

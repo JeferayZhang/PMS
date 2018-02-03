@@ -86,6 +86,19 @@ LEFT JOIN Org ON Org.OrgID=OrderPeople.OrgID WHERE 1=1 ");
             return dt;
         }
 
+        public DataTable getbyNo(string OrderNo)
+        {
+            string sql = "select * from OrderPeople where 1=1 ";
+            if (!string.IsNullOrEmpty(OrderNo._ToStrTrim()))
+            {
+                SqlParameter Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim().ToUpper());
+                dbhelper.SqlParameterList.Add(Para);
+                sql += " AND OrderPeople.OrderNo LIKE '%'+@OrderNo+'%'";
+            }
+            DataTable dt = dbhelper.ExecuteSql(sql);
+            return dt;
+        }
+
         
 
         public int GetCount(int ID, string OrderNo, string UnitName, string name,
@@ -95,9 +108,13 @@ LEFT JOIN Org ON Org.OrgID=OrderPeople.OrgID WHERE 1=1 ");
             sql = string.Format(@"select  count(1) as count FROM  OrderPeople
 LEFT JOIN USERS ON OrderPeople.InUser=USERS.ID
 LEFT JOIN Org ON Org.OrgID=OrderPeople.OrgID WHERE 1=1 ");
-            OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
-            string all = orgInfoDAL.getChilds(orgid, OrgID._ToStr());
-            sql += " AND OrderPeople.ORGID in (" + all + ")";
+            if (!string.IsNullOrEmpty(OrgID) &&!string.IsNullOrEmpty(orgid))
+            {
+                OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
+                string all = orgInfoDAL.getChilds(orgid, OrgID._ToStr());
+                sql += " AND OrderPeople.ORGID in (" + all + ")";
+            }
+            
             if (!string.IsNullOrEmpty(OrderNo._ToStrTrim()))
             {
                 SqlParameter Para = new SqlParameter("OrderNo", OrderNo._ToStrTrim().ToUpper());

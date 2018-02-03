@@ -273,6 +273,9 @@ namespace PMS.Controllers
                 BLL.OrderInfoBLL _bll = new OrderInfoBLL();
                 BLL.OrgInfoBLL _Org = new OrgInfoBLL();
                 DataTable dt = OpenFile(filepath);
+                //删除文件
+                FileInfo fileInfo = new FileInfo(filepath);
+                fileInfo.Delete();
                 if (dt == null || dt.Rows.Count == 0)
                 {
                     ret.result = false;
@@ -324,9 +327,14 @@ namespace PMS.Controllers
                                 }
                                 else
                                 {
-                                    _bll.Insert(item["BKDH"]._ToStrTrim(), item["OrderNum"]._ToInt32(), item["OrderMonths"]._ToInt32(), item["Indate"]._ToStrTrim(), userid._ToStr(),
+                                    ret= _bll.Insert(item["BKDH"]._ToStrTrim(), item["OrderNum"]._ToInt32(), item["OrderMonths"]._ToInt32(), item["Indate"]._ToStrTrim(), userid._ToStr(),
                                         0, item["OrderNo"]._ToStrTrim(), item["UnitName"]._ToStrTrim(), item["Address"]._ToStrTrim(), item["Name"]._ToStrTrim(), item["Phone"]._ToStrTrim(), orgid._ToStr(), tran, userid._ToStr());
                                     count++;
+                                    if (!ret.result)
+                                    {
+                                        tran.Rollback();
+                                        return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
+                                    }                              
                                 }
                             }
                             if (!ret.result)
@@ -336,9 +344,9 @@ namespace PMS.Controllers
                             else
                             {
                                 tran.Commit();
-                                //导入后删除文件
-                                FileInfo fileInfo = new FileInfo(filepath);
-                                fileInfo.Delete();
+                                ret.result = true;
+                                ret.data = "导入成功";
+                                
                             }
                         }
                         catch (Exception ex)

@@ -57,7 +57,12 @@
                         { field: 'OrderDate', align: 'center', title: '起订日期' }
                     ]],
                     page: true,
-                    id: 'testReload'
+                    id: 'testReload',
+                    jump: function (obj, first) {
+                        //obj包含了当前分页的所有参数，比如：
+                        console.log(123); //得到当前页，以便向服务端请求对应页的数据。
+                        console.log(555); //得到每页显示的条数
+                    }
                 });
                 $(function () {
                     var ddd = { str: '' };
@@ -283,6 +288,14 @@
                         }
                     });
                 });
+                //$("#getsum").click(function () {
+                //    var ddd = { str: JSON.stringify(data.field) };
+                //    ajaxHelper.post("/OrderSys/OrderInfos/", ddd, function (da) {
+                        
+                //        form.render();
+                //    });
+                //    return false;
+                //});
                 //执行实例
                 var uploadInst = upload.render({
                     elem: '#file' //绑定元素
@@ -293,9 +306,19 @@
                         layer.load(); //上传loading
                     }
                     , done: function (res, index, upload) {
-
+                        if (res.result) {
+                            layer.open({
+                                title: '提示', content: res.data, time: 2000
+                            });
+                            $("#search").click();
+                        }
+                        else {
+                            layer.open({
+                                title: '提示', content: res.reason, time: 2000
+                            });
+                        }
                         layer.closeAll('loading'); //关闭loading
-                        $("#search").click();
+                        
                     }
                     , error: function () {
                         layer.open({
@@ -383,8 +406,10 @@
             <select id="CompanyUnderArea" lay-filter="CompanyUnderArea" style="width:150px;" name="CompanyUnderArea"></select>
         </div>
     </div>
-    <div class=" layui-form-item">
+    <div class=" layui-form-item" style="margin-left:10px">
+
         <button class="layui-btn" lay-filter="search" lay-submit="" type="button" id="search" data-type="reload"><i class="layui-icon">&#xe615;</i>查询</button>
+        
         <button class="layui-btn layui-btn-warm" type="button" id="add">
             <i class="layui-icon">&#xe654;</i> 新增
         </button>
@@ -398,7 +423,10 @@
             <i class="layui-icon">&#x1006;</i> 删除
         </button>
         <button type="button" class="layui-btn" name="file" id="file"><i class="layui-icon"></i>批量导入订购</button>
-        @*<button class="layui-btn test" id="test4">下载导入模板</button>*@
+        @*<button class="layui-btn layui-btn-warm" type="button" id="getsum">
+            <i class="layui-icon">&#xe615;</i> 汇总
+        </button>
+        <label id="sum" style="font-size:18px;color:red;">总订购数:0;总订购月:0;订购总价:0;已缴总额:0</label>*@
     </div>
 </form>
 <form class="layui-form">

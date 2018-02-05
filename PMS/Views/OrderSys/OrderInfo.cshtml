@@ -6,8 +6,8 @@
         $(function () {
             var ajaxHelper = new AjaxHelper();
 
-            layui.use(['laydate', 'layer', 'element', 'form', 'upload', 'table', 'laytpl'], function () {
-                var laydate = layui.laydate, layer = layui.layer, element = layui.element, form = layui.form,
+            layui.use(['laydate','laypage', 'layer', 'element', 'form', 'upload', 'table', 'laytpl'], function () {
+                var laydate = layui.laydate,laypage=layui.laypage, layer = layui.layer, element = layui.element, form = layui.form,
                     $ = layui.jquery, upload = layui.upload, table = layui.table, laytpl = layui.laytpl;
 
                 var start = {
@@ -34,6 +34,70 @@
                 laydate.render({
                     elem: '#test2'
                 });
+                laypage.render({
+                    jump: function (obj, first)
+                    {
+                        var test1 = $('#test1').val();
+                        var test2 = $('#test2').val();
+                        var Province = $('#Province option:selected').val();
+                        var CompanyCity = $('#CompanyCity option:selected').val();
+                        var CompanyUnderCity = $('#CompanyUnderCity option:selected').val();
+                        var CompanyUnderArea = $('#CompanyUnderArea option:selected').val();
+                        var OrderState = $('#OrderState option:selected').val();
+                        var CostState = $('#CostState option:selected').val();
+                        var OrderNo = $('#OrderNo').val();
+                        var UnitName = $('#UnitName').val();
+                        var BKDH = $('#BKDH').val();
+
+                        var senddata = {
+                            "test1": test1,
+                            "test2": test2,
+                            "Province": Province,
+                            "CompanyCity": CompanyCity,
+                            "CompanyUnderCity": CompanyUnderCity,
+                            "CompanyUnderArea": CompanyUnderArea,
+                            "OrderNo": OrderNo,
+                            "UnitName": UnitName,
+                            "BKDH": BKDH,
+                            "OrderState": OrderState,
+                            "CostState": CostState
+                        };
+                        ajaxHelper.post("/OrderSys/Order_getCounts/", { str: JSON.stringify(senddata) }, function (da) {
+                            var jsonObj = JSON.parse(da);
+                            if (jsonObj.data == "NEEDLOGIN") {
+                                top.location = "../Account/Login";
+                                return false;
+                            }
+                            if (jsonObj.result) {
+                                $("#sum").text(jsonObj.data);
+                            }
+                            else {
+                                layer.open({
+                                    title: '提示', content: jsonObj.reason, time: 2000
+                                });
+                            }
+                        });
+                    }
+                });
+                form.on('submit(search)', function (data) {
+                    ajaxHelper.post("/OrderSys/Order_getCounts/",
+                                { str: JSON.stringify(data.field) },
+                                function (da) {
+                                    var jsonObj = JSON.parse(da);
+                                    if (jsonObj.data == "NEEDLOGIN") {
+                                        top.location = "../Account/Login";
+                                        return false;
+                                    }
+                                    if (jsonObj.result) {
+                                        $("#sum").text(jsonObj.data);
+                                    }
+                                    else {
+                                        layer.open({
+                                            title: '提示', content: jsonObj.reason, time: 2000
+                                        });
+                                    }
+                                });
+                })
                 table.render({
                     height: 'full-350',
                     elem: '#maintb',
@@ -57,12 +121,7 @@
                         { field: 'OrderDate', align: 'center', title: '起订日期' }
                     ]],
                     page: true,
-                    id: 'testReload',
-                    jump: function (obj, first) {
-                        //obj包含了当前分页的所有参数，比如：
-                        console.log(123); //得到当前页，以便向服务端请求对应页的数据。
-                        console.log(555); //得到每页显示的条数
-                    }
+                    id: 'testReload'
                 });
                 $(function () {
                     var ddd = { str: '' };
@@ -152,7 +211,6 @@
                         table.reload('testReload', {
                             page: {
                                 curr: 1, //重新从第 1 页开始
-                                layout: ['limit', 'count', 'prev', 'page', 'next', 'skip'],
                                 groups: 5,
                                 last: true,
                                 first: true
@@ -425,8 +483,8 @@
         <button type="button" class="layui-btn" name="file" id="file"><i class="layui-icon"></i>批量导入订购</button>
         @*<button class="layui-btn layui-btn-warm" type="button" id="getsum">
             <i class="layui-icon">&#xe615;</i> 汇总
-        </button>
-        <label id="sum" style="font-size:18px;color:red;">总订购数:0;总订购月:0;订购总价:0;已缴总额:0</label>*@
+        </button>*@
+        <a id="sum" style="font-size:18px;color:red;">总订购数:0;总订购月:0;订购总价:0;已缴总额:0</a>
     </div>
 </form>
 <form class="layui-form">

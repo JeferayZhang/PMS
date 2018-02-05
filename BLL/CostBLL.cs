@@ -36,7 +36,7 @@ namespace BLL
                 {
                     pg.code = 0;
                     pg.msg = "";
-                    pg.count = dal.GetCount(id, state, orderid, OrderNo, unitname, UserOrgID);
+                    pg.count = dal.GetCount(id, state, orderid, OrderNo, unitname, UserOrgID).Rows[0]["counts"]._ToInt32();
                     pg.data = dt;
                 }
                 else
@@ -53,6 +53,31 @@ namespace BLL
                 pg.msg = ex.Message;
             }
             return pg;
+        }
+
+        public retValue GetCostRecords(int id, string state, int orderid, string OrderNo, string unitname, int UserOrgID = 0)
+        {
+            retValue _retValue = new retValue();
+            try
+            {
+                _retValue.result = true;
+
+                DataTable tj = dal.GetCount(id, state, orderid, OrderNo, unitname, UserOrgID);
+                if (tj.Rows.Count > 0 && tj != null)
+                {
+                    _retValue.data = "总订购月数:" + tj.Rows[0]["OrderMonths"]._ToInt32() + ",总订购份数:" + tj.Rows[0]["OrderNum"]._ToInt32() + ",总价:" + tj.Rows[0]["Money"]._ToDecimal() + ",已缴费用:" + tj.Rows[0]["MoneyPayed"]._ToDecimal();
+                }
+                else
+                {
+                    _retValue.data = "总订购数:0;总订购月:0;订购总价:0;已缴总额:0";
+                }
+            }
+            catch (Exception ex)
+            {
+                _retValue.result = false;
+                _retValue.reason = ex.Message;
+            }
+            return _retValue;
         } 
         #endregion
 

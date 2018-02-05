@@ -85,10 +85,12 @@ left join USERS d on a.updateuser=d.ID where 1=1 ", pagesize);
         /// <param name="dt1"></param>
         /// <param name="dt2"></param>
         /// <returns></returns>
-        public int GetCount(int id, string state, int orderid,string OrderNo, string unitname, int userOrg = 0)
+        public DataTable GetCount(int id, string state, int orderid,string OrderNo, string unitname, int userOrg = 0)
         {
             string sql = string.Format(@"
-select count(1) from cost a
+select count(1) as counts,SUM(b.OrderMonths)OrderMonths,SUM(b.OrderNum)OrderNum,
+SUM(a.Money)Money,SUM(a.MoneyPayed)MoneyPayed
+ from cost a
 left join [Order] b on a.orderid=b.ID
 left join OrderPeople c on b.PersonID=c.ID
 left join USERS d on a.updateuser=d.ID where 1=1 ");
@@ -126,8 +128,8 @@ left join USERS d on a.updateuser=d.ID where 1=1 ");
                 sql += " AND upper(c.UnitName) LIKE '%'+@unitname+'%'";
             }
 
-            int num = dbhelper.Count(sql);
-            return num;
+            DataTable dt = dbhelper.ExecuteSql(sql);
+            return dt;
         }
 
         /// <summary>

@@ -38,5 +38,34 @@ namespace PMS.Controllers
             var js = JsonConvert.SerializeObject(pg);
             return Content(js);
         }
+
+         [HttpPost]
+         public ActionResult Order_getCounts(string str)
+         {
+             retValue ret = new retValue();
+             if (!authorize.checkFilterContext())
+             {
+                 ret.result = true;
+                 ret.data = "NEEDLOGIN";
+                 return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
+             }
+             PMS.Models.UserModel userModel = Session["UserModel"] as PMS.Models.UserModel;
+             int userid = userModel._ID;
+             BLL.CostBLL _BLL = new CostBLL();
+             JObject o = null;
+             if (!string.IsNullOrEmpty(str))
+             {
+                 o = JObject.Parse(str);
+
+                 string OrderNo = o["OrderNo"]._ToStrTrim();
+                 string OrderID = o["OrderID"]._ToStrTrim();
+                 string State = o["CostState"]._ToStrTrim();
+                 string UnitName = o["UnitName"]._ToStrTrim();
+                 ret = _BLL.GetCostRecords(0, State, OrderID._ToInt32(), OrderNo, UnitName, userModel.OrgID);
+             }
+             var js = JsonConvert.SerializeObject(ret);
+
+             return Json(js, JsonRequestBehavior.AllowGet);
+         }
     }
 }

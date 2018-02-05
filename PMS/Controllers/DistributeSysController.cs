@@ -69,7 +69,58 @@ namespace PMS.Controllers
 
             return Content(js);
         }
+        [HttpPost]
+        public ActionResult Order_getCounts(string str)
+        {
+            retValue ret = new retValue();
+            if (!authorize.checkFilterContext())
+            {
+                ret.result = true;
+                ret.data = "NEEDLOGIN";
+                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
+            }
+            PMS.Models.UserModel userModel = Session["UserModel"] as PMS.Models.UserModel;
+            int userid = userModel._ID;
+            BLL.DistributeBLL _BLL = new DistributeBLL();
+            JObject o = null;
+            if (!string.IsNullOrEmpty(str))
+            {
+                o = JObject.Parse(str);
 
+                string test1 = o["test1"]._ToStrTrim();
+                string Group_Type = o["Group_Type"]._ToStrTrim();
+                string Province = o["Province"]._ToStrTrim();
+                string CompanyCity = o["CompanyCity"]._ToStrTrim();
+                string CompanyUnderCity = o["CompanyUnderCity"]._ToStrTrim();
+                string CompanyUnderArea = o["CompanyUnderArea"]._ToStrTrim();
+                string NewspaperName = o["NewspaperName"]._ToStrTrim();
+                string Roads = o["Roads"]._ToStrTrim();
+                string OrgID = "";
+                if (Province._ToInt32() > 0)
+                {
+                    OrgID = Province;
+                }
+                if (CompanyCity._ToInt32() > 0)
+                {
+                    OrgID = CompanyCity;
+                }
+                if (CompanyUnderCity._ToInt32() > 0)
+                {
+                    OrgID = CompanyUnderCity;
+                }
+                if (CompanyUnderArea._ToInt32() > 0)
+                {
+                    OrgID = CompanyUnderArea;
+                }
+                if (Roads._ToInt32() > 0)
+                {
+                    OrgID = Roads;
+                }
+                ret = _BLL.GetCount(NewspaperName, OrgID, userModel.OrgID._ToStr(), Group_Type, test1);
+            }
+            var js = JsonConvert.SerializeObject(ret);
+            return Json(js, JsonRequestBehavior.AllowGet);
+        }
         [HttpGet]
         public ActionResult GetDis2(int page, int limit, string test1, string Group_Type, string NewspaperName,string Province, string CompanyCity, string CompanyUnderCity, string CompanyUnderArea
             , string Roads)
@@ -106,6 +157,58 @@ namespace PMS.Controllers
             var js = JsonConvert.SerializeObject(ret);
 
             return Content(js);
+        }
+        [HttpPost]
+        public ActionResult Order_getCounts2(string str)
+        {
+            retValue ret = new retValue();
+            if (!authorize.checkFilterContext())
+            {
+                ret.result = true;
+                ret.data = "NEEDLOGIN";
+                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
+            }
+            PMS.Models.UserModel userModel = Session["UserModel"] as PMS.Models.UserModel;
+            int userid = userModel._ID;
+            BLL.DistributeBLL _BLL = new DistributeBLL();
+            JObject o = null;
+            if (!string.IsNullOrEmpty(str))
+            {
+                o = JObject.Parse(str);
+
+                string test1 = o["test1"]._ToStrTrim();
+                string Group_Type = o["Group_Type"]._ToStrTrim();
+                string Province = o["Province"]._ToStrTrim();
+                string CompanyCity = o["CompanyCity"]._ToStrTrim();
+                string CompanyUnderCity = o["CompanyUnderCity"]._ToStrTrim();
+                string CompanyUnderArea = o["CompanyUnderArea"]._ToStrTrim();
+                string NewspaperName = o["NewspaperName"]._ToStrTrim();
+                string Roads = o["Roads"]._ToStrTrim();
+                string OrgID = "";
+                if (Province._ToInt32() > 0)
+                {
+                    OrgID = Province;
+                }
+                if (CompanyCity._ToInt32() > 0)
+                {
+                    OrgID = CompanyCity;
+                }
+                if (CompanyUnderCity._ToInt32() > 0)
+                {
+                    OrgID = CompanyUnderCity;
+                }
+                if (CompanyUnderArea._ToInt32() > 0)
+                {
+                    OrgID = CompanyUnderArea;
+                }
+                if (Roads._ToInt32() > 0)
+                {
+                    OrgID = Roads;
+                }
+                ret = _BLL.GetCount(NewspaperName, OrgID, userModel.OrgID._ToStr(), Group_Type, test1,true);
+            }
+            var js = JsonConvert.SerializeObject(ret);
+            return Json(js, JsonRequestBehavior.AllowGet);
         }
 
         #region 查询分发日志

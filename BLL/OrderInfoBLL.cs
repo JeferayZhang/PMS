@@ -26,7 +26,7 @@ namespace BLL
         /// <param name="pageLimit"></param>
         /// <param name="pageIndex"></param>
         /// <returns></returns>
-        public PageModel GetOrderInfo(int ID, string BKDH, string OrderNo, string unitname, string dt1, string dt2, string orgid, string chooseorg, string OrderState, string CostState, int pageLimit = 1, int pageIndex = 0)
+        public PageModel GetOrderInfo(int ID, string BKDH, string OrderNo, string unitname, string dt1, string dt2, string orgid, string chooseorg, string OrderState, string CostState, int pageLimit = 1, int pageIndex = 0, bool istj = false)
         {
             PageModel pg = new PageModel();
             try
@@ -35,10 +35,13 @@ namespace BLL
                     pageLimit, pageIndex, orgid, chooseorg, OrderState, CostState);
                 if (dt.Rows.Count > 0 && dt != null)
                 {
+                    DataTable tj = dal.GetCount(ID, BKDH, OrderNo, unitname, dt1, dt2, orgid,
+                        chooseorg, OrderState, CostState);
                     pg.code = 0;
                     pg.msg = "";
-                    pg.count = dal.GetCount(ID, BKDH, OrderNo, unitname, dt1, dt2, orgid, chooseorg, OrderState, CostState);
+                    pg.count = tj.Rows[0]["num"]._ToInt32();
                     pg.data = dt;
+                    pg.msg = "总订购月数:" + tj.Rows[0]["OrderMonths"]._ToInt32() + ",总订购份数:" + tj.Rows[0]["OrderNum"]._ToInt32() + ",总价:" + tj.Rows[0]["Money"]._ToInt32() + ",已缴费用:" + tj.Rows[0]["MoneyPayed"]._ToInt32();
                 }
                 else
                 {
@@ -56,6 +59,33 @@ namespace BLL
             return pg;
         }
 
+        public PageModel GetCount(int ID, string BKDH, string OrderNo, string unitname, string dt1, string dt2, string orgid, string chooseorg, string OrderState, string CostState)
+        {
+            PageModel pg = new PageModel();
+            try
+            {
+                DataTable tj = dal.GetCount(ID, BKDH, OrderNo, unitname, dt1, dt2, orgid,
+                        chooseorg, OrderState, CostState);
+                if (tj.Rows.Count > 0 && tj != null)
+                {
+                    pg.code = 0;
+                    pg.msg = "总订购月数:" + tj.Rows[0]["OrderMonths"]._ToInt32() + ",总订购份数:" + tj.Rows[0]["OrderNum"]._ToInt32() + ",总价:" + tj.Rows[0]["Money"]._ToDecimal() + ",已缴费用:" + tj.Rows[0]["MoneyPayed"]._ToDecimal();
+                }
+                else
+                {
+                    pg.code = 1;
+                    pg.msg = "未查询到数据";
+                    pg.count = 0;
+                    pg.data = tj;
+                }
+            }
+            catch (Exception ex)
+            {
+                pg.code = 1;
+                pg.msg = ex.Message;
+            }
+            return pg;
+        }
         /// <summary>
         /// 根据订购流水号获取信息
         /// </summary>

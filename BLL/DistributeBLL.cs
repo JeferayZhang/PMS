@@ -146,7 +146,33 @@ namespace BLL
         {
             int cou = _dal.count(ids, type,nianjuanqi);
             return cou;
-        } 
+        }
+
+        public retValue GetCount(string BKDH, string orgid, string userorg, string Group_Type, string dt1,bool area=false)
+        {
+            retValue pg = new retValue();
+            try
+            {
+                DataTable tj = _dal.GetCount(BKDH, orgid, userorg, Group_Type, dt1, area);
+                if (tj.Rows.Count > 0 && tj != null)
+                {
+                    pg.result = true;
+                    pg.data = "总份数:" + tj.Rows[0]["OrderNum"]._ToInt32();
+                }
+                else
+                {
+                    pg.result = true;
+                    pg.reason = "未能查询出数据,不能统计";
+                }
+            }
+            catch (Exception ex)
+            {
+                pg.result = false;
+                pg.reason = ex.Message;
+            }
+            return pg;
+        }
+
         public retValue insertLog(string orderids, string nianjuanqi,int userid,int type=0)
         {
             retValue ret = new retValue();

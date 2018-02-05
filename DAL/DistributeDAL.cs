@@ -26,12 +26,12 @@ namespace DAL
         /// <param name="Group_Type">排序方式:1根据报刊名称排序.2根据机构排序</param>
         /// <param name="dt1">分发日期</param>
         /// <returns></returns>
-        public DataTable GetTable(string BKDH, string chooseorg, string userorg, string Group_Type, string dt1,int limit,int page)
+        public DataTable GetTable(string BKDH, string chooseorg, string userorg, string Group_Type, string dt1, int limit, int page)
         {
             DataTable dt = new DataTable();
             OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
             string all = orgInfoDAL.getChilds(userorg, chooseorg);
-            string wheresql = " AND OrderPeople.ORGID in (" + all + @") ";
+            string wheresql = " AND OrderPeople.ORGID in (" + all + @")  AND t.STATE=0";
             SqlParameter Para = null;
             if (!string.IsNullOrEmpty(BKDH))
             {
@@ -74,12 +74,12 @@ GROUP BY a.DocName,a.OrgName,a.BKDH,a.OrgID ";
             }
             if (!string.IsNullOrEmpty(dt1._ToStrTrim()))
             {
-                Para = new SqlParameter("INDATE1", dt1._ToDateTime());
+                Para = new SqlParameter("INDATE1", dt1._ToDateTime()._ToStr("yyyy-MM-dd"));
                 dbhelper.SqlParameterList.Add(Para);
             }
             else
             {
-                Para = new SqlParameter("INDATE1", System.DateTime.Now.ToShortDateString());
+                Para = new SqlParameter("INDATE1", System.DateTime.Now.ToShortDateString()._ToStr("yyyy-MM-dd"));
                 dbhelper.SqlParameterList.Add(Para);
             }
             string top = "";
@@ -112,7 +112,7 @@ GROUP BY a.DocName,a.OrgName,a.BKDH,a.OrgID ";
             DataTable dt = new DataTable();
             OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
             string all = orgInfoDAL.getChilds(userorg, chooseorg);
-            string wheresql = " AND OrderPeople.ORGID in (" + all + @") ";
+            string wheresql = " AND OrderPeople.ORGID in (" + all + @")  AND t.STATE=0 ";
             SqlParameter Para = null;
             
             if (!string.IsNullOrEmpty(BKDH))
@@ -129,7 +129,7 @@ select t.ID ,t.BKDH,Doc.Name DocName,Org.Name OrgName ,t.OrderNum,t.PersonID fro
 left join OrderPeople on t.PersonID=OrderPeople.ID 
 left join Org on org.OrgID=OrderPeople.OrgID 
 left join Doc on Doc.BKDH=t.BKDH
-where  1=1 "+wheresql+@" and  dateadd(MONTH,t.OrderMonths,t.OrderDate)>CONVERT(varchar(100), @INDATE1, 23)
+where  1=1 " + wheresql + @" and  dateadd(MONTH,t.OrderMonths,t.OrderDate)>CONVERT(varchar(100), @INDATE1, 23)
 and exists(
 select 1 from log where log.orderid=t.id and 
 CONVERT(varchar(100), log.date, 23)=CONVERT(varchar(100), @INDATE1, 23) " + logsql + @"
@@ -146,12 +146,12 @@ GROUP BY a.BKDH,a.DocName,a.OrgName ,a.PersonID ";
             }
             if (!string.IsNullOrEmpty(dt1._ToStrTrim()))
             {
-                Para = new SqlParameter("INDATE1", dt1._ToDateTime());
+                Para = new SqlParameter("INDATE1", dt1._ToDateTime()._ToStr("yyyy-MM-dd"));
                 dbhelper.SqlParameterList.Add(Para);
             }
             else
             {
-                Para = new SqlParameter("INDATE1", System.DateTime.Now.ToShortDateString());
+                Para = new SqlParameter("INDATE1", System.DateTime.Now.ToShortDateString()._ToStr("yyyy-MM-dd"));
                 dbhelper.SqlParameterList.Add(Para);
             }
             string top = "";
@@ -162,7 +162,46 @@ GROUP BY a.BKDH,a.DocName,a.OrgName ,a.PersonID ";
             dt = dbhelper.ExecuteSql("select " + top + " * from (" + sql + ") tttt where tttt.rownumber>" + limit * (page - 1));
             return dt;
         }
-
+        public DataTable GetCount(string BKDH, string chooseorg, string userorg, string Group_Type, string dt1,bool area=false)
+        {
+            DataTable dt = new DataTable();
+            OrgInfoDAL orgInfoDAL = new OrgInfoDAL();
+            string all = orgInfoDAL.getChilds(userorg, chooseorg);
+            string wheresql = " AND OrderPeople.ORGID in (" + all + @")  AND t.STATE=0";
+            SqlParameter Para = null;
+            if (!string.IsNullOrEmpty(BKDH))
+            {
+                wheresql += " AND upper(t.BKDH)=@BKDH";
+                Para = new SqlParameter("BKDH", BKDH.ToUpper());
+                dbhelper.SqlParameterList.Add(Para);
+            }
+            if (area)
+            {
+                wheresql += @" and exists(
+select 1 from log where log.orderid=t.id and 
+CONVERT(varchar(100), log.date, 23)=CONVERT(varchar(100), @INDATE1, 23)  and log.type=0
+) ";
+            }
+            string sql = string.Format(@"
+select sum(t.OrderNum)OrderNum from [Order] t  
+left join OrderPeople on t.PersonID=OrderPeople.ID 
+left join Org on org.OrgID=OrderPeople.OrgID 
+where   dateadd(MONTH,t.OrderMonths,t.OrderDate)>CONVERT(varchar(100), @INDATE1, 23) 
+and CONVERT(varchar(100),t.OrderDate, 23)<=CONVERT(varchar(100),getdate(), 23)  
+" + wheresql);
+            if (!string.IsNullOrEmpty(dt1._ToStrTrim()))
+            {
+                Para = new SqlParameter("INDATE1", dt1._ToDateTime()._ToStr("yyyy-MM-dd"));
+                dbhelper.SqlParameterList.Add(Para);
+            }
+            else
+            {
+                Para = new SqlParameter("INDATE1", System.DateTime.Now.ToShortDateString()._ToStr("yyyy-MM-dd"));
+                dbhelper.SqlParameterList.Add(Para);
+            }
+            dt = dbhelper.ExecuteSql(sql);
+            return dt;
+        }
 
         /// <summary>
         /// 插入分发记录,理论上每条订购记录一天只能分发一次
@@ -222,19 +261,19 @@ GROUP BY a.BKDH,a.DocName,a.OrgName ,a.PersonID ";
             string logsql = "";
             if (!string.IsNullOrEmpty(dt1._ToStrTrim()))
             {
-                Para = new SqlParameter("INDATE1", dt1._ToDateTime());
+                Para = new SqlParameter("INDATE1", dt1._ToDateTime()._ToStr("yyyy-MM-dd"));
                 dbhelper.SqlParameterList.Add(Para);
                 logsql += " AND CONVERT(varchar(100),log.date, 23)  >= CONVERT(varchar(100),@INDATE1, 23)";
             }
             if (!string.IsNullOrEmpty(dt2._ToStrTrim()))
             {
-                Para = new SqlParameter("INDATE2", dt2._ToDateTime());
+                Para = new SqlParameter("INDATE2", dt2._ToDateTime()._ToStr("yyyy-MM-dd"));
                 dbhelper.SqlParameterList.Add(Para);
                 logsql += " AND  CONVERT(varchar(100),log.date, 23)  <= CONVERT(varchar(100),@INDATE2, 23) ";
             }
             if (!string.IsNullOrEmpty(userid._ToStrTrim()))
             {
-                Para = new SqlParameter("userid", userid._ToDateTime());
+                Para = new SqlParameter("userid", userid._ToStrTrim());
                 dbhelper.SqlParameterList.Add(Para);
                 logsql += " AND  log.userid=@userid ";
             }
@@ -273,19 +312,19 @@ left join Org f on f.OrgID=e.OrgID where  Log.TYPE=0 AND   1=1 " + logsql;
             string logsql = "";
             if (!string.IsNullOrEmpty(dt1._ToStrTrim()))
             {
-                Para = new SqlParameter("INDATE1", dt1._ToDateTime());
+                Para = new SqlParameter("INDATE1", dt1._ToDateTime()._ToStr("yyyy-MM-dd"));
                 dbhelper.SqlParameterList.Add(Para);
                 logsql += " AND CONVERT(varchar(100),log.date, 23)  >= CONVERT(varchar(100),@INDATE1, 23)";
             }
             if (!string.IsNullOrEmpty(dt2._ToStrTrim()))
             {
-                Para = new SqlParameter("INDATE2", dt2._ToDateTime());
+                Para = new SqlParameter("INDATE2", dt2._ToDateTime()._ToStr("yyyy-MM-dd"));
                 dbhelper.SqlParameterList.Add(Para);
                 logsql += " AND  CONVERT(varchar(100),log.date, 23)  <= CONVERT(varchar(100),@INDATE2, 23) ";
             }
             if (!string.IsNullOrEmpty(userid._ToStrTrim()))
             {
-                Para = new SqlParameter("userid", userid._ToDateTime());
+                Para = new SqlParameter("userid", userid._ToStrTrim());
                 dbhelper.SqlParameterList.Add(Para);
                 logsql += " AND  log.userid=@userid ";
             }

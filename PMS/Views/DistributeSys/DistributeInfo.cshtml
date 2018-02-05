@@ -15,9 +15,9 @@
     <script>
         $(function () {
             var ajaxHelper = new AjaxHelper();
-            layui.use(['laydate', 'layer', 'element', 'form', 'table', 'laytpl'], function () {
-                var laydate = layui.laydate, layer = layui.layer, element = layui.element, form = layui.form, table = layui.table, $ = layui.jquery, laytpl = layui.laytpl;
-
+            layui.use(['laydate', 'laypage', 'layer', 'element', 'form', 'table', 'laytpl'], function () {
+                var laydate = layui.laydate, laypage = layui.laypage, layer = layui.layer, element = layui.element,
+                    form = layui.form, table = layui.table, $ = layui.jquery, laytpl = layui.laytpl;
                 var start = {
                     min: laydate.now
                     , max: '2099-06-16 23:59:59'
@@ -27,7 +27,6 @@
                         end.start = datas //将结束日的初始值设定为开始日
                     }
                 };
-
                 var end = {
                     min: laydate.now
                     , max: '2099-06-16 23:59:59'
@@ -39,6 +38,42 @@
                 laydate.render({
                     elem: '#test1'
                 });
+                laypage.render({
+                    jump: function (obj, first) {
+                        var test1 = $('#test1').val();
+                        var Group_Type = $('#Group_Type').val();
+                        var Province = $('#Province option:selected').val();
+                        var CompanyCity = $('#CompanyCity option:selected').val();
+                        var CompanyUnderCity = $('#CompanyUnderCity option:selected').val();
+                        var CompanyUnderArea = $('#CompanyUnderArea option:selected').val();
+                        var Roads = $('#Roads option:selected').val();
+                        var NewspaperName = $('#NewspaperName option:selected').val();
+                        var senddata = {
+                            "test1": test1,
+                            "Group_Type": Group_Type,
+                            "Province": Province,
+                            "CompanyCity": CompanyCity,
+                            "CompanyUnderCity": CompanyUnderCity,
+                            "CompanyUnderArea": CompanyUnderArea,
+                            "Roads": Roads,
+                            "NewspaperName": NewspaperName
+                        };
+                        ajaxHelper.post("/DistributeSys/Order_getCounts/",
+                            { str: JSON.stringify(senddata) },
+                            function (da) {
+                                var jsonObj = JSON.parse(da);
+                                if (jsonObj.data == "NEEDLOGIN") {
+                                    top.location = "../Account/Login";
+                                    return false;
+                                }
+                                if (jsonObj.result) {
+                                    $("#sum").text(jsonObj.data);
+                                }
+                                else {
+                                    layer.open({
+                                        title: '提示', content: jsonObj.reason, time: 2000
+                                    });
+                                } }); } });
                 table.render({
                     height: 'full-350',
                     elem: '#maintb',
@@ -94,6 +129,25 @@
                     bindqk();
                     selectchanged('', "Province");
                 });
+                form.on('submit(search)', function (data) {
+                    ajaxHelper.post("/DistributeSys/Order_getCounts/",
+                                { str: JSON.stringify(data.field) },
+                                function (da) {
+                                    var jsonObj = JSON.parse(da);
+                                    if (jsonObj.data == "NEEDLOGIN") {
+                                        top.location = "../Account/Login";
+                                        return false;
+                                    }
+                                    if (jsonObj.result) {
+                                        $("#sum").text(jsonObj.data);
+                                    }
+                                    else {
+                                        layer.open({
+                                            title: '提示', content: jsonObj.reason, time: 2000
+                                        });
+                                    }
+                                });
+                })
                 function selectchanged(parentid, elem) {
                     $("#" + elem + "").empty();
                     var ddd = { str: parentid }
@@ -239,6 +293,7 @@
         </div>
         <button class="layui-btn" type="button" lay-filter="search" lay-submit="" data-type="reload">统计</button>
         <button class="layui-btn" type="button" lay-filter="save1" lay-submit="" data-type="save">分发</button>
+        <a id="sum" style="font-size:18px;color:red;">总份数:0</a>
     </div>
 </form>
 <div>

@@ -43,7 +43,7 @@ namespace DAL
 select a.ID ,b.Name docname ,a.BKDH,c.UnitName,c.Name ToUser,a.OrderDate,a.OrderMonths,
 a.OrderNum,CONVERT(varchar(100), a.Indate, 23) Indate,a.PosterID,d.Name as GetUser,e.NAME as InUser ,a.PersonID,a.NGUID,Cost.Money,Cost.MoneyPayed,Cost.ID as CostID,
 ROW_NUMBER() over (order by a.ID) as rownumber,b.Price, case isnull(a.state,0) when 0 then '正常' when -1 then '退订' when 1 then '过期' end as OrderState,
-case ISNULL(Cost.state,0) when 0 then '已缴清' when '1' then '未缴清' when -1 then '退订未处理' when '-2' then '退订已处理' end as CostState
+case ISNULL(Cost.state,0) when 0 then '已缴清' when '1' then '未缴清' when '-1' then '退订未处理' when '-2' then '退订已处理' end as CostState
 from [Order]  a 
 inner join dbo.OrderPeople c on a.PersonID=c.ID
 left join Cost on Cost.OrderID=a.ID
@@ -107,11 +107,13 @@ where 1=1 ");
         }
 
 
-        public int GetCount(int id, string BKDH, string OrderNo, string unitname,
+        public DataTable GetCount(int id, string BKDH, string OrderNo, string unitname,
             string dt1, string dt2, string orgid, string chooseorg, string orderstate, string coststate)
         {
             string sql = string.Format(@"
-select count(1) as num
+select count(1) as num,sum(a.OrderMonths) as OrderMonths,sum(a.OrderNum) as OrderNum,
+sum(Cost.Money) as Money,
+sum(Cost.MoneyPayed) as MoneyPayed
 from [Order]  a 
 inner join dbo.OrderPeople c on a.PersonID=c.ID
 left join Cost on Cost.OrderID=a.ID
@@ -170,8 +172,8 @@ where 1=1 ");
                 dbhelper.SqlParameterList.Add(Para);
                 sql += " AND  CONVERT(varchar(100),a.INDATE, 23)  <= CONVERT(varchar(100),@INDATE2, 23) ";
             }
-            int num = dbhelper.Count(sql);
-            return num;
+            DataTable dt= dbhelper.ExecuteSql(sql);
+            return dt;
         }
 
         /// <summary>
@@ -404,8 +406,8 @@ where[order].ID = @ID)  where  orderid=@ID ";
             string res = "";
             try
             {
-                string sql = @" insert into [Order](BKDH,personid,userid,ordernum,orderdate,posterid,ordermonths) 
-values(@BKDH,@personid,@userid,@ordernum,@orderdate,@posterid,@ordermonths) ";
+                string sql = @" insert into [Order](BKDH,personid,userid,ordernum,orderdate,posterid,ordermonths,state) 
+values(@BKDH,@personid,@userid,@ordernum,@orderdate,@posterid,@ordermonths,0) ";
                 SqlParameter Para = null;
                 Para = new SqlParameter("BKDH", BKDH._ToStrTrim().ToUpper());
                 dbhelper.SqlParameterList.Add(Para);

@@ -59,6 +59,62 @@ namespace PMS.Controllers
             var js = JsonConvert.SerializeObject(pg);
             return Content(js);
         }
+
+        [HttpPost]
+        public ActionResult Order_getCounts(string str)
+        {
+            retValue ret = new retValue();
+            if (!authorize.checkFilterContext())
+            {
+                ret.result = true;
+                ret.data = "NEEDLOGIN";
+                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
+            }
+            PMS.Models.UserModel userModel = Session["UserModel"] as PMS.Models.UserModel;
+            int userid = userModel._ID;
+            BLL.OrderInfoBLL _BLL = new OrderInfoBLL();
+            JObject o = null;
+            if (!string.IsNullOrEmpty(str))
+            {
+                o = JObject.Parse(str);
+
+                string test1 = o["test1"]._ToStrTrim();
+                string test2 = o["test2"]._ToStrTrim();
+                string Province = o["Province"]._ToStrTrim();
+                string CompanyCity = o["CompanyCity"]._ToStrTrim();
+                string CompanyUnderCity = o["CompanyUnderCity"]._ToStrTrim();
+                string CompanyUnderArea = o["CompanyUnderArea"]._ToStrTrim();
+                string OrderNo = o["OrderNo"]._ToStrTrim();
+                string UnitName = o["UnitName"]._ToStrTrim();
+                string BKDH = o["BKDH"]._ToStrTrim();
+                string OrderState = o["OrderState"]._ToStrTrim();
+                string CostState = o["CostState"]._ToStrTrim();
+                string OrgID = "";
+                if (Province._ToInt32() > 0)
+                {
+                    OrgID = Province;
+                }
+                if (CompanyCity._ToInt32() > 0)
+                {
+                    OrgID = CompanyCity;
+                }
+                if (CompanyUnderCity._ToInt32() > 0)
+                {
+                    OrgID = CompanyUnderCity;
+                }
+                if (CompanyUnderArea._ToInt32() > 0)
+                {
+                    OrgID = CompanyUnderArea;
+                }
+                PageModel pg = _BLL.GetCount(0, BKDH, OrderNo, UnitName, test1, test2,
+                userModel.OrgID._ToStr(), OrgID, OrderState, CostState);
+                ret.result = true;
+                ret.data = pg.msg;
+            }
+            var js = JsonConvert.SerializeObject(ret);
+
+            return Json(js, JsonRequestBehavior.AllowGet);
+        }
         #endregion
 
         #region 初始化订单新增修改界面

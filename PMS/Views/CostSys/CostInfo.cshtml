@@ -7,8 +7,46 @@
             var ajaxHelper = new AjaxHelper();
 
 
-            layui.use(['laydate', 'layer', 'element', 'form', 'table'], function () {
-                var laydate = layui.laydate, layer = layui.layer, element = layui.element, form = layui.form, $ = layui.jquery, table = layui.table;
+            layui.use(['laydate', 'layer','laypage', 'element', 'form', 'table'], function () {
+                var laydate = layui.laydate, layer = layui.layer,laypage=layui.laypage, element = layui.element, form = layui.form,
+                    $ = layui.jquery, table = layui.table;
+                laypage.render({
+                    jump: function (obj, first) {
+                        var OrderID = $('#OrderID').val();
+                        var CostState = $('#CostState').val();
+                        var OrderNo = $('#OrderNo').val();
+                        var UnitName = $('#UnitName').val();
+
+                        var senddata = {
+                            "OrderID": OrderID,
+                            "OrderNo": OrderNo,
+                            "CostState": CostState,
+                            "UnitName": UnitName
+                        };
+                        ajaxHelper.post("/CostSys/Order_getCounts/", { str: JSON.stringify(senddata) }, function (da) {
+                            var jsonObj = JSON.parse(da);
+                            if (jsonObj.data == "NEEDLOGIN") {
+                                top.location = "../Account/Login";
+                                return false;
+                            }
+                            console.log(jsonObj);
+                            $("#sum").text(jsonObj.data);
+                        });
+                    }
+                });
+                form.on('submit(search)', function (data) {
+                    ajaxHelper.post("/CostSys/Order_getCounts/",
+                                { str: JSON.stringify(data.field) },
+                                function (da) {
+                                    var jsonObj = JSON.parse(da);
+                                    if (jsonObj.data == "NEEDLOGIN") {
+                                        top.location = "../Account/Login";
+                                        return false;
+                                    }
+                                    console.log(jsonObj);
+                                    $("#sum").text(jsonObj.data);
+                                });
+                })
                 table.render({
                     height: 'full-200',
                     elem: '#maintb',
@@ -122,15 +160,13 @@
                 <option value="-2">退订已处理</option>
             </select>
         </div>
-        <button class="layui-btn layui-btn-normal" data-type="reload" type="button">
+        <button class="layui-btn layui-btn-normal" lay-filter="search" lay-submit="" data-type="reload" type="button">
             查询
         </button>
         <button class="layui-btn layui-btn-warm" type="button" id="edit">
             缴费
         </button>
-        @*<button class="layui-btn layui-btn-danger" type="button" id="delete">
-            全部置为已缴
-        </button>*@
+        <a id="sum" style="font-size:18px;color:red;">总订购数:0;总订购月:0;订购总价:0;已缴总额:0</a>
     </div>
 </form>
 <form class="layui-form">

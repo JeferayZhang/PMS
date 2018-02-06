@@ -247,7 +247,7 @@
                         area: ['700px', '380px'],
                         anim: 2,
                         moveOut: true,
-                        content: ['/OrderSys/Order_AddEdit', 'no'],//iframe的url，no代表不显示滚动条
+                        content: ['/OrderSys/Order_AddEdit'],//iframe的url，no代表不显示滚动条
                         end: function () {
                             $("#search").click();
                         }
@@ -272,7 +272,7 @@
                         area: ['700px', '380px'],
                         anim: 2,
                         moveOut: true,
-                        content: ['/OrderSys/Order_AddEdit?addeditcode=' + addeditcode, 'no'],//iframe的url，no代表不显示滚动条
+                        content: ['/OrderSys/Order_AddEdit?addeditcode=' + addeditcode],//iframe的url，no代表不显示滚动条
                         end: function () {
                             $("#search").click();
                         }
@@ -340,7 +340,7 @@
                         area: ['400px', '380px'],
                         anim: 2,
                         moveOut: true,
-                        content: ['/OrderSys/Order_Continue?addeditcode=' + ids, 'no'],//iframe的url，no代表不显示滚动条
+                        content: ['/OrderSys/Order_Continue?addeditcode=' + ids],//iframe的url，no代表不显示滚动条
                         end: function () {
                             $("#search").click();
                         }

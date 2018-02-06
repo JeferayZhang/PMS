@@ -36,7 +36,7 @@
                         area: ['700px', '550px'],
                         anim: 2,
                         moveOut: true,
-                        content: ['/BasicSys/UserInfo_AddEdit?addeditcode=' + addeditcode, 'no'],//iframe的url，no代表不显示滚动条
+                        content: ['/BasicSys/UserInfo_AddEdit?addeditcode=' + addeditcode],//iframe的url，no代表不显示滚动条
                         end: function () {
                             var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
                             parent.layer.close(index);  // 关闭layer

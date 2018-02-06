@@ -123,7 +123,7 @@
                         area: ['700px', '380px'],
                         anim: 2,
                         moveOut: true,
-                        content: ['/OrderSys/Order_AddEdit?from=cost&addeditcode=' + data[0].orderid, 'no'],//iframe的url，no代表不显示滚动条
+                        content: ['/OrderSys/Order_AddEdit?from=cost&addeditcode=' + data[0].orderid],//iframe的url，no代表不显示滚动条
                         end: function () {
                             $("#search").click();
                         }

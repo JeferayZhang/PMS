@@ -87,15 +87,18 @@
                     });
                 }
                 form.on('select(Province)', function (data) {
-                    $("#CompanyCity").empty();
-                    document.getElementById('CompanyCity').innerHTML = "";
-                    document.getElementById('CompanyUnderCity').innerHTML = "";
-                    document.getElementById('CompanyUnderArea').innerHTML = "";
-                    $("#CompanyUnderCity").empty();
-                    $("#CompanyUnderArea").empty();
                     var parentid = $("#Province option:selected").val();
-                    if (parentid == "") {
-                        return false;
+                    var getTpl2 = $("#orginfo").html(),
+                        view2 = $("#CompanyCity"),
+                        view3 = $("#CompanyUnderCity"),
+                        view4 = $("#CompanyUnderArea");
+                    if (parentid == 0) {
+                        laytpl(getTpl2).render([], function (a2) {
+                            $(view2).html(a2);
+                            $(view3).html(a2);
+                            $(view4).html(a2);
+                        });
+                        form.render();
                     }
                     else {
                         selectchanged(parentid, "CompanyCity");
@@ -103,30 +106,34 @@
                     return false;
                 });
                 form.on('select(CompanyCity)', function (data) {
-                    $("#CompanyUnderCity").html("");
-                    $("#CompanyUnderArea").html("");
                     var parentid = $("#CompanyCity option:selected").val();
-                    if (parentid == "") {
-                        return false;
+                    var getTpl2 = $("#orginfo").html(),
+                        view3 = $("#CompanyUnderCity"),
+                        view4 = $("#CompanyUnderArea");
+                    if (parentid == 0) {
+                        laytpl(getTpl2).render([], function (a2) {
+                            $(view3).html(a2);
+                            $(view4).html(a2);
+                        });
+                        form.render();
                     }
-                    selectchanged(parentid, "CompanyUnderCity");
-                    return false;
+                    else {
+                        selectchanged(parentid, "CompanyUnderCity");
+                    }
                 });
                 form.on('select(CompanyUnderCity)', function (data) {
-                    $("#CompanyUnderArea").html("");
                     var parentid = $("#CompanyUnderCity option:selected").val();
-                    if (parentid == "") {
-                        return false;
+                    var getTpl2 = $("#orginfo").html(),
+                        view4 = $("#CompanyUnderArea");
+                    if (parentid == 0) {
+                        laytpl(getTpl2).render([], function (a2) {
+                            $(view4).html(a2);
+                        });
+                        form.render();
                     }
-                    selectchanged(parentid, "CompanyUnderArea");
-                    return false;
-                });
-                form.on('select(CompanyUnderArea)', function (data) {
-                    var parentid = $("#CompanyUnderArea option:selected").val();
-                    if (parentid == "") {
-                        return false;
+                    else {
+                        selectchanged(parentid, "CompanyUnderArea");
                     }
-                    selectchanged(parentid, "");
                     return false;
                 });
                 form.render();
@@ -135,7 +142,7 @@
     </script>
 }
 <script id="orginfo" type="text/html">
-    <option value="">请选择</option>
+    <option value="0">请选择</option>
     {{#  layui.each(d, function(index, item){ }}
     <option value="{{item.OrgID}}">{{item.Name}}</option>
     {{#  }); }}

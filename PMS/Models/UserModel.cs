@@ -7,6 +7,10 @@ namespace PMS.Models
 {
     public class UserModel
     {
+        /// <summary>
+        /// 标识用户是否需要登录
+        /// </summary>
+        public static bool needlogin = true;
         private int ID;
         /// <summary>
         /// 用户流水号

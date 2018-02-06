@@ -2,6 +2,7 @@
 using Common;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using PMS.App_Start;
 using PMS.Models;
 using System.Collections.Generic;
 using System.Data;
@@ -9,6 +10,10 @@ using System.Web.Mvc;
 
 namespace PMS.Controllers
 {
+    /// <summary>
+    /// NeedLoginFilter特性对整个控制器加了登录验证,意思就是说,在执行所有的方法之前,都会进行登录验证
+    /// </summary>
+    [NeedLoginFilter(Message = "Controller")]
     public class BasicSysController : Controller
     {
         //
@@ -32,14 +37,6 @@ namespace PMS.Controllers
             string CompanyUnderArea, string UserNo, string NAME, string Role, string IDCard, string State)
         {
             PageModel _page = new PageModel();
-            if (!authorize.checkFilterContext())
-            {
-                _page.code = 0;
-                _page.count = 0;
-                _page.data = "";
-                return Content(JsonConvert.SerializeObject(_page));
-            }
-
             BLL.UserBLL _UserBLL = new UserBLL();
 
             UserModel user = Session["UserModel"] as UserModel;
@@ -75,12 +72,6 @@ namespace PMS.Controllers
         public JsonResult UserInfo_Deletes(string str)
         {
             retValue ret = new retValue();
-            if (!authorize.checkFilterContext())
-            {
-                ret.result = true;
-                ret.data = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
 
             BLL.UserBLL _UserBLL = new UserBLL();
 
@@ -104,12 +95,6 @@ namespace PMS.Controllers
         public JsonResult UserInfo_Update(string str)
         {
             retValue ret = new retValue();
-            if (!authorize.checkFilterContext())
-            {
-                ret.result = true;
-                ret.data = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
 
             BLL.UserBLL _UserBLL = new UserBLL();
            
@@ -155,12 +140,6 @@ namespace PMS.Controllers
         public JsonResult GetPosters()
         {
             retValue ret = new retValue();
-            if (!authorize.checkFilterContext())
-            {
-                ret.result = true;
-                ret.data = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
             UserModel user = Session["UserModel"] as UserModel;
             BLL.UserBLL _BLL = new UserBLL();
             ret.result = true;
@@ -200,12 +179,6 @@ namespace PMS.Controllers
         public JsonResult UserInfo_AddEdits(string str)
         {
             retValue ret = new retValue();
-            if (!authorize.checkFilterContext())
-            {
-                ret.result = true;
-                ret.data = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
             UserModel user = Session["UserModel"] as UserModel;
             BLL.UserBLL _UserBLL = new UserBLL();
             JObject o = null;
@@ -276,6 +249,7 @@ namespace PMS.Controllers
                     DataTable dt = ret.data as DataTable;
                     DataRow dr = dt.Rows[0];
                     user._ID = dr["ID"]._ToInt32();
+                    UserModel.needlogin = false;
                     user.UserNo = dr["UserNo"]._ToStrTrim();
                     user.OrgID = dr["OrgID"]._ToInt32();
                     user.Name = dr["NAME"]._ToStrTrim();
@@ -308,6 +282,7 @@ namespace PMS.Controllers
             Session["UserModel"] = null;
             ret.result = true;
             ret.data = "NEEDLOGIN";
+            UserModel.needlogin = true;
             var js = JsonConvert.SerializeObject(ret);
             return Json(js, JsonRequestBehavior.AllowGet);
         }
@@ -330,12 +305,6 @@ namespace PMS.Controllers
         public JsonResult DocInfos(string str)
         {
             retValue ret = new retValue();
-            if (!authorize.checkFilterContext())
-            {
-                ret.result = true;
-                ret.data = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
 
             BLL.DocBLL _DocBLL = new DocBLL();
 
@@ -373,13 +342,6 @@ namespace PMS.Controllers
         public JsonResult GetAllDocInfo(string str)
         {
             retValue ret = new retValue();
-            if (!authorize.checkFilterContext())
-            {
-                ret.result = true;
-                ret.data = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
-
             BLL.DocBLL _BLL = new DocBLL();
             ret = _BLL.GetDoc(str, "", "", "", "", "", "", "", "", "");
             var js = JsonConvert.SerializeObject(ret);
@@ -426,12 +388,6 @@ namespace PMS.Controllers
         public JsonResult DocInfo_AddEdits(string str)
         {
             retValue ret = new retValue();
-            if (!authorize.checkFilterContext())
-            {
-                ret.result = true;
-                ret.data = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
             BLL.DocBLL _DocBLL = new DocBLL();
             UserModel usermodel = Session["UserModel"] as UserModel;
             JObject o = null;
@@ -471,12 +427,6 @@ namespace PMS.Controllers
         public JsonResult DocInfo_Delete(string str)
         {
             retValue ret = new retValue();
-            if (!authorize.checkFilterContext())
-            {
-                ret.result = true;
-                ret.data = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
 
             BLL.DocBLL _DocBLL = new DocBLL();
 
@@ -584,12 +534,6 @@ namespace PMS.Controllers
         public ActionResult OrgInfo_AddEdits(string str)
         {
             retValue ret = new retValue();
-            if (!authorize.checkFilterContext())
-            {
-                ret.result = true;
-                ret.data = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
 
             BLL.OrgInfoBLL _BLL = new OrgInfoBLL();
             JObject o = null;
@@ -674,12 +618,6 @@ namespace PMS.Controllers
         public JsonResult OrgInfo_Deletes(string str)
         {
             retValue ret = new retValue();
-            if (!authorize.checkFilterContext())
-            {
-                ret.result = true;
-                ret.data = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
 
             BLL.OrgInfoBLL _BLL = new OrgInfoBLL();
             UserModel user = Session["UserModel"] as UserModel;

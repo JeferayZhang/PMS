@@ -9,9 +9,11 @@ using System.Data;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Converters;
+using PMS.App_Start;
 
 namespace PMS.Controllers
 {
+    [NeedLoginFilter(Message = "Controller")]
     public class CostSysController : Controller
     {
         //
@@ -25,12 +27,6 @@ namespace PMS.Controllers
         public ActionResult CostInfos(int page, int limit, string OrderNo, string OrderID, string State, string UnitName)
         {
             PageModel ret = new PageModel();
-            if (!authorize.checkFilterContext())
-            {
-                ret.code = 2;
-                ret.msg = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
             BLL.CostBLL _BLL = new CostBLL();
             PMS.Models.UserModel userModel = Session["UserModel"] as PMS.Models.UserModel;
             PageModel pg = _BLL.GetCostRecords(0, State, OrderID._ToInt32(), OrderNo, UnitName, limit, page,userModel.OrgID);
@@ -43,12 +39,6 @@ namespace PMS.Controllers
          public ActionResult Order_getCounts(string str)
          {
              retValue ret = new retValue();
-             if (!authorize.checkFilterContext())
-             {
-                 ret.result = true;
-                 ret.data = "NEEDLOGIN";
-                 return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-             }
              PMS.Models.UserModel userModel = Session["UserModel"] as PMS.Models.UserModel;
              int userid = userModel._ID;
              BLL.CostBLL _BLL = new CostBLL();

@@ -11,9 +11,11 @@ using System.Web.Mvc;
 using DAL;
 using System.Data.SqlClient;
 using System.IO;
+using PMS.App_Start;
 
 namespace PMS.Controllers
 {
+    [NeedLoginFilter(Message = "Controller")]
     public class OrderSysController : Controller
     {
         //
@@ -64,12 +66,6 @@ namespace PMS.Controllers
         public ActionResult Order_getCounts(string str)
         {
             retValue ret = new retValue();
-            if (!authorize.checkFilterContext())
-            {
-                ret.result = true;
-                ret.data = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
             PMS.Models.UserModel userModel = Session["UserModel"] as PMS.Models.UserModel;
             int userid = userModel._ID;
             BLL.OrderInfoBLL _BLL = new OrderInfoBLL();
@@ -125,12 +121,6 @@ namespace PMS.Controllers
         public ActionResult Order_AddEdit()
         {
             PageModel ret = new PageModel();
-            if (!authorize.checkFilterContext())
-            {
-                ret.code = 2;
-                ret.msg = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
             int addeditcode = Request["addeditcode"]._ToInt32();
             string from = Request["from"]._ToStr();
             if (addeditcode > 0)
@@ -158,12 +148,6 @@ namespace PMS.Controllers
         public ActionResult Order_AddEdits(string str)
         {
             retValue ret = new retValue();
-            if (!authorize.checkFilterContext())
-            {
-                ret.result = true;
-                ret.data = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
             PMS.Models.UserModel userModel = Session["UserModel"] as PMS.Models.UserModel;
             int userid = userModel._ID;
             BLL.OrderInfoBLL _BLL = new OrderInfoBLL();
@@ -228,13 +212,6 @@ namespace PMS.Controllers
         {
             BLL.OrderInfoBLL _BLL = new OrderInfoBLL();
             retValue ret = new retValue();
-            if (!authorize.checkFilterContext())
-            {
-                ret.result = true;
-                ret.data = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
-
 
             string content = string.Empty;
             DataTable dt = str.ToTable();
@@ -266,12 +243,6 @@ namespace PMS.Controllers
         {
             BLL.OrderInfoBLL _BLL = new OrderInfoBLL();
             retValue ret = new retValue();
-            if (!authorize.checkFilterContext())
-            {
-                ret.result = true;
-                ret.data = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
             JObject o = null;
             PMS.Models.UserModel userModel = Session["UserModel"] as PMS.Models.UserModel;
             int userid = userModel._ID;
@@ -304,12 +275,6 @@ namespace PMS.Controllers
         public ActionResult Order_PL(HttpPostedFileBase file)
         {
             retValue ret = new retValue();
-            if (!authorize.checkFilterContext())
-            {
-                ret.result = true;
-                ret.data = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
             ret.result = true;
             if (file == null)
             {
@@ -505,12 +470,6 @@ namespace PMS.Controllers
         public ActionResult Order_Continue()
         {
             PageModel ret = new PageModel();
-            if (!authorize.checkFilterContext())
-            {
-                ret.code = 2;
-                ret.msg = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
             string addeditcode = Request["addeditcode"]._ToStr();
             if (!string.IsNullOrEmpty(addeditcode))
             {
@@ -542,13 +501,6 @@ namespace PMS.Controllers
             string CompanyUnderArea, string OrderNo, string Name)
         {
             PageModel ret = new PageModel();
-            if (!authorize.checkFilterContext())
-            {
-                ret.code = 2;
-                ret.msg = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
-
             BLL.SubscriberBLL _SubscriberBLL = new SubscriberBLL();
 
             JObject o = null;
@@ -583,12 +535,6 @@ namespace PMS.Controllers
         public JsonResult GetAllOrderPeopleInfos(string str)
         {
             PageModel ret = new PageModel();
-            if (!authorize.checkFilterContext())
-            {
-                ret.code = 2;
-                ret.msg = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
             Models.UserModel user = Session["UserModel"] as Models.UserModel;
             BLL.SubscriberBLL _SubscriberBLL = new SubscriberBLL();
             PageModel pg = _SubscriberBLL.GetSubscriber(0, "", "", "", "", "", "", user.OrgID._ToStr(), 0, 0);
@@ -633,12 +579,6 @@ namespace PMS.Controllers
 
             string content = string.Empty;
             retValue ret = new retValue();
-            if (!authorize.checkFilterContext())
-            {
-                ret.result = true;
-                ret.data = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
             PMS.Models.UserModel userModel = Session["UserModel"] as PMS.Models.UserModel;
             int userid = userModel._ID;
             if (!string.IsNullOrEmpty(str))
@@ -679,13 +619,6 @@ namespace PMS.Controllers
         {
             BLL.SubscriberBLL _SubscriberBLL = new SubscriberBLL();
             retValue ret = new retValue();
-            if (!authorize.checkFilterContext())
-            {
-                ret.result = true;
-                ret.data = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
-
             string content = string.Empty;
             DataTable dt = str.ToTable();
             string ids = "";

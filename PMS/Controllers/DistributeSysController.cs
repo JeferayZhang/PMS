@@ -11,9 +11,11 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Converters;
 using PMS.Models;
 using DAL;
+using PMS.App_Start;
 
 namespace PMS.Controllers
 {
+    [NeedLoginFilter(Message = "Controller")]
     public class DistributeSysController : Controller
     {
         //
@@ -73,12 +75,6 @@ namespace PMS.Controllers
         public ActionResult Order_getCounts(string str)
         {
             retValue ret = new retValue();
-            if (!authorize.checkFilterContext())
-            {
-                ret.result = true;
-                ret.data = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
             PMS.Models.UserModel userModel = Session["UserModel"] as PMS.Models.UserModel;
             int userid = userModel._ID;
             BLL.DistributeBLL _BLL = new DistributeBLL();
@@ -162,12 +158,6 @@ namespace PMS.Controllers
         public ActionResult Order_getCounts2(string str)
         {
             retValue ret = new retValue();
-            if (!authorize.checkFilterContext())
-            {
-                ret.result = true;
-                ret.data = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
             PMS.Models.UserModel userModel = Session["UserModel"] as PMS.Models.UserModel;
             int userid = userModel._ID;
             BLL.DistributeBLL _BLL = new DistributeBLL();
@@ -218,10 +208,6 @@ namespace PMS.Controllers
         /// <returns></returns>
         public ActionResult DistributeLog()
         {
-            if (!authorize.checkFilterContext())
-            {
-                return Redirect("/Account/Login");
-            }
             ViewData.Model = Request["from"]._ToStr();
             return View();
         }
@@ -234,12 +220,6 @@ namespace PMS.Controllers
         public ActionResult GetHistory(int page, int limit, string test1, string test2, string User, string tttttt)
         {
             PageModel ret = new PageModel();
-            if (!authorize.checkFilterContext())
-            {
-                ret.code = 2;
-                ret.msg = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
 
             BLL.DistributeBLL _BLL = new DistributeBLL();
             UserModel userModel = Session["userModel"] as UserModel;
@@ -267,12 +247,6 @@ namespace PMS.Controllers
         public JsonResult GetFFs()
         {
             retValue ret = new retValue();
-            if (!authorize.checkFilterContext())
-            {
-                ret.result = true;
-                ret.data = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
             UserModel user = Session["UserModel"] as UserModel;
             BLL.UserBLL _BLL = new UserBLL();
             OrgInfoDAL _OrgInfoDAL = new OrgInfoDAL();
@@ -287,10 +261,6 @@ namespace PMS.Controllers
 
         public ActionResult DistributeInfo_Edit()
         {
-            if (!authorize.checkFilterContext())
-            {
-                return Redirect("/Account/Login");
-            }
             ViewData.Model = Request["ids"]._ToStr() + "|" + Request["action"]._ToStr();
             return View();
         }
@@ -304,12 +274,6 @@ namespace PMS.Controllers
         public JsonResult DistributeLog_FF(string str)
         {
             retValue ret = new retValue();
-            if (!authorize.checkFilterContext())
-            {
-                ret.result = true;
-                ret.data = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
             BLL.DistributeBLL _BLL = new DistributeBLL();
             JObject o = null;
             if (!string.IsNullOrEmpty(str))
@@ -340,12 +304,6 @@ namespace PMS.Controllers
         public JsonResult Check_FF(string str)
         {
             retValue ret = new retValue();
-            if (!authorize.checkFilterContext())
-            {
-                ret.result = true;
-                ret.data = "NEEDLOGIN";
-                return Json(JsonConvert.SerializeObject(ret), JsonRequestBehavior.AllowGet);
-            }
             BLL.DistributeBLL _BLL = new DistributeBLL();
             JObject o = null;
             if (!string.IsNullOrEmpty(str))

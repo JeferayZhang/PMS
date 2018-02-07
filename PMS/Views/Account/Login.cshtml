@@ -16,7 +16,7 @@
                     ajaxHelper.post("/BasicSys/UserLogin/", ddd, function (da) {
                         var jsonObj = JSON.parse(da);
                         if (jsonObj.result) {
-                            location.href = "/Home/Index";
+                            top.location = "/Home/Index";
                         }
                         else {
                             layer.open({

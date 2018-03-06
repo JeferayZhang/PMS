@@ -112,17 +112,13 @@ left join Org b on Org.ParentID=b.OrgID
 FROM org t  where t.orgid in ("+ orgid + @")
 group by t.OrgID";
             DataTable dt = dbh.ExecuteSql(sql);
-            if (dt.Rows.Count>0 && !string.IsNullOrEmpty(dt.Rows[0]["ids"]._ToStr()))
+            foreach (DataRow item in dt.Rows)
             {
-                foreach (DataRow item in dt.Rows)
+                if (!string.IsNullOrEmpty(item["ids"]._ToStr()))
                 {
-                    if (!string.IsNullOrEmpty(item["ids"]._ToStr()))
-                    {
-                        childs += item["ids"]._ToStr() + ",";
-                    }
+                    childs += item["ids"]._ToStr() + ",";
                     getChilds(item["ids"]._ToStr());
                 }
-                
             }
             return childs;
         }

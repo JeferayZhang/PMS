@@ -2,16 +2,9 @@
     <script>
         $(function () {
             var ajaxHelper = new AjaxHelper();
-
             layui.use(['jquery', 'layer', 'form'], function () {
                 var $ = layui.jquery, layer = layui.layer, form = layui.form;
                 form.on('submit(save1)', function (data) {
-                    //if (!$('#UserNo').val().match(/[^\\w+$]/)) {
-                    //    layer.open({
-                    //        title: '提示', content: '用户编号应由数字、字母或下划线组成!', time: 2000
-                    //    });
-                    //    return;
-                    //}
                     var ddd = { str: JSON.stringify(data.field) };
                     ajaxHelper.post("/BasicSys/UserLogin/", ddd, function (da) {
                         var jsonObj = JSON.parse(da);
@@ -23,7 +16,6 @@
                                 title: '提示', content: jsonObj.reason
                             });
                         }
-
                     });
                     return false;
                 });
@@ -32,23 +24,6 @@
         });
     </script>
 }
-@*<form class="layui-form" style="margin-top: 20px;">
-        <div class="layui-form-item">
-            <label class="layui-form-label">账号</label>
-            <div class="layui-input-inline">
-                <input type="text" id="UserNo" name="UserNo" autocomplete="off" class="layui-input" maxlength="50">
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <label class="layui-form-label">密码</label>
-            <div class="layui-input-inline">
-                <input  id="Password" type="password" name="Password" autocomplete="off" class="layui-input" maxlength="50" value="">
-            </div>
-        </div>
-        <button class="layui-btn layui-btn-warm" type="button" lay-filter="save1" lay-submit="" data-type="save">
-            <i class="layui-icon">&#xe618;</i> 确定
-        </button>
-    </form>*@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -86,14 +61,9 @@
         </div>
     </div>
     <div id="page2_jPanel5" class="Panel Panel_Null">
-        @*<div id="page2_jImages1" class="Timage Timage_style1 Timage_auto">
-        <img src="~/Images/jloginbg04.jpg" alt="images/jlogosmall.png" title="" />
-        </div>*@
-        @*<map name="page2_jImages1_map" id="page2_jImages1_map"></map>*@
         <div id="page2_jLabel3" class="text">曲靖市邮政分公司</div>
         <div id="page2_jLabel4" class="text">报刊订阅分发管理系统</div>
     </div>
-
 </body>
 
 </html>
